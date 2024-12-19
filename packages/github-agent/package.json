@@ -9,7 +9,8 @@
     "./workflows": "./dist/workflows.js"
   },
   "scripts": {
-    "build": "tsc --build"
+    "build": "tsc --build",
+    "build:bundle": "node ./bin/bundle-workflows.mjs dist/workflows.js dist/workflows-bundle.js"
   },
   "repository": {
     "type": "git",
