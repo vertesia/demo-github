@@ -6,7 +6,11 @@ settings:
 
 importers:
 
-  .: {}
+  .:
+    devDependencies:
+      google-artifactregistry-auth:
+        specifier: ^3.2.0
+        version: 3.2.0
 
   apps/simple-app: {}
 
@@ -28,9 +32,6 @@ importers:
       '@types/source-map':
         specifier: ^0.5.2
         version: 0.5.7
-      google-artifactregistry-auth:
-        specifier: ^3.2.0
-        version: 3.2.0
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
