@@ -1,0 +1,50 @@
+name: actions
+
+on: [push]
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: pnpm/action-setup@v4
+    - name: Install Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+        cache: pnpm
+    - name: Install dependencies
+      run: pnpm install
+    - name: Run build
+      run: pnpm -r build
+
+  publish-pkg-github-agent:
+    runs-on: ubuntu-latest
+    needs: install
+    if: github.ref == 'refs/heads/main'
+    steps:
+    - uses: actions/checkout@v2
+    - uses: pnpm/action-setup@v4
+    - name: Install Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+        cache: pnpm
+    - name: Install dependencies
+      run: pnpm install
+    - name: Run build
+      run: pnpm -r build
+    - name: Authenticate with Google Cloud
+      uses: google-github-actions/auth@v2
+      id: gauth
+      with:
+        token_format: access_token
+        project_id: "dengenlabs"
+        service_account: gar-pusher@dengenlabs.iam.gserviceaccount.com
+        workload_identity_provider: "projects/265888598630/locations/global/workloadIdentityPools/composable-cloud/providers/github"
+        access_token_lifetime: 300s
+        create_credentials_file: true
+    - name: Authenticate to Google Artifact Registry
+      run: pnpm run artifactregistry-login --repo-config=.npmrc
+    - name: Publish Package
+      run: pnpm publish packages/github-agent
