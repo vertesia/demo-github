@@ -20,3 +20,9 @@ pnpm run artifactregistry-login --repo-config=.npmrc
 #Retrieving credentials from gcloud...
 #Success!
 ```
+
+### Publish
+
+```sh
+pnpm publish packages/github-agent
+```
