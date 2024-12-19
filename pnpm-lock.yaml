@@ -8,6 +8,8 @@ importers:
 
   .: {}
 
+  apps/agent-runner: {}
+
   apps/simple-app: {}
 
   packages/github-agent:
