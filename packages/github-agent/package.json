@@ -15,6 +15,9 @@
     "type": "git",
     "url": "github.com/becomposable/demo-github"
   },
+  "bin": {
+    "bundle-workflows": "./bin/bundle-workflows.mjs"
+  },
   "devDependencies": {
     "@types/node": "^22.10.2",
     "@types/source-map": "^0.5.2",
