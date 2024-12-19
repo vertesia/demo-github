@@ -29,5 +29,8 @@
     "@temporalio/activity": "^1.11.5",
     "@temporalio/worker": "^1.11.5",
     "@temporalio/workflow": "^1.11.5"
+  },
+  "publishConfig": {
+    "registry": "https://us-central1-npm.pkg.dev/dengenlabs/npm/"
   }
 }
