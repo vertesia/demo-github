@@ -8,7 +8,11 @@ importers:
 
   .: {}
 
-  apps/agent-runner: {}
+  apps/agent-runner:
+    dependencies:
+      '@becomposable/github-agent':
+        specifier: workspace:^
+        version: link:../../packages/github-agent
 
   apps/simple-app: {}
 
