@@ -1,7 +1,7 @@
 {
-  "name": "demo-github",
+  "name": "@becomposable/demo-github-root",
   "version": "1.0.0",
-  "description": "",
+  "description": "This is the root of the monorepo for the GitHub demo.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
