@@ -7,3 +7,7 @@ settings:
 importers:
 
   .: {}
+
+  apps/simple-app: {}
+
+  packages/github-agent: {}
