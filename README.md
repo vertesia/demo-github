@@ -9,14 +9,20 @@ We use Google Artifact Registry to store the private NPM packages.
 ### Login
 
 ```sh
-cd packages/github-agent
-pnpm run artifactregistry-login
+pnpm run artifactregistry-login --repo-config=.npmrc
 #
-# > @becomposable/github-agent@1.0.0 artifactregistry-login /Users/mincong/github/demo-github/packages/github-agent
-# > pnpm exec artifactregistry-auth
+#> @becomposable/demo-github-root@1.0.0 artifactregistry-login /Users/mincong/github/demo-github
+#> pnpm exec artifactregistry-auth "--repo-config=.npmrc"
 #
-# ...
-# Retrieving application default credentials...
-# Retrieving credentials from gcloud...
-# Success!
+#(node:85854) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+#(Use `node --trace-deprecation ...` to show where the warning was created)
+#Retrieving application default credentials...
+#Retrieving credentials from gcloud...
+#Success!
+```
+
+### Publish
+
+```sh
+pnpm publish packages/github-agent
 ```

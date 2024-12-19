@@ -1,7 +1,7 @@
 {
   "name": "@becomposable/github-agent",
   "type": "module",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": false,
   "description": "A simple GitHub agent for demonstrating the Agent Runner feature of Composable.",
   "exports": {
@@ -9,7 +9,6 @@
     "./workflows": "./dist/workflows.js"
   },
   "scripts": {
-    "artifactregistry-login": "pnpm exec artifactregistry-auth",
     "build": "tsc --build && node ./bin/bundle-workflows.mjs dist/workflows.js dist/workflows-bundle.js"
   },
   "repository": {
@@ -22,7 +21,6 @@
   "devDependencies": {
     "@types/node": "^22.10.2",
     "@types/source-map": "^0.5.2",
-    "google-artifactregistry-auth": "^3.2.0",
     "typescript": "^5.7.2"
   },
   "dependencies": {
