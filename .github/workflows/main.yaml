@@ -51,4 +51,7 @@ jobs:
     - name: Authenticate to Google Artifact Registry
       run: pnpm run artifactregistry-login --repo-config=.npmrc
     - name: Publish Package
-      run: pnpm publish packages/github-agent
+      run: |
+        # We modified the .npmrc file to use GAR, which put the Git repository in dirty state.
+        # So we need to disable the Git checks.
+        pnpm publish packages/github-agent --no-git-checks
