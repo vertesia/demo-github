@@ -1,0 +1,27 @@
+{
+  "name": "@becomposable/github-agent",
+  "type": "module",
+  "version": "1.0.0",
+  "private": false,
+  "description": "A simple GitHub agent for demonstrating the Agent Runner feature of Composable.",
+  "exports": {
+    "./activities": "./dist/activities.js",
+    "./workflows": "./dist/workflows.js"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/becomposable/demo-github"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/source-map": "^0.5.2",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "@temporalio/activity": "^1.11.5",
+    "@temporalio/workflow": "^1.11.5"
+  }
+}
