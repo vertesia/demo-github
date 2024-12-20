@@ -12,11 +12,13 @@ cd packages/github-agent
 # minor: normal updates
 # patch: unused for now
 pnpm version minor
-# a commit is made by Git
+# github-agent/1.4.0
+
+git commit -am "Bump version"
 
 # push changes
 git push origin main
-git push origin v1.2.0
+git push origin github-agent/1.4.0
 ```
 
 ## NPM Registry
