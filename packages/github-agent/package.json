@@ -6,7 +6,8 @@
   "description": "A simple GitHub agent for demonstrating the Agent Runner feature of Composable.",
   "exports": {
     "./activities": "./dist/activities.js",
-    "./workflows": "./dist/workflows.js"
+    "./workflows": "./dist/workflows.js",
+    "./workflows-bundle": "./dist/workflows-bundle.js"
   },
   "scripts": {
     "build": "tsc --build && node ./bin/bundle-workflows.mjs dist/workflows.js dist/workflows-bundle.js"
