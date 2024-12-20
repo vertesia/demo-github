@@ -31,7 +31,7 @@ We use Google Artifact Registry to store the private NPM packages.
 ```sh
 pnpm run artifactregistry-login --repo-config=.npmrc
 #
-#> @becomposable/demo-github-root@1.0.0 artifactregistry-login /Users/mincong/github/demo-github
+#> @becomposable-priv/demo-github-root@1.0.0 artifactregistry-login /Users/mincong/github/demo-github
 #> pnpm exec artifactregistry-auth "--repo-config=.npmrc"
 #
 #(node:85854) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
