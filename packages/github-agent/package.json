@@ -1,7 +1,7 @@
 {
   "name": "@becomposable/github-agent",
   "type": "module",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": false,
   "description": "A simple GitHub agent for demonstrating the Agent Runner feature of Composable.",
   "exports": {
@@ -15,7 +15,7 @@
     "type": "git",
     "url": "github.com/becomposable/demo-github"
   },
-  "tag-version-prefix": "github-agent@",
+  "tag-version-prefix": "github-agent/",
   "bin": {
     "bundle-workflows": "./bin/bundle-workflows.mjs"
   },
