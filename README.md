@@ -12,7 +12,7 @@ cd packages/github-agent
 # minor: normal updates
 # patch: unused for now
 pnpm version minor
-# github-agent/1.4.0
+# 1.4.0
 
 git commit -am "github-agent/1.4.0"
 git tag github-agent/1.4.0
