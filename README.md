@@ -14,7 +14,8 @@ cd packages/github-agent
 pnpm version minor
 # github-agent/1.4.0
 
-git commit -am "Bump version"
+git commit -am "github-agent/1.4.0"
+git tag github-agent/1.4.0
 
 # push changes
 git push origin main
