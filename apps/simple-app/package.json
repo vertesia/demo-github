@@ -1,5 +1,5 @@
 {
-  "name": "@becomposable/simple-app",
+  "name": "@becomposable-priv/simple-app",
   "version": "1.0.0",
   "private": true,
   "description": "Simple app for the GitHub demo.",
