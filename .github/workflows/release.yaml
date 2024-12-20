@@ -3,7 +3,7 @@ name: release
 on:
   push:
     tags:
-      - 'v*' # Push events to matching v*, i.e. v1.0.0, v1.1.0
+      - 'github-agent/*'
 
 permissions:
   id-token: write
