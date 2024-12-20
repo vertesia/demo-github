@@ -15,6 +15,7 @@
     "type": "git",
     "url": "github.com/becomposable/demo-github"
   },
+  "tag-version-prefix": "github-agent@",
   "bin": {
     "bundle-workflows": "./bin/bundle-workflows.mjs"
   },
