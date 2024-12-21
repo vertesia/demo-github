@@ -21,6 +21,7 @@
     "bundle-workflows": "./bin/bundle-workflows.mjs"
   },
   "devDependencies": {
+    "@temporalio/testing": "^1.11.5",
     "@types/node": "^22.10.2",
     "@types/source-map": "^0.5.2",
     "typescript": "^5.7.2"
