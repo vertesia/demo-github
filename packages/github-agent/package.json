@@ -1,7 +1,7 @@
 {
   "name": "@dglabs/github-agent",
   "type": "module",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "private": false,
   "description": "A simple GitHub agent for demonstrating the Agent Runner feature of Composable.",
   "exports": {
