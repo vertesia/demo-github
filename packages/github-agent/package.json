@@ -1,5 +1,5 @@
 {
-  "name": "@becomposable-priv/github-agent",
+  "name": "@dglabs/github-agent",
   "type": "module",
   "version": "1.8.0",
   "private": false,

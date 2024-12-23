@@ -1,5 +1,5 @@
 {
-  "name": "@becomposable-priv/demo-github-root",
+  "name": "@dglabs/demo-github-root",
   "version": "1.0.0",
   "private": true,
   "description": "This is the root of the monorepo for the GitHub demo.",
