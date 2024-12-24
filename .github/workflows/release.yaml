@@ -12,6 +12,8 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    outputs:
+      repo_access_token: ${{ steps.secrets.outputs.REPO_ACCESS_TOKEN }}
     steps:
     - uses: actions/checkout@v2
     - uses: pnpm/action-setup@v4
@@ -41,3 +43,24 @@ jobs:
         # We modified the .npmrc file to use GAR, which put the Git repository in dirty state.
         # So we need to disable the Git checks.
         pnpm publish packages/github-agent --no-git-checks
+    - name: Get Repository Access Token
+      id: secrets
+      run: |
+        echo "REPO_ACCESS_TOKEN=$(gcloud secrets versions access latest --secret=github-repo-studio-access-token)" >> $GITHUB_OUTPUT
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: release
+    steps:
+      - name: Dispatch Deployment Request
+        uses: myrotvorets/trigger-repository-dispatch-action@1.0.0
+        with:
+          token: ${{ needs.release.outputs.repo_access_token }}
+          repo: becomposable/studio
+          type: gcp-deployment-request
+          payload: |
+            {
+              "environment": "staging",
+              "sha": "${{ github.sha }}",
+              "cloud_run_only": false
+            }
