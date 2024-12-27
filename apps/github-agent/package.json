@@ -4,6 +4,7 @@
   "version": "1.9.0",
   "private": false,
   "description": "A simple GitHub agent for demonstrating the Agent Runner feature of Composable.",
+  "main": "./dist/main.js",
   "exports": {
     "./activities": "./dist/activities.js",
     "./workflows": "./dist/workflows.js",
