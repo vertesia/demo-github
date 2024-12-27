@@ -35,7 +35,7 @@ jobs:
         access_token_lifetime: 300s
         create_credentials_file: true
     - name: Authenticate to Google Artifact Registry
-      run: pnpm run artifactregistry-login --repo-config=.npmrc
+      run: pnpm run registry-login --repo-config=.npmrc
     - name: Publish Package
       run: |
         # We modified the .npmrc file to use GAR, which put the Git repository in dirty state.
