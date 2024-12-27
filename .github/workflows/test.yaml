@@ -27,7 +27,9 @@ jobs:
         access_token_lifetime: 300s
         create_credentials_file: true
     - name: Authenticate to Google Artifact Registry
-      run: pnpm run registry-login --repo-config=.npmrc
+      run: |
+        pnpm add --filter "@dglabs/demo-github-root"
+        pnpm run registry-login --repo-config=.npmrc
     - name: Install dependencies
       run: pnpm install
     - name: Run build
