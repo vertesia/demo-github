@@ -3,7 +3,7 @@ name: test
 on: [push]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -13,23 +13,18 @@ jobs:
       with:
         node-version: 22
         cache: pnpm
+    - name: Authenticate with Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        token_format: access_token
+        project_id: "dengenlabs"
+        service_account: gar-pusher@dengenlabs.iam.gserviceaccount.com
+        workload_identity_provider: "projects/265888598630/locations/global/workloadIdentityPools/composable-cloud/providers/github"
+        access_token_lifetime: 300s
+        create_credentials_file: true
     - name: Install dependencies
       run: pnpm install
     - name: Run build
       run: pnpm -r build
-
-  test:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-    - uses: actions/checkout@v2
-    - uses: pnpm/action-setup@v4
-    - name: Install Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 22
-        cache: pnpm
-    - name: Install dependencies
-      run: pnpm install
     - name: Run tests
       run: pnpm -r test

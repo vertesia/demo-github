@@ -26,7 +26,6 @@ jobs:
       run: pnpm -r build
     - name: Authenticate with Google Cloud
       uses: google-github-actions/auth@v2
-      id: gauth
       with:
         token_format: access_token
         project_id: "dengenlabs"
