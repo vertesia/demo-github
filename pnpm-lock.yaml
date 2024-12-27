@@ -15,9 +15,7 @@ importers:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.2)(terser@5.37.0)
 
-  apps/simple-app: {}
-
-  packages/github-agent:
+  apps/github-agent:
     dependencies:
       '@temporalio/activity':
         specifier: ^1.11.5
@@ -41,6 +39,8 @@ importers:
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
+
+  apps/simple-app: {}
 
 packages:
 
