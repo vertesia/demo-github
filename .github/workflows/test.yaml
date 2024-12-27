@@ -28,7 +28,7 @@ jobs:
         create_credentials_file: true
     - name: Authenticate to Google Artifact Registry
       run: |
-        pnpm add --filter "@dglabs/demo-github-root"
+        pnpm install --filter "@dglabs/demo-github-root"
         pnpm run registry-login --repo-config=.npmrc
     - name: Install dependencies
       run: pnpm install
