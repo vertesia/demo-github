@@ -21,11 +21,13 @@ jobs:
       uses: google-github-actions/auth@v2
       with:
         token_format: access_token
-        project_id: "dengenlabs"
+        project_id: dengenlabs
         service_account: gar-pusher@dengenlabs.iam.gserviceaccount.com
-        workload_identity_provider: "projects/265888598630/locations/global/workloadIdentityPools/composable-cloud/providers/github"
+        workload_identity_provider: projects/265888598630/locations/global/workloadIdentityPools/composable-cloud/providers/github
         access_token_lifetime: 300s
         create_credentials_file: true
+    - name: Authenticate to Google Artifact Registry
+      run: pnpm run registry-login --repo-config=.npmrc
     - name: Install dependencies
       run: pnpm install
     - name: Run build
