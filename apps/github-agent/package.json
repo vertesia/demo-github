@@ -25,9 +25,11 @@
     "@temporalio/testing": "^1.11.5",
     "@types/node": "^22.10.2",
     "@types/source-map": "^0.5.2",
+    "only-allow": "^1.2.1",
     "typescript": "^5.7.2"
   },
   "dependencies": {
+    "@dglabs/agent-runner": "^1.0.1",
     "@temporalio/activity": "^1.11.5",
     "@temporalio/worker": "^1.11.5",
     "@temporalio/workflow": "^1.11.5"
