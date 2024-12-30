@@ -5,6 +5,24 @@ This projects demonstrates the integration of GitHub Agent into the Composable a
 ## Prerequisites
 
 * You need to have access to Google Cloud project `dengenlabs` to fetch certificates for connecting to Temporal Cloud.
+* You already installed and configured the Google Cloud CLI `gcloud`.
+
+## Quickstart
+
+```sh
+# install internal packages
+gcloud auth login
+pnpm install --filter "@dglabs/demo-github-root"
+pnpm registry-login
+pnpm install
+
+# build workspace
+pnpm -r build
+
+# start application
+cd apps/github-agent
+npn run dev
+```
 
 ## Application
 
