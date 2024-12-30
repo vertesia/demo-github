@@ -38,9 +38,9 @@ jobs:
       run: pnpm -r test
 
   publish-github-runner:
+    if: github.ref == 'refs/heads/main'
     needs: test
     runs-on: ubuntu-latest
-    # TODO: only for main branch
     steps:
     - uses: actions/checkout@v2
     - uses: pnpm/action-setup@v4
