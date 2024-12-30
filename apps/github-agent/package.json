@@ -12,6 +12,7 @@
   },
   "scripts": {
     "build": "tsc --build && node ./bin/bundle-workflows.mjs dist/workflows.js dist/workflows-bundle.js",
+    "dev": "node dist/main.js",
     "test": "vitest run"
   },
   "repository": {
