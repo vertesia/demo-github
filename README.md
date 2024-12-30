@@ -2,47 +2,36 @@
 
 This projects demonstrates the integration of GitHub Agent into the Composable as a collection of Agentic Workflows.
 
-## Release
+## Prerequisites
 
-The release process is semi-automatic. You need to bump the version of the AI Agent using the `pnpm version` command and push the generated tag to GitHub. Once done, the CI will publish a new version to the NPM Registry. Assume that you are releasing the package `v1.2.0`, here is how would you do it from the `main` branch:
+* You need to have access to Google Cloud project `dengenlabs` to fetch certificates for connecting to Temporal Cloud.
 
-```sh
-cd packages/github-agent
-# major: if your workflows are no longer compatible with the existing format
-# minor: normal updates
-# patch: unused for now
-pnpm version minor
-# 1.4.0
+## Application
 
-git commit -am "github-agent/1.4.0"
-git tag github-agent/1.4.0
+### Agent Entrypoint
 
-# push changes
-git push origin main
-git push origin github-agent/1.4.0
-```
+In the `main.ts` file of the Agent, you need to run a Temporal Worker based on the package `@dglabs/agent-runner`. You can `run` the runner with options. Two entries are mandatory: the location of the workflow bundle and the list of activities.
 
-## NPM Registry
+* The workflow bundle is a standlone file which contains all the workflows and their underlying dependencies. You need to package the bundle yourself.
+* The activities are functions are normal functions or method executions that are intended to execute a single, well-defined action (either short or long-running), such as querying a database, calling a third-party API, or transcoding a media file.
 
-We use Google Artifact Registry to store the private NPM packages.
+Here is the example from GitHub Agent:
 
-### Login
+```ts
+// file: apps/github-agent/src/main.ts
+import { run, WorkerRunOptions, resolveScriptFile } from "@dglabs/agent-runner";
 
-```sh
-pnpm run artifactregistry-login --repo-config=.npmrc
-#
-#> @becomposable-priv/demo-github-root@1.0.0 artifactregistry-login /Users/mincong/github/demo-github
-#> pnpm exec artifactregistry-auth "--repo-config=.npmrc"
-#
-#(node:85854) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
-#(Use `node --trace-deprecation ...` to show where the warning was created)
-#Retrieving application default credentials...
-#Retrieving credentials from gcloud...
-#Success!
-```
+const workflowBundle = await resolveScriptFile("@dglabs/github-agent/workflows-bundle", import.meta.url);
+const activities = await import('./activities.js');
 
-### Publish
+const options: WorkerRunOptions = {
+    workflowBundle,
+    activities,
+};
 
-```sh
-pnpm publish packages/github-agent
+await run(options).catch((err: any) => {
+    console.error(err);
+}).finally(() => {
+    process.exit(0);
+});
 ```

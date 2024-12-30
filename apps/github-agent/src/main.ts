@@ -1,7 +1,7 @@
 import { run, WorkerRunOptions, resolveScriptFile } from "@dglabs/agent-runner";
 
-const workflowBundle = await resolveScriptFile("@dglabs/github-agent/workflows-bundle", import.meta.url)
-const activities = await import('./activities')
+const workflowBundle = await resolveScriptFile("@dglabs/github-agent/workflows-bundle", import.meta.url);
+const activities = await import('./activities.js');
 
 const options: WorkerRunOptions = {
     workflowBundle,
