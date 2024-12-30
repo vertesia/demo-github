@@ -6,7 +6,7 @@ const activities = await import('./activities.js');
 const options: WorkerRunOptions = {
     workflowBundle,
     activities,
-    domain: "github-agent",
+    domain: "vertesia-github-agent",
 };
 
 await run(options).catch((err: any) => {
