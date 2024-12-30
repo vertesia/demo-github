@@ -57,7 +57,7 @@ temporal workflow start \
 
 Inspect results from Temporal Cloud:
 
-TODO
+<img width="1512" alt="image" src="https://github.com/user-attachments/assets/340685ed-b595-47e1-aa6a-fd63263b2ba9" />
 
 ## Application
 
