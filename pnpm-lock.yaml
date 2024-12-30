@@ -18,8 +18,8 @@ importers:
   apps/github-agent:
     dependencies:
       '@dglabs/agent-runner':
-        specifier: ^1.0.1
-        version: 1.0.1(@aws-sdk/client-sts@3.716.0)
+        specifier: ^1.0.2
+        version: 1.0.2(@aws-sdk/client-sts@3.716.0)
       '@temporalio/activity':
         specifier: ^1.11.5
         version: 1.11.5
@@ -195,14 +195,14 @@ packages:
   '@datadog/sketches-js@2.1.1':
     resolution: {integrity: sha512-d5RjycE+MObE/hU+8OM5Zp4VjTwiPLRa8299fj7muOmR16fb942z8byoMbCErnGh0lBevvgkGrLclQDvINbIyg==}
 
-  '@dglabs/agent-runner@1.0.1':
-    resolution: {integrity: sha512-j//J03OjGC2muInfOwl1Q3OeyU4pGoVHF9j6uzkAr375e6S9uoVDr3S0CHaeRLOtnK4YaVq+F3rsUXHXqUmgUQ==, tarball: https://us-central1-npm.pkg.dev/dengenlabs/npm/@dglabs/agent-runner/-/@dglabs/agent-runner-1.0.1.tgz}
+  '@dglabs/agent-runner@1.0.2':
+    resolution: {integrity: sha512-HIccO9h/GsyPmYS9d4AqheajwZzZ+QCYXly2uHufS9RnGNxSbSoETBhinn2dYwiOanujuseYiH6RgFrXsIECYQ==, tarball: https://us-central1-npm.pkg.dev/dengenlabs/npm/@dglabs/agent-runner/-/@dglabs/agent-runner-1.0.2.tgz}
 
-  '@dglabs/cloud@1.0.1':
-    resolution: {integrity: sha512-ppD329LYnp3m/pir4bXRzdl1DxEqLYECOkO39Vf82JjjEIDpnG0mu+Zs5BaNZ6fZqhfGY9liWy0QJm6Lc7bcsw==, tarball: https://us-central1-npm.pkg.dev/dengenlabs/npm/@dglabs/cloud/-/@dglabs/cloud-1.0.1.tgz}
+  '@dglabs/cloud@1.0.2':
+    resolution: {integrity: sha512-t2+95s6a2xb3zkNFFP5lqC6l0dlOjvGZaHQAy0MWkcsahE03yH3gqXl/wvTTII5tIT+Jr3JqbmR9NweA3Q1UGw==, tarball: https://us-central1-npm.pkg.dev/dengenlabs/npm/@dglabs/cloud/-/@dglabs/cloud-1.0.2.tgz}
 
-  '@dglabs/logger@1.0.1':
-    resolution: {integrity: sha512-rIF9ZZzvYbe3okI+qsyXRafIUtuR3Ke9ZCsBN3VDLfP9D/NfLofZJ59890nLk9XZBnx1/X6iYN8sm9NZZQdiZA==, tarball: https://us-central1-npm.pkg.dev/dengenlabs/npm/@dglabs/logger/-/@dglabs/logger-1.0.1.tgz}
+  '@dglabs/logger@1.0.2':
+    resolution: {integrity: sha512-TZJaaBmw4Bxz8eDoEUcWg3aGK/FWvbKwAIkS+WdOWUKXLfQ/QVjF/52kQQUAauuC/eXoVN8yFDey4b0g8TNePQ==, tarball: https://us-central1-npm.pkg.dev/dengenlabs/npm/@dglabs/logger/-/@dglabs/logger-1.0.2.tgz}
 
   '@esbuild/aix-ppc64@0.21.5':
     resolution: {integrity: sha512-1SDgH6ZSPTlggy1yI6+Dbkiz8xzpHJEVAlF/AM1tHPLsf5STom9rwtjE4hKAF20FfXXNTFqEYXyJNWh1GiZedQ==}
@@ -2504,10 +2504,10 @@ snapshots:
 
   '@datadog/sketches-js@2.1.1': {}
 
-  '@dglabs/agent-runner@1.0.1(@aws-sdk/client-sts@3.716.0)':
+  '@dglabs/agent-runner@1.0.2(@aws-sdk/client-sts@3.716.0)':
     dependencies:
-      '@dglabs/cloud': 1.0.1(@aws-sdk/client-sts@3.716.0)
-      '@dglabs/logger': 1.0.1
+      '@dglabs/cloud': 1.0.2(@aws-sdk/client-sts@3.716.0)
+      '@dglabs/logger': 1.0.2
       '@temporalio/activity': 1.11.5
       '@temporalio/client': 1.11.5
       '@temporalio/worker': 1.11.5
@@ -2531,11 +2531,11 @@ snapshots:
       - uglify-js
       - webpack-cli
 
-  '@dglabs/cloud@1.0.1(@aws-sdk/client-sts@3.716.0)':
+  '@dglabs/cloud@1.0.2(@aws-sdk/client-sts@3.716.0)':
     dependencies:
       '@aws-sdk/client-sso-oidc': 3.716.0(@aws-sdk/client-sts@3.716.0)
       '@becomposable/common': 0.42.2
-      '@dglabs/logger': 1.0.1
+      '@dglabs/logger': 1.0.2
       '@google-cloud/secret-manager': 5.6.0
       google-auth-library: 9.15.0
       googleapis: 142.0.0
@@ -2554,7 +2554,7 @@ snapshots:
       - socks
       - supports-color
 
-  '@dglabs/logger@1.0.1':
+  '@dglabs/logger@1.0.2':
     dependencies:
       dd-trace: 5.30.0
       pino: 8.21.0
