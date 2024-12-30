@@ -86,7 +86,7 @@ jobs:
         tags: |
           type=ref,event=branch
           type=ref,event=pr
-          type=sha
+          type=sha,format=long,prefix=
 
     - name: Login to GAR
       uses: docker/login-action@v3
