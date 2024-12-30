@@ -4,15 +4,15 @@
   "version": "1.9.0",
   "private": false,
   "description": "A simple GitHub agent for demonstrating the Agent Runner feature of Composable.",
-  "main": "./dist/main.js",
+  "main": "./lib/main.js",
   "exports": {
-    "./activities": "./dist/activities.js",
-    "./workflows": "./dist/workflows.js",
-    "./workflows-bundle": "./dist/workflows-bundle.js"
+    "./activities": "./lib/activities.js",
+    "./workflows": "./lib/workflows.js",
+    "./workflows-bundle": "./lib/workflows-bundle.js"
   },
   "scripts": {
-    "build": "tsc --build && node ./bin/bundle-workflows.mjs dist/workflows.js dist/workflows-bundle.js",
-    "dev": "node dist/main.js",
+    "build": "tsc --build && node ./bin/bundle-workflows.mjs lib/workflows.js lib/workflows-bundle.js",
+    "dev": "node lib/main.js",
     "test": "vitest run"
   },
   "repository": {
