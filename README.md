@@ -55,6 +55,10 @@ temporal workflow start \
     -w github-agent:get-repos
 ```
 
+Inspect results from Temporal Cloud:
+
+TODO
+
 ## Application
 
 ### Agent Entrypoint
