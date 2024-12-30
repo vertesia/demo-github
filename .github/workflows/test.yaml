@@ -1,4 +1,4 @@
-name: test
+name: actions
 
 on: [push]
 
@@ -82,7 +82,7 @@ jobs:
       with:
         # list of Docker images to use as base name for tags
         images: |
-          us.gcr.io/dengenlabs/agents/composable/github-agent
+          us.gcr.io/dengenlabs/agents/vertesia/github-agent
         tags: |
           type=ref,event=branch
           type=ref,event=pr
