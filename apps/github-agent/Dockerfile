@@ -29,4 +29,4 @@ USER composable
 
 ENV SERVICE_NAME=$SERVICE_NAME
 ENTRYPOINT ["/app/datadog-init"]
-CMD /usr/local/bin/node /app/lib/main.js
+CMD /usr/local/bin/node /app/apps/github-agent/lib/main.js
