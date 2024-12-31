@@ -9,8 +9,8 @@ COPY --from=datadog/serverless-init:1 /datadog-init /app/datadog-init
 
 WORKDIR /app
 
-RUN apt-get update -y \
-    && apt-get install -y openssl
+RUN apt-get update -y && \
+    apt-get install -y openssl
 
 RUN addgroup --system --gid 1001 composable
 RUN adduser --system --uid 1001 composable
