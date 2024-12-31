@@ -9,13 +9,6 @@ COPY --from=datadog/serverless-init:1 /datadog-init /app/datadog-init
 
 WORKDIR /app
 
-#Install packages
-RUN apt-get update -y
-RUN apt-get -y install mupdf-tools curl
-RUN curl https://github.com/jgm/pandoc/releases/download/3.3/pandoc-3.3-1-amd64.deb -L -o pandoc.deb
-RUN dpkg -i pandoc.deb
-
-
 RUN addgroup --system --gid 1001 composable
 RUN adduser --system --uid 1001 composable
 
