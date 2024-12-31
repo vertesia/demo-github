@@ -68,11 +68,8 @@ jobs:
 
     - name: Run build
       run: |
-        pnpm add -g turbo
-        turbo prune --scope=@dglabs/github-agent
-        cd out
         pnpm install
-        turbo build --filter=@dglabs/github-agent
+        pnpm -r build
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
