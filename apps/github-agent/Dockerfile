@@ -12,7 +12,7 @@ WORKDIR /app
 RUN addgroup --system --gid 1001 composable
 RUN adduser --system --uid 1001 composable
 
-COPY --chown=zeno:composable out .
+COPY --chown=zeno:composable . .
 
 ARG PORT=8080
 ENV PORT=$PORT
