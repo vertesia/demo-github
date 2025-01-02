@@ -8,10 +8,11 @@ FROM base as build
 COPY . /app
 WORKDIR /app
 
-RUN pnpm add -g google-artifactregistry-auth
-# Use a cache layer for the pnpm store
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
-RUN pnpm run -r build
+# Mount secret for private packages
+RUN --mount=type=secret,id=gcp,target=/root/.config/gcloud \
+    pnpm add -g google-artifactregistry-auth && \
+    pnpm install --frozen-lockfile && \
+    pnpm run -r build
 
 
 FROM base as app
