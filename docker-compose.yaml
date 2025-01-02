@@ -1,0 +1,21 @@
+name: demo-github
+
+services:
+  github-agent:
+    build:
+      context: .
+      dockerfile: ./apps/github-agent/Dockerfile
+      secrets:
+        - gcp
+    env_file:
+      - ./apps/github-agent/.env
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/gcp
+    volumes:
+      - ~/.config/gcloud:/app/.config/gcloud
+    secrets:
+      - gcp
+
+secrets:
+  gcp:
+    file: ~/.config/gcloud/application_default_credentials.json
