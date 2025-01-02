@@ -18,7 +18,7 @@ cp apps/github-agent/.env.template apps/github-agent/.env
 # envionment and the name of the application
 ```
 
-Connect to private NPM registry and start the whole solution locally with either 1) `pnpm` or 2) `docker`.
+Connect to private NPM registry and start the whole solution locally with either `pnpm` or `docker`.
 
 **pnpm**:
 
