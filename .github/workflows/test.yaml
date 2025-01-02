@@ -85,4 +85,4 @@ jobs:
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         secrets: |
-          "gcp=${HOME}/.config/gcloud/application_default_credentials.json"
+          "gcp=${{ steps.gauth.outputs.GOOGLE_APPLICATION_CREDENTIALS }}"
