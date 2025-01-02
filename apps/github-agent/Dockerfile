@@ -12,9 +12,8 @@ WORKDIR /app
 RUN --mount=type=secret,id=gcp,target=/tmp/credentials.json \
     export GOOGLE_APPLICATION_CREDENTIALS=/tmp/credentials.json && \
     pnpm add -g google-artifactregistry-auth && \
-    pnpm run registry-login
-
-RUN pnpm install --frozen-lockfile && \
+    pnpm run registry-login && \
+    pnpm install --frozen-lockfile && \
     pnpm run -r build
 
 
