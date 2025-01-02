@@ -9,9 +9,7 @@ COPY . /app
 WORKDIR /app
 
 # Authenticate with Google Artifact Registry
-# FIXME SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ENV "GOOGLE_APPLICATION_CREDENTIALS") (line 12)
-ENV GOOGLE_APPLICATION_CREDENTIALS=/tmp/credentials.json
-RUN --mount=type=secret,id=gcp,target=/tmp/credentials.json \
+RUN --mount=type=secret,id=gcp,target=/root/.config/gcloud/application_default_credentials.json \
     pnpm add -g google-artifactregistry-auth
 
 RUN pnpm install --frozen-lockfile && \
