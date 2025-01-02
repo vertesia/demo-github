@@ -39,6 +39,7 @@ npn run dev
 **docker**:
 
 ```sh
+gcloud auth login
 docker compose up --build
 ```
 
