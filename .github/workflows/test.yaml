@@ -84,5 +84,5 @@ jobs:
         push: ${{ github.ref == 'refs/heads/main' }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
-        secrets-file: |
+        secret-files: |
           "gcp=${{ steps.gauth.outputs.credentials_file_path }}"
