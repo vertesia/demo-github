@@ -85,4 +85,4 @@ jobs:
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         secrets: |
-          "gcp=${{ steps.gauth.outputs.GOOGLE_APPLICATION_CREDENTIALS }}"
+          "gcp=${{ steps.gauth.outputs.credentials_file_path }}"
