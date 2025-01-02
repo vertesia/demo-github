@@ -37,7 +37,7 @@ jobs:
     - name: Run tests
       run: pnpm -r test
 
-  publish-github-runner:
+  publish-github-agent:
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/docker')
     needs: test
     runs-on: ubuntu-latest
