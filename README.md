@@ -10,7 +10,17 @@ This projects demonstrates the integration of GitHub Agent into the Composable a
 
 ## Quickstart
 
-Install dependencies, build source code, connect to private NPM registry, and connect to Temporal Cloud
+Set up the application using the `.env` file:
+
+```sh
+cp apps/github-agent/.env.template apps/github-agent/.env
+# TODO: you need to update settings to adapt to your environment, especially the name of the
+# envionment and the name of the application
+```
+
+Connect to private NPM registry and start the whole solution locally with either 1) `pnpm` or 2) `docker`.
+
+**pnpm**:
 
 ```sh
 # install internal packages
@@ -22,30 +32,25 @@ pnpm install
 # build workspace
 pnpm -r build
 
-# connect to Temporal Cloud
-./bin/load-temporal-certificates.sh
-#
-# /!\ IMPORTANT /!\
-# Follow the output of the scripts to export certificates.sh
-#
-# test if the certificates are loaded correctly
-temporal workflow list --limit 5
-```
-
-Set up the application using the `.env` file:
-
-```sh
-cd apps/github-agent
-cp .env.template .env
-# TODO: you need to update settings to adapt to your environment, especially the name of the
-# envionment and the name of the application
-```
-
-Start the demo locally:
-
-```sh
 # start application
 npn run dev
+```
+
+**docker**:
+
+```sh
+docker compose up --build
+```
+
+Connect to Temporal Cloud and trigger a workflow:
+
+```sh
+# /!\ IMPORTANT /!\
+# follow the output of the scripts to export certificates
+./bin/load-temporal-certificates.sh
+
+# test if the certificates are loaded correctly
+temporal workflow list --limit 5
 
 # trigger a new workflow
 temporal workflow start \
