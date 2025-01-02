@@ -9,8 +9,8 @@ COPY . /app
 WORKDIR /app
 
 # Authenticate with Google Artifact Registry
-RUN --mount=type=secret,id=gcp,target=/root/.config/gcloud/application_default_credentials.json \
-    export GOOGLE_APPLICATION_CREDENTIALS=/root/.config/gcloud/application_default_credentials.json && \
+RUN --mount=type=secret,id=gcp,target=/tmp/credentials.json \
+    export GOOGLE_APPLICATION_CREDENTIALS=/tmp/credentials.json && \
     pnpm add -g google-artifactregistry-auth && \
     pnpm run registry-login
 
