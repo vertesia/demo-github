@@ -7,6 +7,7 @@ This projects demonstrates the integration of GitHub Agent into the Composable a
 * You need to have access to Google Cloud project `dengenlabs` to fetch certificates for connecting to Temporal Cloud.
 * You already installed and configured the Google Cloud CLI `gcloud`.
 * You have `temporal` CLI installed.
+* (Optional) you have Docker Desktop and `docker` CLI installed.
 
 ## Quickstart
 
