@@ -1,12 +1,14 @@
-FROM node:23.5-bookworm-slim AS base
+FROM node:23.5-slim AS base
+WORKDIR /app
+
+
+FROM base AS build
+
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 
-
-FROM base AS build
 COPY . /app
-WORKDIR /app
 
 # Authenticate with Google Artifact Registry
 RUN --mount=type=secret,id=gcp,target=/tmp/credentials.json \
@@ -19,7 +21,7 @@ RUN --mount=type=secret,id=gcp,target=/tmp/credentials.json \
 
 FROM base AS app
 RUN apt-get update -y && \
-    apt-get install -y curl
+    apt-get install -y openssl ca-certificates
 
 COPY --from=datadog/serverless-init:1 /datadog-init /app/datadog-init
 COPY --from=build /app /app
