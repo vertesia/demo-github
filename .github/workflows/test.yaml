@@ -38,18 +38,11 @@ jobs:
       run: pnpm -r test
 
   publish-github-runner:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/docker')
     needs: test
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: pnpm/action-setup@v4
-    - name: Install Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 22
-        cache: pnpm
-
     - name: Authenticate with Google Cloud
       uses: google-github-actions/auth@v2
       id: gauth
@@ -60,16 +53,6 @@ jobs:
         workload_identity_provider: projects/265888598630/locations/global/workloadIdentityPools/composable-cloud/providers/github
         access_token_lifetime: 300s
         create_credentials_file: true
-
-    - name: Authenticate to Google Artifact Registry
-      run: |
-        pnpm add -g google-artifactregistry-auth
-        pnpm run registry-login
-
-    - name: Run build
-      run: |
-        pnpm install
-        pnpm -r build
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
@@ -97,9 +80,9 @@ jobs:
       uses: docker/build-push-action@v6
       with:
         context: .
-        build-args: |
-          SERVICE_NAME=vertesia-github-agent
         file: ./apps/github-agent/Dockerfile
-        push: true
+        push: ${{ github.ref == 'refs/heads/main' }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
+        secrets: |
+          "gcp=${HOME}/.config/gcloud/application_default_credentials.json"

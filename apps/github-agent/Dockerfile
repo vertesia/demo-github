@@ -23,5 +23,7 @@ RUN apt-get update -y && \
 COPY --from=datadog/serverless-init:1 /datadog-init /app/datadog-init
 COPY --from=build /app /app
 
+ENV SERVICE_NAME=github-agent
+
 ENTRYPOINT ["/app/datadog-init"]
 CMD ["node", "/app/apps/github-agent/lib/main.js"]
