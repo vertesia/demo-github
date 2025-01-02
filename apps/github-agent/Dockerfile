@@ -4,18 +4,21 @@ ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 
 
-FROM base as build
+FROM base AS build
 COPY . /app
 WORKDIR /app
 
-# Mount secret for private packages
-RUN --mount=type=secret,id=gcp,target=/root/.config/gcloud \
-    pnpm add -g google-artifactregistry-auth && \
-    pnpm install --frozen-lockfile && \
+# Authenticate with Google Artifact Registry
+# FIXME SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ENV "GOOGLE_APPLICATION_CREDENTIALS") (line 12)
+ENV GOOGLE_APPLICATION_CREDENTIALS=/tmp/credentials.json
+RUN --mount=type=secret,id=gcp,target=/tmp/credentials.json \
+    pnpm add -g google-artifactregistry-auth
+
+RUN pnpm install --frozen-lockfile && \
     pnpm run -r build
 
 
-FROM base as app
+FROM base AS app
 RUN apt-get update -y && \
     apt-get install -y curl
 
