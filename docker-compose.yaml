@@ -11,8 +11,6 @@ services:
       - ./apps/github-agent/.env
     environment:
       GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/gcp
-    volumes:
-      - ~/.config/gcloud:/app/.config/gcloud
     secrets:
       - gcp
 
