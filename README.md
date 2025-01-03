@@ -25,7 +25,7 @@ Connect to private NPM registry and start the whole solution locally with either
 
 ```sh
 # install internal packages
-gcloud auth login
+gcloud auth application-default login
 pnpm install --filter "@dglabs/demo-github-root"
 pnpm registry-login
 pnpm install
@@ -40,7 +40,7 @@ npn run dev
 **docker**:
 
 ```sh
-gcloud auth login
+gcloud auth application-default login
 docker compose up --build
 ```
 
