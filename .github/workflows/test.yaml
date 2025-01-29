@@ -6,6 +6,13 @@ permissions:
   id-token: write
   contents: read
 
+env:
+  VT_ENV: staging
+  VT_SITE: staging.cloud.vertesia.io
+  VT_ACCOUNT: 652d77895674c387e105948c  # Dengen Labs
+  VT_PROJECT: 654df9de09676ad3b8631dc3  # Experiments
+  VT_PROFILE: staging-experiments # note: this should match the field ".vertesia.profile" in the agent's "package.json" file.
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -42,20 +49,30 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout source code
+      uses: actions/checkout@v2
+
+    - name: Authenticate with Google Cloud
+      uses: google-github-actions/auth@v2
+      id: gauth
+      with:
+        token_format: access_token
+        project_id: dengenlabs
+        service_account: gar-pusher@dengenlabs.iam.gserviceaccount.com
+        workload_identity_provider: projects/265888598630/locations/global/workloadIdentityPools/composable-cloud/providers/github
+        access_token_lifetime: 300s
+        create_credentials_file: true
+
+    - name: Get Vertesia API key
+      run: |
+        export VT_API_KEY="$(gcloud secrets versions access latest --secret=release-notes-api-key)"
+        echo "::add-mask::${VT_API_KEY}"
+        echo "VT_API_KEY=${VT_API_KEY}" >> $GITHUB_ENV
+
     - name: Set up Vertesia CLI
       run: |
         npm install -g @vertesia/cli
-    # - name: Authenticate with Google Cloud
-    #   uses: google-github-actions/auth@v2
-    #   id: gauth
-    #   with:
-    #     token_format: access_token
-    #     project_id: dengenlabs
-    #     service_account: gar-pusher@dengenlabs.iam.gserviceaccount.com
-    #     workload_identity_provider: projects/265888598630/locations/global/workloadIdentityPools/composable-cloud/providers/github
-    #     access_token_lifetime: 300s
-    #     create_credentials_file: true
+        bin/init-vertesia-profile.sh
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
