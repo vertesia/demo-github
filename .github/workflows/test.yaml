@@ -43,6 +43,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Set up Vertesia CLI
+      run: |
+        npm install -g @vertesia/cli
     # - name: Authenticate with Google Cloud
     #   uses: google-github-actions/auth@v2
     #   id: gauth
@@ -54,8 +57,8 @@ jobs:
     #     access_token_lifetime: 300s
     #     create_credentials_file: true
 
-    # - name: Set up Docker Buildx
-    #   uses: docker/setup-buildx-action@v3
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
 
     # - name: Docker meta
     #   id: meta
