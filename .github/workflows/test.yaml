@@ -75,6 +75,11 @@ jobs:
         bin/init-vertesia-profile.sh
         vertesia profiles
 
+    - name: Connect to Vertesia NPM registry
+      run: |
+        cd apps/github-agent
+        vertesia agent connect
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
@@ -96,5 +101,6 @@ jobs:
         context: .
         file: ./apps/github-agent/Dockerfile
         push: ${{ github.ref == 'refs/heads/main' }}
+        platforms: linux/amd64
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
