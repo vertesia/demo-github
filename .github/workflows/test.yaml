@@ -90,18 +90,11 @@ jobs:
           type=ref,event=pr
           type=sha,format=long,prefix=
 
-    - name: Login to GAR
-      run: |
-        cd apps/github-agent
-        docker login us-docker.pkg.dev/dengenlabs/us.gcr.io
-
-    # - name: Build and push Docker image
-    #   uses: docker/build-push-action@v6
-    #   with:
-    #     context: .
-    #     file: ./apps/github-agent/Dockerfile
-    #     push: ${{ github.ref == 'refs/heads/main' }}
-    #     tags: ${{ steps.meta.outputs.tags }}
-    #     labels: ${{ steps.meta.outputs.labels }}
-    #     secret-files: |
-    #       "gcp=${{ steps.gauth.outputs.credentials_file_path }}"
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        file: ./apps/github-agent/Dockerfile
+        push: ${{ github.ref == 'refs/heads/main' }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
