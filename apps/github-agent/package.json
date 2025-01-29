@@ -1,0 +1,35 @@
+{
+  "name": "@vertesia/github-agent",
+  "version": "1.10.0",
+  "description": "",
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "clean": "rimraf ./lib tsconfig.tsbuildinfo",
+    "build": "${npm_package_vertesia_pm} run clean && tsc --build && node ./bin/bundle-workflows.mjs lib/workflows.js lib/workflows-bundle.js",
+    "start": "node lib/main.js",
+    "connect": "vertesia agent connect"
+  },
+  "vertesia": {
+    "pm": "pnpm",
+    "image": {
+      "repository": "us-docker.pkg.dev/dengenlabs/us.gcr.io",
+      "organization": "vertesia",
+      "name": "github-agent"
+    },
+    "profile": "staging-experiments"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "dependencies": {
+    "@dglabs/agent-runner": "^0.9.2",
+    "@temporalio/activity": "^1.11.5",
+    "@temporalio/worker": "^1.11.5",
+    "@temporalio/workflow": "^1.11.5"
+  }
+}
