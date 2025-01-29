@@ -10,19 +10,19 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-l
 
 FROM base AS build
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
-RUN pnpm run build
+RUN pnpm run -r build
 
 FROM base
 RUN apt-get update -y && \
     apt-get install -y openssl ca-certificates
 
 COPY --from=prod-deps /app/node_modules /app/node_modules
-COPY --from=build /app/lib /app/lib
-COPY --from=build /app/bin /app/bin
+COPY --from=build /app/apps/github-agent/lib /app/apps/github-agent/lib
+COPY --from=build /app/apps/github-agent/bin /app/apps/github-agent/bin
 
 COPY --from=datadog/serverless-init:1 /datadog-init /app/datadog-init
 
 ENV SERVICE_NAME=vertesia_github-agent
 
 ENTRYPOINT ["/app/datadog-init"]
-CMD [ "pnpm", "start" ]
+CMD ["pnpm", "start"]
