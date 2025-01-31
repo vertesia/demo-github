@@ -1,5 +1,5 @@
 {
-  "name": "@dglabs/demo-github-root",
+  "name": "@dglabs/github-server",
   "version": "1.10.0",
   "private": true,
   "devDependencies": {

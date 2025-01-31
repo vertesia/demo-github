@@ -1,5 +1,5 @@
 {
-  "name": "@vertesia/github-agent",
+  "name": "@dglabs/github-agent",
   "version": "1.10.0",
   "description": "",
   "type": "module",
