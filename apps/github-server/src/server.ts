@@ -1,4 +1,4 @@
-import { logger } from "@dglabs/logger";
+import { logger } from "./setup-logger.js";
 
 process.on('uncaughtException', function (err) {
     console.error('Uncaught error!', err.stack);
