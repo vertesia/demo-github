@@ -23,7 +23,7 @@ jobs:
       with:
         node-version: 22
         cache: pnpm
-    - name: Authenticate to Google Artifact Registry
+    - name: Authenticate to NPM registry
       run: |
         npm install -g @vertesia/cli
         vertesia profiles create "${VT_PROFILE}" \
@@ -37,7 +37,9 @@ jobs:
         vertesia agent connect --profile "${VT_PROFILE}" --non-interactive
 
     - name: Install dependencies
-      run: pnpm install
+      run: |
+        cd apps/github-agent
+        pnpm install
     - name: Run build
       run: pnpm -r build
     - name: Run tests
