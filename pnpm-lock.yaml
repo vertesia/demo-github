@@ -43,47 +43,6 @@ importers:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.2)(terser@5.37.0)
 
-  apps/github-agent-old:
-    dependencies:
-      '@dglabs/agent-runner':
-        specifier: ^0.9.2
-        version: 0.9.2(@aws-sdk/client-sts@3.716.0)
-      '@temporalio/activity':
-        specifier: ^1.11.5
-        version: 1.11.5
-      '@temporalio/worker':
-        specifier: ^1.11.5
-        version: 1.11.5
-      '@temporalio/workflow':
-        specifier: ^1.11.5
-        version: 1.11.5
-    devDependencies:
-      '@temporalio/testing':
-        specifier: ^1.11.5
-        version: 1.11.5
-      '@types/node':
-        specifier: ^22.10.2
-        version: 22.10.2
-      '@types/source-map':
-        specifier: ^0.5.2
-        version: 0.5.7
-      only-allow:
-        specifier: ^1.2.1
-        version: 1.2.1
-      typescript:
-        specifier: ^5.7.2
-        version: 5.7.2
-
-  apps/github-server:
-    dependencies:
-      '@dglabs/logger':
-        specifier: ^0.9.2
-        version: 0.9.2
-    devDependencies:
-      typescript:
-        specifier: ^5.7.2
-        version: 5.7.2
-
 packages:
 
   '@aws-crypto/sha256-browser@5.2.0':
@@ -844,9 +803,6 @@ packages:
   '@temporalio/proto@1.11.5':
     resolution: {integrity: sha512-LjRGQdLRpRxDp2NSyNyhCp7JLaUlMY2T+hAeGfueR5cOVZxHXTO8TXnnjimi0UM1knyA6sW3yNJCNieKlCcASg==}
 
-  '@temporalio/testing@1.11.5':
-    resolution: {integrity: sha512-1HXH3BTYvMfKXAL5sM1BIE5OWurUWiZDnoX0fYYNG//rtK2A0gc48XMej9xtj0hWEMw3NnyGsbimHmVYHhAYmg==}
-
   '@temporalio/worker@1.11.5':
     resolution: {integrity: sha512-WeIK/2ZQMCFVz89FeSa081kMDeHbyL0yZf335Rn0my2l0TcWWoHjVI9kQGuEAuP6fke/sCCQxpcxJ8EvEMHX8w==}
     engines: {node: '>= 16.0.0'}
@@ -887,10 +843,6 @@ packages:
 
   '@types/request@2.48.12':
     resolution: {integrity: sha512-G3sY+NpsA9jnwm0ixhAFQSJ3Q9JkpLZpJbI3GMv0mIAT0y3mRabYeINzal5WOChIiaTEGQYlHOKgkaM9EisWHw==}
-
-  '@types/source-map@0.5.7':
-    resolution: {integrity: sha512-LrnsgZIfJaysFkv9rRJp4/uAyqw87oVed3s1hhF83nwbo9c7MG9g5DqR0seHP+lkX4ldmMrVolPjQSe2ZfD0yA==}
-    deprecated: This is a stub types definition for source-map (https://github.com/mozilla/source-map). source-map provides its own type definitions, so you don't need @types/source-map installed!
 
   '@types/tough-cookie@4.0.5':
     resolution: {integrity: sha512-/Ad8+nIOV7Rl++6f1BdKxFSMgmoqEoYbHRpPcx3JEfv8VRsQe9Z4mCXeJBzxs7mbHY/XOZZuXlRNfhpVPbs6ZA==}
@@ -1715,10 +1667,6 @@ packages:
   once@1.4.0:
     resolution: {integrity: sha512-lNaJgI+2Q5URQBkccEKHTQOPaXdUxnZZElQTZY0MFUAuaEqe1E+Nyvgdz/aIyNi6Z9MzO5dv1H8n58/GELp3+w==}
 
-  only-allow@1.2.1:
-    resolution: {integrity: sha512-M7CJbmv7UCopc0neRKdzfoGWaVZC+xC1925GitKH9EAqYFzX9//25Q7oX4+jw0tiCCj+t5l6VZh8UPH23NZkMA==}
-    hasBin: true
-
   opentracing@0.14.7:
     resolution: {integrity: sha512-vz9iS7MJ5+Bp1URw8Khvdyw1H/hGvzHWlKQ7eRrQojSCDL1/SrWfrY9QebLw97n2deyRtzHRC3MkQfVNUCo91Q==}
     engines: {node: '>=0.10'}
@@ -2206,10 +2154,6 @@ packages:
 
   whatwg-url@5.0.0:
     resolution: {integrity: sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==}
-
-  which-pm-runs@1.1.0:
-    resolution: {integrity: sha512-n1brCuqClxfFfq/Rb0ICg9giSZqCS+pLtccdag6C2HyufBrh3fBOiy9nb6ggRMvWOVH5GrdJskj5iGTZNxd7SA==}
-    engines: {node: '>=4'}
 
   which@2.0.2:
     resolution: {integrity: sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==}
@@ -3346,22 +3290,6 @@ snapshots:
       long: 5.2.3
       protobufjs: 7.4.0
 
-  '@temporalio/testing@1.11.5':
-    dependencies:
-      '@temporalio/activity': 1.11.5
-      '@temporalio/client': 1.11.5
-      '@temporalio/common': 1.11.5
-      '@temporalio/core-bridge': 1.11.5
-      '@temporalio/proto': 1.11.5
-      '@temporalio/worker': 1.11.5
-      '@temporalio/workflow': 1.11.5
-      abort-controller: 3.0.0
-    transitivePeerDependencies:
-      - '@swc/helpers'
-      - esbuild
-      - uglify-js
-      - webpack-cli
-
   '@temporalio/worker@1.11.5':
     dependencies:
       '@swc/core': 1.10.1
@@ -3428,10 +3356,6 @@ snapshots:
       '@types/node': 22.10.2
       '@types/tough-cookie': 4.0.5
       form-data: 2.5.2
-
-  '@types/source-map@0.5.7':
-    dependencies:
-      source-map: 0.7.4
 
   '@types/tough-cookie@4.0.5': {}
 
@@ -4303,10 +4227,6 @@ snapshots:
     dependencies:
       wrappy: 1.0.2
 
-  only-allow@1.2.1:
-    dependencies:
-      which-pm-runs: 1.1.0
-
   opentracing@0.14.7: {}
 
   p-limit@3.1.0:
@@ -4846,8 +4766,6 @@ snapshots:
     dependencies:
       tr46: 0.0.3
       webidl-conversions: 3.0.1
-
-  which-pm-runs@1.1.0: {}
 
   which@2.0.2:
     dependencies:
