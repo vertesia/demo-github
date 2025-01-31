@@ -115,3 +115,9 @@ Push the Docker image to Google Cloud
 ```sh
 pnpm agent:push
 ```
+
+Deploy the Docker image to Vertesia Cloud
+
+```sh
+pnpm agent:deploy
+```
