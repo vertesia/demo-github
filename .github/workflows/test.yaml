@@ -8,7 +8,6 @@ permissions:
 
 env:
   VT_ENV: staging
-  VT_SITE: staging.cloud.vertesia.io
   VT_ACCOUNT: 652d77895674c387e105948c  # Dengen Labs
   VT_PROJECT: 654df9de09676ad3b8631dc3  # Experiments
   VT_PROFILE: staging-experiments # note: this should match the field ".vertesia.profile" in the agent's "package.json" file.
@@ -51,34 +50,16 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Authenticate with Google Cloud
-      uses: google-github-actions/auth@v2
-      id: gauth
-      with:
-        token_format: access_token
-        project_id: dengenlabs
-        service_account: gar-pusher@dengenlabs.iam.gserviceaccount.com
-        workload_identity_provider: projects/265888598630/locations/global/workloadIdentityPools/composable-cloud/providers/github
-        access_token_lifetime: 300s
-        create_credentials_file: true
-
-    - name: Get Vertesia API key
+    - name: Set up Vertesia CLI
       run: |
-        export VT_API_KEY="$(gcloud secrets versions access latest --secret=release-notes-api-key)"
-        echo "::add-mask::${VT_API_KEY}"
-        echo "VT_API_KEY=${VT_API_KEY}" >> $GITHUB_ENV
-
-    - name: Create Vertesia profile
-      run: |
+        npm install -g @vertesia/cli
         vertesia profiles create "${VT_PROFILE}" \
             --target "${VT_ENV}" \
             --account "${VT_ACCOUNT}" \
             --project ${VT_PROJECT} \
-            --apikey "${VT_API_KEY}"
-
-    - name: Connect to Vertesia
-      run: |
-        vertesia connect --profile "${VT_PROFILE}" --non-interactive
+            --apikey "${{ secrets.VT_API_KEY }}"
+        vertesia profiles
+        vertesia agent connect --profile "${VT_PROFILE}" --non-interactive
 
     # - name: Set up Docker Buildx
     #   uses: docker/setup-buildx-action@v3
