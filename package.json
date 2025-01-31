@@ -4,8 +4,6 @@
   "private": true,
   "description": "This is the root of the monorepo for the GitHub demo.",
   "scripts": {
-    "preinstall": "pnpm registry-login",
-    "registry-login": "pnpm exec artifactregistry-auth",
     "agent:build": "docker buildx build --no-cache --platform linux/amd64 -t vertesia/github-agent:latest -t vertesia/github-agent:0.0.0-$(git rev-parse HEAD) -t us-docker.pkg.dev/dengenlabs/us.gcr.io/agents/vertesia/github-agent:0.0.0-$(git rev-parse HEAD) -f apps/github-agent/Dockerfile .",
     "agent:push": "cd apps/github-agent && docker push us-docker.pkg.dev/dengenlabs/us.gcr.io/agents/vertesia/github-agent:0.0.0-$(git rev-parse HEAD)",
     "agent:deploy": "cd apps/github-agent && vertesia agent publish --deploy-only 0.0.0-$(git rev-parse HEAD)"
