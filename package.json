@@ -4,6 +4,8 @@
   "private": true,
   "description": "This is the root of the monorepo for the GitHub demo.",
   "scripts": {
+    "preinstall": "pnpm registry-login",
+    "registry-login": "pnpm exec artifactregistry-auth",
     "agent:build": "docker buildx build --no-cache --platform linux/amd64 -t vertesia/github-agent:latest -f apps/github-agent/Dockerfile .",
     "agent:publish": "echo 'Publishing agent'"
   },
