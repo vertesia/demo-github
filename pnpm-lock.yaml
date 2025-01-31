@@ -8,9 +8,6 @@ importers:
 
   .:
     devDependencies:
-      google-artifactregistry-auth:
-        specifier: ^3.2.0
-        version: 3.2.0
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@edge-runtime/vm@3.0.3)(@types/node@22.10.2)(terser@5.37.0)
@@ -1609,10 +1606,6 @@ packages:
   glob@11.0.1:
     resolution: {integrity: sha512-zrQDm8XPnYEKawJScsnM0QzobJxlT/kHOOlRTio8IH/GrmxRE5fjllkzdaHclIuNjUQTJYH2xHNIGfdpJkDJUw==}
     engines: {node: 20 || >=22}
-    hasBin: true
-
-  google-artifactregistry-auth@3.2.0:
-    resolution: {integrity: sha512-zkxnWly7GjLNlo/qyYyQFISMAWQJreGCKm/JBRqmrx9gP4EmettqmLqTThLunh0VLoeEnR7aFWjtggvG9m9kwQ==}
     hasBin: true
 
   google-auth-library@9.15.0:
@@ -4564,14 +4557,6 @@ snapshots:
       minipass: 7.1.2
       package-json-from-dist: 1.0.1
       path-scurry: 2.0.0
-
-  google-artifactregistry-auth@3.2.0:
-    dependencies:
-      google-auth-library: 9.15.0
-      yargs: 17.7.2
-    transitivePeerDependencies:
-      - encoding
-      - supports-color
 
   google-auth-library@9.15.0:
     dependencies:
