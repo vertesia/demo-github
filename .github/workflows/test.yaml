@@ -59,7 +59,7 @@ jobs:
             --project ${VT_PROJECT} \
             --apikey "${{ secrets.VT_API_KEY }}"
         vertesia profiles
-        vertesia connect --profile "${VT_PROFILE}" --non-interactive
+        vertesia agent connect --profile "${VT_PROFILE}" --non-interactive
 
     # - name: Set up Docker Buildx
     #   uses: docker/setup-buildx-action@v3
