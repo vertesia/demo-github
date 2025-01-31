@@ -10,7 +10,6 @@
   },
   "packageManager": "pnpm@9.15.0",
   "devDependencies": {
-    "google-artifactregistry-auth": "^3.2.0",
     "vitest": "^2.1.8"
   }
 }
