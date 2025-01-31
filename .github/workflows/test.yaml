@@ -68,16 +68,15 @@ jobs:
         echo "::add-mask::${VT_API_KEY}"
         echo "VT_API_KEY=${VT_API_KEY}" >> $GITHUB_ENV
 
-    - name: Create Vertesia profile
+    - name: Set up Vertesia CLI
       run: |
+        npm install -g @vertesia/cli
         vertesia profiles create "${VT_PROFILE}" \
             --target "${VT_ENV}" \
             --account "${VT_ACCOUNT}" \
             --project ${VT_PROJECT} \
             --apikey "${VT_API_KEY}"
-
-    - name: Connect to Vertesia
-      run: |
+        vertesia profiles
         vertesia connect --profile "${VT_PROFILE}" --non-interactive
 
     # - name: Set up Docker Buildx
