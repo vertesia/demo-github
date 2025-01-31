@@ -74,7 +74,7 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
 
-  apps/simple-app: {}
+  apps/github-server: {}
 
 packages:
 

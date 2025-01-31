@@ -1,8 +1,8 @@
 {
-  "name": "@dglabs/simple-app",
+  "name": "@dglabs/github-server",
   "version": "1.0.0",
   "private": true,
-  "description": "Simple app for the GitHub demo.",
+  "description": "Simple web server for the GitHub demo.",
   "main": "lib/index.js",
   "scripts": {
     "build": "mkdir -p dist && cp src/index.js dist/"
