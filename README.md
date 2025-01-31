@@ -109,3 +109,9 @@ pnpm agent:build
 > When building the Docker image on your MacBook, you need to disable Rosetta on Docker Desktop due to issue <https://github.com/docker/for-mac/issues/7255> Buildx throws Illegal Instruction installing ca-certificates when building for linux/amd64 on M2.
 >
 > Open Docker Desktop, go to "Settings", visit "Generaral", under "Virtual Machine Options", disable option "Use Rosetta for x86_64/amd64 emulation on Apple Silicon". Apply and restart Docker Desktop.
+
+Push the Docker image to Google Cloud
+
+```sh
+pnpm agent:push
+```

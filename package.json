@@ -7,7 +7,7 @@
     "preinstall": "pnpm registry-login",
     "registry-login": "pnpm exec artifactregistry-auth",
     "agent:build": "docker buildx build --no-cache --platform linux/amd64 -t vertesia/github-agent:latest -t vertesia/github-agent:$(git rev-parse HEAD) -t us-docker.pkg.dev/dengenlabs/us.gcr.io/agents/vertesia/github-agent:$(git rev-parse HEAD) -f apps/github-agent/Dockerfile .",
-    "agent:publish": "cd apps/github-agent && docker push us-docker.pkg.dev/dengenlabs/us.gcr.io/agents/vertesia/github-agent:$(git rev-parse HEAD)"
+    "agent:push": "cd apps/github-agent && docker push us-docker.pkg.dev/dengenlabs/us.gcr.io/agents/vertesia/github-agent:$(git rev-parse HEAD)"
   },
   "packageManager": "pnpm@9.15.0",
   "devDependencies": {
