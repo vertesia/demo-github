@@ -15,5 +15,3 @@ vercel dev
 ```sh
 curl https://demo-github.vertesia.dev/api/hello
 ```
-
-
