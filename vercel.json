@@ -1,8 +1,7 @@
 {
     "functions": {
-        "apps/github-server/api/**/*.ts": {
-            "maxDuration": 60,
-            "runtime": "vercel-node@latest"
+        "apps/github-server/api/*": {
+            "maxDuration": 60
         }
     }
 }
