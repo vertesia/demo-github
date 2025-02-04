@@ -1,0 +1,3 @@
+{
+    "installCommand": "cd ../.. && turbo prune --scope=@dglabs/github-server && cd out && pnpm install"
+}
