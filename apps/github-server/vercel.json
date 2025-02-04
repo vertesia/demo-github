@@ -1,5 +1,5 @@
 {
-    "buildCommand": "echo 'No build command specified' && pwd && cd ../../out/apps/github-server && pnpm install",
-    "installCommand": "cd ../.. && turbo prune --scope=@dglabs/github-server && cd out && pnpm install",
+    "buildCommand": "echo \"[build] the current directory is $(pwd)\" && cd ../../out/apps/github-server && pnpm install",
+    "installCommand": "echo \"[install] the current directory is $(pwd)\" && cd ../.. && turbo prune --scope=@dglabs/github-server && cd out && pnpm install",
     "outputDirectory": "."
 }
