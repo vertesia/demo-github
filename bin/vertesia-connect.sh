@@ -15,6 +15,8 @@ VT_ACCOUNT=652d77895674c387e105948c  # Dengen Labs
 VT_PROJECT=654df9de09676ad3b8631dc3  # Experiments
 VT_PROFILE=staging-experiments # note: this should match the field ".vertesia.profile" in the agent's "package.json" file.
 
+echo "Connecting to Vertesia private NPM registry"
+
 if vertesia profiles | grep -q "${VT_PROFILE}"; then
     echo "Profile \"${VT_PROFILE}\" already exists"
     vertesia profiles use "$VT_PROFILE"
