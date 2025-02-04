@@ -1,0 +1,5 @@
+{
+    "buildCommand": "echo \"[build] the current directory is $(pwd)\" && pnpm build && echo '[build] custom build command completed.'",
+    "installCommand": "cd ../.. && pnpm vercel:install",
+    "outputDirectory": "."
+}

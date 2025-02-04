@@ -2,6 +2,9 @@
   "name": "@dglabs/github-server",
   "version": "1.10.0",
   "private": true,
+  "scripts": {
+    "build": "echo 'No build command specified'"
+  },
   "devDependencies": {
     "@types/node": "^17.0.42",
     "@vercel/node": "^2.9.6",
