@@ -1,3 +1,4 @@
 {
-    "installCommand": "cd ../.. && turbo prune --scope=@dglabs/github-server && cd out && pnpm install"
+    "installCommand": "cd ../.. && turbo prune --scope=@dglabs/github-server && cd out && pnpm install",
+    "buildCommand": "echo 'No build command specified'"
 }
