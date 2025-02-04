@@ -1,0 +1,4 @@
+{
+    "installCommand": "echo 'custom_installation from vercel.json'",
+    "buildCommand": "echo 'custom_build from vercel.json'"
+}
