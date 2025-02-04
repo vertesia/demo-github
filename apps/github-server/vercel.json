@@ -1,4 +1,5 @@
 {
+    "buildCommand": "echo 'No build command specified'",
     "installCommand": "cd ../.. && turbo prune --scope=@dglabs/github-server && cd out && pnpm install",
-    "buildCommand": "echo 'No build command specified'"
+    "outputDirectory": "."
 }
