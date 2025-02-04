@@ -1,6 +1,7 @@
 {
     "functions": {
         "api/**/*.ts": {
+            "runtime": "22.x"
         }
     }
 }
