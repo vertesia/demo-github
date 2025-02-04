@@ -1,5 +1,19 @@
 #!/bin/bash
 
+function use_existing_profile {
+    echo "Profile \"${VT_PROFILE}\" already exists"
+    vertesia profiles use "$VT_PROFILE"
+}
+
+function create_profile {
+    echo "Profile \"${VT_PROFILE}\" does not exist, creating it"
+    vertesia profiles create "$VT_PROFILE" \
+            --target "$VT_ENV" \
+            --account "$VT_ACCOUNT" \
+            --project "$VT_PROJECT" \
+            --apikey "$VT_API_KEY"
+}
+
 if ! command -v vertesia &> /dev/null; then
     echo 'Vertesia CLI is not installed. Please install it first: npm install -g @vertesia/cli'
     exit 1
@@ -17,16 +31,13 @@ VT_PROFILE=staging-experiments # note: this should match the field ".vertesia.pr
 
 echo "Connecting to Vertesia private NPM registry"
 
-if vertesia profiles | grep -q "${VT_PROFILE}"; then
-    echo "Profile \"${VT_PROFILE}\" already exists"
-    vertesia profiles use "$VT_PROFILE"
+if [[ -n "${VERCEL}" ]]; then
+    echo "Running in Vercel environment"
+    create_profile
+elif vertesia profiles | grep -q "${VT_PROFILE}"; then
+    use_existing_profile
 else
-    echo "Profile \"${VT_PROFILE}\" does not exist, creating it"
-    vertesia profiles create "$VT_PROFILE" \
-            --target "$VT_ENV" \
-            --account "$VT_ACCOUNT" \
-            --project "$VT_PROJECT" \
-            --apikey "$VT_API_KEY"
+    create_profile
 fi
 
 cd apps/github-agent || exit
