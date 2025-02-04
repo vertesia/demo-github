@@ -1,5 +1,5 @@
 {
     "buildCommand": "echo \"[build] the current directory is $(pwd)\" && cd ../../out/apps/github-server && pnpm install && echo '[build] custom build command completed.'",
-    "installCommand": "echo \"[install] the current directory is $(pwd)\" && cd ../.. && npm -g i @vertesia/cli && pnpm vertesia:connect && turbo prune --scope=@dglabs/github-server && cd out && pnpm install && echo '[install] custom install command completed.'",
+    "installCommand": "echo \"[install] the current directory is $(pwd)\" && cd ../.. && npm -g i @vertesia/cli && vertesia --version && pnpm vertesia:connect && turbo prune --scope=@dglabs/github-server && cd out && pnpm install && echo '[install] custom install command completed.'",
     "outputDirectory": "."
 }
