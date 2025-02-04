@@ -1,4 +1,3 @@
 {
-    "installCommand": "echo 'custom_installation from apps/github-server/vercel.json'",
-    "buildCommand": "echo 'custom_build from apps/github-server/vercel.json'"
+    "installCommand": "cd ../.. && turbo prune --scope=@dglabs/github-server && cd out && pnpm install"
 }
