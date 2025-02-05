@@ -2,6 +2,8 @@
 
 This projects demonstrates the integration of GitHub Agent into the Composable as a collection of Agentic Workflows.
 
+![Architecture Overview Diagram](docs/diagrams/architecture-overview.png)
+
 ## Prerequisites
 
 * You need to have access to Google Cloud project `dengenlabs` to fetch certificates for connecting to Temporal Cloud.
