@@ -35,14 +35,14 @@ HIDE_STEREOTYPE()
 
 AddElementTag("service_account", $bgColor="#1E9EA6", $fontColor="#FFFFFF", $borderColor="#000000")
 
-Person(composable_users, "User", "Vertesia users and staff")
-System_Ext(service_account, "Service Account", "Integration for GitHub", $sprite="robot2", $tags="service_account")
+Person(vertesia_users, "User", "Vertesia users and staff")
+System_Ext(sys_github, "GitHub", "Organizations and repositories subscribed to the Vertesia GitHub AI Agent.", $tags="service_account")
 
 System_Boundary(sys_composable, "Vertesia") {
     System_Boundary(sys_composable_nginx, "https://github.vertesia.dev") {
-        Container(composable_github_server, "GitHub Server", "", "Webhook for GitHub.")
+        Container(vertesia_github_server, "GitHub Server", "", "Webhook for GitHub.")
     }
-    Container(composable_github_worker, "GitHub Agent", "", "Temporal worker for GitHub.")
+    Container(vertesia_github_agent, "GitHub Agent", "", "Temporal worker for GitHub.")
 }
 
 System_Boundary(sys_temporal, "https://cloud.temploral.io") {
@@ -50,13 +50,15 @@ System_Boundary(sys_temporal, "https://cloud.temploral.io") {
 }
 
 ' Clients
-composable_users <---> composable_github_server
-service_account <---> composable_github_server
+vertesia_users ---> vertesia_github_server: send\nevents
+vertesia_users -r-> sys_github: uses
+sys_github ---> vertesia_github_server: send\nevents
 
-service_account -[hidden]r-> composable_users
+sys_github -[hidden]l-> vertesia_users
 
 ' Backend
-composable_github_server -r-> composable_github_worker
-composable_github_server <-d-> temporal_server
-composable_github_worker <-d-> temporal_server
+vertesia_github_server -[hidden]r-> vertesia_github_agent
+vertesia_github_server <-d-> temporal_server
+vertesia_github_agent <-d-> temporal_server
+vertesia_github_agent -u-> sys_github: provides\ninformation
 @enduml
