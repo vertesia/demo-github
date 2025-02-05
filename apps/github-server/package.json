@@ -3,7 +3,7 @@
   "version": "1.10.0",
   "private": true,
   "scripts": {
-    "build": "echo 'No build command specified'"
+    "build": "tsc"
   },
   "devDependencies": {
     "@types/node": "^17.0.42",
