@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2021",
+    "module": "ESNext",
+
+    /* Bundler mode */
+    "moduleResolution": "node", /* q: more recent version? */
+    "resolveJsonModule": true, /* q: do we need to resolve JSON? */
+    "isolatedModules": true, /* q: do we want isolated modules? */
+    "noEmit": true, /* q: do we want to emit? */
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
+  }
+}
