@@ -2,6 +2,10 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import { createHmac, timingSafeEqual } from 'crypto';
 
 const GITHUB_SECRET = process.env.GITHUB_SECRET || '';
+const supportedRepoUrls = [
+  'https://github.com/vertesia/demo-github',
+  'https://github.com/vertesia/studio',
+];
 
 function verifySignature(req: VercelRequest): boolean {
   const signature = req.headers['x-hub-signature-256'] as string;
@@ -24,20 +28,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const event = req.headers['x-github-event'];
-  console.log(`Received GitHub event: ${event}`);
-  console.log('Payload:', req.body);
+  console.log(`Received GitHub event: ${event}. Payload:`, req.body);
 
-  // Handle specific GitHub events if needed
   switch (event) {
-    case 'push':
-      console.log('Push event detected');
-      break;
     case 'pull_request':
-      console.log('Pull request event detected');
+      handlePullRequest(req.body);
       break;
     default:
       console.log('Unhandled event type');
   }
 
   return res.status(200).json({ message: 'Webhook received' });
+}
+
+function handlePullRequest(event: any) {
+  const repoUrl = event.repository.html_url;
+
+  if (!supportedRepoUrls.includes(repoUrl)) {
+    console.log('[pull_request_handler] Skipped, unsupported repository:', repoUrl);
+    return;
+  }
+
+  console.log('[pull_request_handler] Handling pull request:', repoUrl);
 }
