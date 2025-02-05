@@ -1,0 +1,62 @@
+' See https://github.com/plantuml-stdlib/C4-PlantUML
+@startuml architecture-overview
+
+' ----- Vertesia Theme (start) -----
+' See Vertesia Brand Guidelines
+' https://drive.google.com/file/d/1iEgOfUqDoSSpXGI1E3ZVo9-C4SR8pcZ9/view
+'
+' Example of a theme:
+' https://github.com/plantuml-stdlib/C4-PlantUML/blob/master/themes/puml-theme-C4_violet.puml
+
+skinparam defaultFontName "Inter Tight"
+
+!$PERSON_FONT_COLOR = "#000000"
+!$PERSON_BG_COLOR = "#F69E0C"
+!$PERSON_BORDER_COLOR = "#000000"
+
+!$CONTAINER_BG_COLOR = "#0047BB"
+!$CONTAINER_BORDER_COLOR = "#000000"
+
+!$SYSTEM_BG_COLOR = "#7815C2"
+
+!$EXTERNAL_SYSTEM_FONT_COLOR = "#666666"
+!$EXTERNAL_SYSTEM_BG_COLOR = "#E8EDF9"
+!$EXTERNAL_CONTAINER_FONT_COLOR = "#666666"
+!$EXTERNAL_CONTAINER_BG_COLOR = "#E8EDF9"
+' ----- Vertesia Theme (end) -----
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+
+title GitHub Architecture
+
+HIDE_STEREOTYPE()
+
+AddElementTag("service_account", $bgColor="#1E9EA6", $fontColor="#FFFFFF", $borderColor="#000000")
+
+Person(composable_users, "User", "Vertesia users and staff")
+System_Ext(service_account, "Service Account", "Integration for GitHub", $sprite="robot2", $tags="service_account")
+
+System_Boundary(sys_composable, "Vertesia") {
+    System_Boundary(sys_composable_nginx, "https://github.vertesia.dev") {
+        Container(composable_github_server, "GitHub Server", "", "Webhook for GitHub.")
+    }
+    Container(composable_github_worker, "GitHub Agent", "", "Temporal worker for GitHub.")
+}
+
+System_Boundary(sys_temporal, "https://cloud.temploral.io") {
+    ContainerDb_Ext(temporal_server, "Temporal", "", "Workflow engine.")
+}
+
+' Clients
+composable_users <---> composable_github_server
+service_account <---> composable_github_server
+
+service_account -[hidden]r-> composable_users
+
+' Backend
+composable_github_server -r-> composable_github_worker
+composable_github_server <-d-> temporal_server
+composable_github_worker <-d-> temporal_server
+@enduml
