@@ -45,9 +45,10 @@ function handlePullRequest(event: any) {
   const repoUrl = event.repository.html_url;
 
   if (!supportedRepoUrls.includes(repoUrl)) {
-    console.log('[pull_request_handler] Skipped, unsupported repository:', repoUrl);
+    console.log('[pull_request] Skipped, unsupported repository:', repoUrl);
     return;
   }
 
-  console.log('[pull_request_handler] Handling pull request:', repoUrl);
+  const workflowId = `${event.repository.full_name}/pull/${event.number}`;
+  console.log(`[pull_request] Handling pull request "${repoUrl}" as "${workflowId}"`);
 }
