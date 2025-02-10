@@ -12,7 +12,7 @@
   },
   "packageManager": "pnpm@9.15.0",
   "devDependencies": {
-    "vitest": "^2.1.8"
+    "vitest": "^2.1.9"
   },
   "pnpm": {
     "overrides": {
