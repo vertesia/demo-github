@@ -12,6 +12,13 @@
   },
   "packageManager": "pnpm@9.15.0",
   "devDependencies": {
-    "vitest": "^2.1.8"
+    "vitest": "^2.1.9"
+  },
+  "pnpm": {
+    "overrides": {
+      "path-to-regexp@>=4.0.0 <6.3.0": "^6.3.0",
+      "undici@>=4.5.0 <5.28.5": "^5.28.5",
+      "undici@>=6.0.0 <6.21.1": "^6.21.1"
+    }
   }
 }
