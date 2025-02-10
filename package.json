@@ -11,9 +11,6 @@
     "vertesia:connect": "bin/vertesia-connect.sh"
   },
   "packageManager": "pnpm@9.15.0",
-  "devDependencies": {
-    "vitest": "^2.1.9"
-  },
   "pnpm": {
     "overrides": {
       "path-to-regexp@>=4.0.0 <6.3.0": "^6.3.0",
