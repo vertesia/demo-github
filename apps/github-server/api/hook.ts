@@ -1,7 +1,7 @@
 import { Client, Connection } from '@temporalio/client';
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { createHmac, timingSafeEqual } from 'crypto';
-import dns from 'dns';
+import * as dns from 'dns';
 
 const GITHUB_SECRET = process.env.GITHUB_SECRET || '';
 const supportedRepoUrls = [
