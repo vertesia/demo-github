@@ -16,17 +16,17 @@ importers:
   apps/github-agent:
     dependencies:
       '@dglabs/agent-runner':
-        specifier: ^0.9.3
+        specifier: 0.9.3
         version: 0.9.3(@aws-sdk/client-sts@3.716.0)
       '@temporalio/activity':
-        specifier: ^1.11.5
-        version: 1.11.5
+        specifier: 1.11.7
+        version: 1.11.7
       '@temporalio/worker':
-        specifier: ^1.11.5
-        version: 1.11.5
+        specifier: 1.11.7
+        version: 1.11.7
       '@temporalio/workflow':
-        specifier: ^1.11.5
-        version: 1.11.5
+        specifier: 1.11.7
+        version: 1.11.7
     devDependencies:
       '@types/node':
         specifier: ^22.10.2
@@ -45,6 +45,10 @@ importers:
         version: 2.1.9(@edge-runtime/vm@3.2.0)(@types/node@22.10.2)(terser@5.37.0)
 
   apps/github-server:
+    dependencies:
+      '@temporalio/client':
+        specifier: 1.11.7
+        version: 1.11.7
     devDependencies:
       '@types/node':
         specifier: ^16.18.11
@@ -863,27 +867,27 @@ packages:
   '@swc/types@0.1.17':
     resolution: {integrity: sha512-V5gRru+aD8YVyCOMAjMpWR1Ui577DD5KSJsHP8RAxopAH22jFz6GZd/qxqjO6MJHQhcsjvjOFXyDhyLQUnMveQ==}
 
-  '@temporalio/activity@1.11.5':
-    resolution: {integrity: sha512-IHvaADrKhxYyhuybnMt5JX3rxK94DstENwO2jq5qjsS2p5jr1qjU72pRDUSXAha1endqgsyjqIyxqrEOsqzuyg==}
+  '@temporalio/activity@1.11.7':
+    resolution: {integrity: sha512-8WjXmvre0He9RvipP5nPK8dDbC/EoMtllCjcdiyPI69jDiihoTxOLpiYXIXdHn9yGbf34lHa21ZiRVZNhFkeHg==}
 
-  '@temporalio/client@1.11.5':
-    resolution: {integrity: sha512-Q8hFqxyf41MQmCeyxcGpbiMyuxhilvG8FScFwSbFs8ZZPZykNcpr5o+TOowLWzGWAL5f2bIKETh/eXDZpZvY7g==}
+  '@temporalio/client@1.11.7':
+    resolution: {integrity: sha512-rStMiKMNPH396TDBIDoavi2B/QQaV6NHHzEzhmyD7MoDJvuApIv1uSKcjYlRdmXiv0lF1FC2ONcquq7lmKSCYg==}
 
-  '@temporalio/common@1.11.5':
-    resolution: {integrity: sha512-6cgGTAT+jSKKwCPOoUDIseJuDroP7cEIAX/pYpNBRGvfj+lpU8GitSVsPEZTVoMQ400otzBa1n80aH8bnOLVTw==}
+  '@temporalio/common@1.11.7':
+    resolution: {integrity: sha512-T3so7KE8nGmesjrbrfjtQLXhw7lJYKW87V/soxNeAxW/i3n3/7km3/dx8F7FBlgbu66Uu8CIWVbxLnVSS+Frbg==}
 
-  '@temporalio/core-bridge@1.11.5':
-    resolution: {integrity: sha512-1IzxtPrndR99golP1yZnvsOHU9QP5o9KdNtM/W5VxChFc0ihmeZpisptgfYyqa9VaO/Bs9wEoSmH6fCSB9knTQ==}
+  '@temporalio/core-bridge@1.11.7':
+    resolution: {integrity: sha512-QiVqX2b+7GiZ9VlyeUunDILMvgU2UX2PyWXemuoLeM+33X/xbLW/UgwtDS2TKcON69UrUH1OG9yl6DPXpeOrfQ==}
 
-  '@temporalio/proto@1.11.5':
-    resolution: {integrity: sha512-LjRGQdLRpRxDp2NSyNyhCp7JLaUlMY2T+hAeGfueR5cOVZxHXTO8TXnnjimi0UM1knyA6sW3yNJCNieKlCcASg==}
+  '@temporalio/proto@1.11.7':
+    resolution: {integrity: sha512-O34R2wk8PvmYpMHhsL7g2lIdtTA5wkQ5LJ86eHY0cF9zhDs/CoGiysl9qBOg9fy4WXHqzmcUm/V50hGefaM7gw==}
 
-  '@temporalio/worker@1.11.5':
-    resolution: {integrity: sha512-WeIK/2ZQMCFVz89FeSa081kMDeHbyL0yZf335Rn0my2l0TcWWoHjVI9kQGuEAuP6fke/sCCQxpcxJ8EvEMHX8w==}
+  '@temporalio/worker@1.11.7':
+    resolution: {integrity: sha512-r8AMBFFQkZghsVnqJ7RcPBBXYhm498oATL7FY9WL1kBf73wQ7cZl82Vug1VT9fHF/SX3Kq8WdNXC3jPhO+jG6g==}
     engines: {node: '>= 16.0.0'}
 
-  '@temporalio/workflow@1.11.5':
-    resolution: {integrity: sha512-U0kGoQ6bttEiT59km+cpeSxVr2Bq8ZHmlurP2N+9nQdxa10RsMqrp5YQrJQfg7KrfrYbeY1HyJBQ7Ljy1FrOtQ==}
+  '@temporalio/workflow@1.11.7':
+    resolution: {integrity: sha512-NGNmGCoV3xPvRifjRhCZKbIbPAup92/OC2xuaTb3hzBb13N9Pbm6HVljgQORzKNyO55rXDRpTnAiJ40en57IgA==}
 
   '@tootallnate/once@2.0.0':
     resolution: {integrity: sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==}
@@ -3172,10 +3176,10 @@ snapshots:
     dependencies:
       '@dglabs/cloud': 0.9.3(@aws-sdk/client-sts@3.716.0)
       '@dglabs/logger': 0.9.3
-      '@temporalio/activity': 1.11.5
-      '@temporalio/client': 1.11.5
-      '@temporalio/worker': 1.11.5
-      '@temporalio/workflow': 1.11.5
+      '@temporalio/activity': 1.11.7
+      '@temporalio/client': 1.11.7
+      '@temporalio/worker': 1.11.7
+      '@temporalio/workflow': 1.11.7
       dotenv: 16.4.7
       import-meta-resolve: 4.1.0
     transitivePeerDependencies:
@@ -3844,48 +3848,48 @@ snapshots:
     dependencies:
       '@swc/counter': 0.1.3
 
-  '@temporalio/activity@1.11.5':
+  '@temporalio/activity@1.11.7':
     dependencies:
-      '@temporalio/common': 1.11.5
+      '@temporalio/common': 1.11.7
       abort-controller: 3.0.0
 
-  '@temporalio/client@1.11.5':
+  '@temporalio/client@1.11.7':
     dependencies:
       '@grpc/grpc-js': 1.12.5
-      '@temporalio/common': 1.11.5
-      '@temporalio/proto': 1.11.5
+      '@temporalio/common': 1.11.7
+      '@temporalio/proto': 1.11.7
       abort-controller: 3.0.0
       long: 5.2.3
       uuid: 9.0.1
 
-  '@temporalio/common@1.11.5':
+  '@temporalio/common@1.11.7':
     dependencies:
-      '@temporalio/proto': 1.11.5
+      '@temporalio/proto': 1.11.7
       long: 5.2.3
       ms: 3.0.0-canary.1
       proto3-json-serializer: 2.0.2
 
-  '@temporalio/core-bridge@1.11.5':
+  '@temporalio/core-bridge@1.11.7':
     dependencies:
-      '@temporalio/common': 1.11.5
+      '@temporalio/common': 1.11.7
       arg: 5.0.2
       cargo-cp-artifact: 0.1.9
       which: 4.0.0
 
-  '@temporalio/proto@1.11.5':
+  '@temporalio/proto@1.11.7':
     dependencies:
       long: 5.2.3
       protobufjs: 7.4.0
 
-  '@temporalio/worker@1.11.5':
+  '@temporalio/worker@1.11.7':
     dependencies:
       '@swc/core': 1.10.1
-      '@temporalio/activity': 1.11.5
-      '@temporalio/client': 1.11.5
-      '@temporalio/common': 1.11.5
-      '@temporalio/core-bridge': 1.11.5
-      '@temporalio/proto': 1.11.5
-      '@temporalio/workflow': 1.11.5
+      '@temporalio/activity': 1.11.7
+      '@temporalio/client': 1.11.7
+      '@temporalio/common': 1.11.7
+      '@temporalio/core-bridge': 1.11.7
+      '@temporalio/proto': 1.11.7
+      '@temporalio/workflow': 1.11.7
       abort-controller: 3.0.0
       heap-js: 2.5.0
       memfs: 4.15.0
@@ -3902,10 +3906,10 @@ snapshots:
       - uglify-js
       - webpack-cli
 
-  '@temporalio/workflow@1.11.5':
+  '@temporalio/workflow@1.11.7':
     dependencies:
-      '@temporalio/common': 1.11.5
-      '@temporalio/proto': 1.11.5
+      '@temporalio/common': 1.11.7
+      '@temporalio/proto': 1.11.7
 
   '@tootallnate/once@2.0.0': {}
 
