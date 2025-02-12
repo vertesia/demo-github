@@ -10,5 +10,8 @@
     "@types/node": "22.13.1",
     "@vercel/node": "^5.1.0",
     "typescript": "5.7.3"
+  },
+  "dependencies": {
+    "@temporalio/client": "1.11.7"
   }
 }
