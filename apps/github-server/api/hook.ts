@@ -1,11 +1,21 @@
+import { Client, Connection } from '@temporalio/client';
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { createHmac, timingSafeEqual } from 'crypto';
+import dns from 'dns';
 
 const GITHUB_SECRET = process.env.GITHUB_SECRET || '';
 const supportedRepoUrls = [
   'https://github.com/vertesia/demo-github',
   'https://github.com/vertesia/studio',
 ];
+
+// Temporal
+const temporalTaskQueue = `agents/vertesia/github-agent`;
+const temporalAddress = "staging.i16ci.tmprl.cloud:7233";
+const temporalNamespace = "staging";
+const temporalWorkflowType = "reviewPullRequest";
+
+let client: Client | null = null;
 
 function verifySignature(req: VercelRequest): boolean {
   const signature = req.headers['x-hub-signature-256'] as string;
@@ -32,7 +42,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   switch (event) {
     case 'pull_request':
-      handlePullRequest(req.body);
+      await handlePullRequest(req.body);
       break;
     default:
       console.log('Unhandled event type');
@@ -41,7 +51,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   return res.status(200).json({ message: 'Webhook received' });
 }
 
-function handlePullRequest(event: any) {
+async function handlePullRequest(event: any) {
   const repoUrl = event.repository.html_url;
 
   if (!supportedRepoUrls.includes(repoUrl)) {
@@ -51,4 +61,59 @@ function handlePullRequest(event: any) {
 
   const workflowId = `${event.repository.full_name}/pull/${event.number}`;
   console.log(`[pull_request] Handling pull request "${repoUrl}" as "${workflowId}"`);
+  const client = await getTemporalClient();
+
+  const handle = await client.workflow.start(temporalWorkflowType, {
+    workflowId: workflowId,
+    taskQueue: temporalTaskQueue,
+    args: [
+      { githubEvent: event },
+    ],
+  });
+  console.log(`[pull_request] Started workflow "${workflowId}" with run ID ${handle.firstExecutionRunId}`);
+}
+
+async function getTemporalClient(): Promise<Client> {
+  if (!client) {
+      const start = Date.now();
+      console.log(`Connecting to Temporal server ${temporalAddress}`);
+
+      const temporalIp = await dns.promises.lookup(temporalAddress.split(':')[0]).catch((err) => {
+          console.error({ err }, `Failed to resolve Temporal server address ${temporalAddress} in ${Date.now() - start}ms`);
+          throw err;
+      });
+      console.debug(`Resolved Temporal server address to ${temporalIp.address} in ${Date.now() - start}ms`);
+
+      // get clientCertPair from environment variables
+      const crt = process.env.TEMPORAL_TLS_CERT;
+      const key = process.env.TEMPORAL_TLS_KEY;
+
+      if (!crt || !key) {
+          throw new Error('Failed to get temporal client cert pair from vault');
+      }
+
+      // Connect to the default Server location
+      const connection = await Connection.connect({
+          address: temporalAddress,
+          tls: {
+              clientCertPair: {
+                  crt: Buffer.from(crt),
+                  key: Buffer.from(key)
+              },
+          },
+      })
+
+      client = new Client({
+          connection,
+          namespace: temporalNamespace,
+      });
+
+      await client.connection.ensureConnected().then(async () => {
+          console.log(`Connected to Temporal server ${connection.options.address} [IP: ${temporalIp.address}] in ${Date.now() - start}ms`);
+      }).catch((err) => {
+        console.error({ err }, `Failed to connect to Temporal server ${connection.options.address} in ${Date.now() - start}ms`);
+          throw err;
+      });
+  }
+  return client;
 }
