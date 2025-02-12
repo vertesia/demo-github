@@ -13,6 +13,13 @@ This projects demonstrates the integration of GitHub Agent into the Composable a
 
 ## Quickstart
 
+Steps:
+
+1. Set up the application using the `.env` file
+2. Connect to the Vertesia private NPM registry
+3. Download Vertesia Agent Runner SDK
+4. Build the pnpm workspace
+
 Set up the application using the `.env` file:
 
 ```sh
@@ -21,29 +28,56 @@ cp apps/github-agent/.env.template apps/github-agent/.env
 # envionment and the name of the application
 ```
 
-Connect to private NPM registry and start the whole solution locally with either `pnpm` or `docker`.
-
-**pnpm**:
+Connect to private NPM registry:
 
 ```sh
-# install internal packages
-gcloud auth application-default login
-pnpm install --filter "@dglabs/demo-github-root"
-pnpm registry-login
-pnpm install
-
-# build workspace
-pnpm -r build
-
-# start application
-npn run dev
+pnpm vertesia:connect
+#
+# > @dglabs/demo-github-root@1.10.0 vertesia:connect /Users/mincong/github/demo-github
+# > bin/vertesia-connect.sh
+#
+# Connecting to Vertesia private NPM registry
+# Profile "staging-experiments" already exists
+# Connected to Vertesia private NPM registry
 ```
 
-**docker**:
+Download Vertesia Agent Runner SDK:
+
+```sh
+pnpm install
+```
+
+Build the pnpm workspace:
+
+```sh
+pnpm -r build
+```
+
+Log in to Google Cloud to fetch mTLS certificates from Google Secret Manager:
 
 ```sh
 gcloud auth application-default login
-docker compose up --build
+```
+
+Start the agent locally:
+
+```sh
+cd apps/github-agent
+pnpm start
+# [17:14:20.822] INFO (llm-studio/28718): Creating worker with options
+#     options: {
+#       "taskQueue": "agents/vertesia/github-agent/desktop-vertesia-mhuang",
+#       "debugMode": true,
+#       "activities": {},
+#       "workflowBundle": {
+#         "codePath": "/Users/mincong/github/demo-github/apps/github-agent/lib/workflows-bundle.js"
+#       },
+#       "connection": {
+#         "nativeClient": {},
+#         "referenceHolders": {}
+#       },
+#       "namespace": "dev.i16ci"
+#     }
 ```
 
 Connect to Temporal Cloud and trigger a workflow:
