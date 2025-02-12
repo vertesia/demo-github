@@ -75,45 +75,45 @@ async function handlePullRequest(event: any) {
 
 async function getTemporalClient(): Promise<Client> {
   if (!client) {
-      const start = Date.now();
-      console.log(`Connecting to Temporal server ${temporalAddress}`);
+    const start = Date.now();
+    console.log(`Connecting to Temporal server ${temporalAddress}`);
 
-      const temporalIp = await dns.promises.lookup(temporalAddress.split(':')[0]).catch((err) => {
-          console.error({ err }, `Failed to resolve Temporal server address ${temporalAddress} in ${Date.now() - start}ms`);
-          throw err;
-      });
-      console.debug(`Resolved Temporal server address to ${temporalIp.address} in ${Date.now() - start}ms`);
+    const temporalIp = await dns.promises.lookup(temporalAddress.split(':')[0]).catch((err) => {
+      console.error({ err }, `Failed to resolve Temporal server address ${temporalAddress} in ${Date.now() - start}ms`);
+      throw err;
+    });
+    console.debug(`Resolved Temporal server address to ${temporalIp.address} in ${Date.now() - start}ms`);
 
-      // get clientCertPair from environment variables
-      const crt = process.env.TEMPORAL_TLS_CERT;
-      const key = process.env.TEMPORAL_TLS_KEY;
+    // get clientCertPair from environment variables
+    const crt = process.env.TEMPORAL_TLS_CERT;
+    const key = process.env.TEMPORAL_TLS_KEY;
 
-      if (!crt || !key) {
-          throw new Error('Failed to get temporal client cert pair from vault');
-      }
+    if (!crt || !key) {
+      throw new Error('Failed to get temporal client cert pair from vault');
+    }
 
-      // Connect to the default Server location
-      const connection = await Connection.connect({
-          address: temporalAddress,
-          tls: {
-              clientCertPair: {
-                  crt: Buffer.from(crt),
-                  key: Buffer.from(key)
-              },
-          },
-      })
+    // Connect to the default Server location
+    const connection = await Connection.connect({
+      address: temporalAddress,
+      tls: {
+        clientCertPair: {
+          crt: Buffer.from(crt),
+          key: Buffer.from(key)
+        },
+      },
+    })
 
-      client = new Client({
-          connection,
-          namespace: temporalNamespace,
-      });
+    client = new Client({
+      connection,
+      namespace: temporalNamespace,
+    });
 
-      await client.connection.ensureConnected().then(async () => {
-          console.log(`Connected to Temporal server ${connection.options.address} [IP: ${temporalIp.address}] in ${Date.now() - start}ms`);
-      }).catch((err) => {
-        console.error({ err }, `Failed to connect to Temporal server ${connection.options.address} in ${Date.now() - start}ms`);
-          throw err;
-      });
+    await client.connection.ensureConnected().then(async () => {
+      console.log(`Connected to Temporal server ${connection.options.address} [IP: ${temporalIp.address}] in ${Date.now() - start}ms`);
+    }).catch((err) => {
+      console.error({ err }, `Failed to connect to Temporal server ${connection.options.address} in ${Date.now() - start}ms`);
+      throw err;
+    });
   }
   return client;
 }
