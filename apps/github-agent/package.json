@@ -21,7 +21,7 @@
     "profile": "staging-experiments"
   },
   "devDependencies": {
-    "@types/node": "^22.10.2",
+    "@types/node": "22.13.1",
     "rimraf": "^6.0.1",
     "typescript": "^5.7.2",
     "vite": "^5.4.14",
