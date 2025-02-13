@@ -31,6 +31,9 @@ importers:
         specifier: 4.1.1
         version: 4.1.1
     devDependencies:
+      '@dglabs/cloud':
+        specifier: 0.9.3
+        version: 0.9.3(@aws-sdk/client-sts@3.716.0)
       '@octokit/types':
         specifier: 13.8.0
         version: 13.8.0
