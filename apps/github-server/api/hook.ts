@@ -72,12 +72,12 @@ async function handlePullRequest(event: any) {
     });
     console.log(`[pull_request] Started workflow "${workflowId}" with run ID ${handle.firstExecutionRunId}`);
   } else {
-    // const handle = await client.workflow.getHandle(workflowId);
-    // handle.signal(
-    //   'updatePullRequest',
-    //   arg,
-    // );
-    console.log(`[pull_request] Signal existing workflow: ${workflowId} (dry-run)`);
+    const handle = await client.workflow.getHandle(workflowId);
+    handle.signal(
+      'updatePullRequest',
+      arg,
+    );
+    console.log(`[pull_request] Signal sent to existing workflow: ${workflowId}`);
   }
 }
 
