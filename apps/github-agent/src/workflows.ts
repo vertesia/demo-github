@@ -1,4 +1,10 @@
-import { log, proxyActivities } from "@temporalio/workflow";
+import {
+    defineSignal,
+    log,
+    proxyActivities,
+    setHandler,
+    condition,
+} from "@temporalio/workflow";
 import * as activities from "./activities.js";
 
 const {
@@ -19,6 +25,11 @@ export async function helloWorkflow() {
     await helloActivity();
 }
 
+/* ----------
+ Pull Request Review Workflow
+ ---------- */
+
+export const updatePullRequestSignal = defineSignal<[ReviewPullRequestRequest]>('updatePullRequest');
 export type ReviewPullRequestRequest = {
     /**
      * The event that triggered this workflow in the GitHub API.
@@ -31,5 +42,20 @@ export type ReviewPullRequestResponse = {
 }
 export async function reviewPullRequest(request: ReviewPullRequestRequest): Promise<ReviewPullRequestResponse> {
     log.info("Entering reviewPullRequest workflow:", request);
+    let event = request.githubEvent;
+
+    // Register the signal handler
+    setHandler(updatePullRequestSignal, (data: ReviewPullRequestRequest) => {
+        log.info('Signal received with data:', data);
+        event = data.githubEvent;
+    });
+
+    await condition(() => event.pull_request.state === 'closed' || event.pull_request.merged);
+
+    if (event.pull_request.merged) {
+        log.info(`Pull request is merged (state: ${event.pull_request.state}, merged: ${event.pull_request.merged})`);
+    } else {
+        log.info(`Pull request is closed (state: ${event.pull_request.state}, merged: ${event.pull_request.merged})`);
+    }
     return {};
 }

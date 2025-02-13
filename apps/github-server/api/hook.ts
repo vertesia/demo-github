@@ -60,17 +60,25 @@ async function handlePullRequest(event: any) {
   }
 
   const workflowId = `${event.repository.full_name}/pull/${event.number}`;
-  console.log(`[pull_request] Handling pull request "${repoUrl}" as "${workflowId}"`);
+  console.log(`[pull_request] Handling pull request "${event.pull_request.html_url}" as "${workflowId}"`);
   const client = await getTemporalClient();
 
-  const handle = await client.workflow.start(temporalWorkflowType, {
-    workflowId: workflowId,
-    taskQueue: temporalTaskQueue,
-    args: [
-      { githubEvent: event },
-    ],
-  });
-  console.log(`[pull_request] Started workflow "${workflowId}" with run ID ${handle.firstExecutionRunId}`);
+  const arg = { githubEvent: event };
+  if (event.action === 'opened') {
+    const handle = await client.workflow.start(temporalWorkflowType, {
+      workflowId: workflowId,
+      taskQueue: temporalTaskQueue,
+      args: [arg],
+    });
+    console.log(`[pull_request] Started workflow "${workflowId}" with run ID ${handle.firstExecutionRunId}`);
+  } else {
+    // const handle = await client.workflow.getHandle(workflowId);
+    // handle.signal(
+    //   'updatePullRequest',
+    //   arg,
+    // );
+    console.log(`[pull_request] Signal existing workflow: ${workflowId} (dry-run)`);
+  }
 }
 
 async function getTemporalClient(): Promise<Client> {
