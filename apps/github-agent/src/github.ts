@@ -43,17 +43,6 @@ export class VertesiaGithubApp {
         });
     }
 
-    async runWorkflow(workflow_id: string, ref: string, inputs?: Record<string, any>) {
-        const octokit = await this.getRestClient();
-        return await octokit.rest.actions.createWorkflowDispatch({
-            owner: "vertesia",
-            repo: "studio",
-            workflow_id,
-            ref,
-            inputs
-        });
-    }
-
     async commentOnPullRequest(pull_number: number, body: string) {
         const octokit = await this.getRestClient();
         return await octokit.rest.issues.createComment({
