@@ -1,7 +1,7 @@
 import {
+    defineSignal,
     log,
     proxyActivities,
-    defineSignal,
     setHandler,
 } from "@temporalio/workflow";
 import * as activities from "./activities.js";
