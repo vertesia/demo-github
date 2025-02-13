@@ -3,6 +3,7 @@ import {
     log,
     proxyActivities,
     setHandler,
+    condition,
 } from "@temporalio/workflow";
 import * as activities from "./activities.js";
 
@@ -49,10 +50,7 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
         event = data.githubEvent;
     });
 
-    while (event.pull_request.state !== 'closed') {
-        log.info('Pull request is still open, waiting for signal');
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate waiting
-    }
+    await condition(() => event.pull_request.state === 'closed' || event.pull_request.merged);
 
     if (event.pull_request.merged) {
         log.info(`Pull request is merged (state: ${event.pull_request.state}, merged: ${event.pull_request.merged})`);
