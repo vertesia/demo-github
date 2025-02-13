@@ -6,6 +6,7 @@ import {
     condition,
 } from "@temporalio/workflow";
 import * as activities from "./activities.js";
+import { VertesiaGithubApp } from "./github.js";
 
 const {
     helloActivity,
@@ -49,6 +50,13 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
         log.info('Signal received with data:', data);
         event = data.githubEvent;
     });
+
+    log.info("Setting up GitHub App client");
+    const app = await VertesiaGithubApp.getInstance();
+
+    if (event.pull_request.user.login === 'mincong-h' && event.repository.full_name === 'vertesia/demo-github') {
+        app.commentOnPullRequest(event.pull_request.number, "Hello from Temporal!");
+    }
 
     await condition(() => event.pull_request.state === 'closed' || event.pull_request.merged);
 

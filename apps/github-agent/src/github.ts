@@ -14,7 +14,7 @@ const GITHUB_CODE_REVIEW_APP_ID = "1144331";
  */
 async function getVertesiaGithubAppKey() {
     const vault = createSecretProvider(process.env.CLOUD as SupportedCloudEnvironments ?? SupportedCloudEnvironments.gcp)
-    return await vault.getSecret('github-vertesia-agent-deployer');
+    return await vault.getSecret('github-vertesia-agent-code-review');
 }
 
 
@@ -51,6 +51,16 @@ export class VertesiaGithubApp {
             workflow_id,
             ref,
             inputs
+        });
+    }
+
+    async commentOnPullRequest(pull_number: number, body: string) {
+        const octokit = await this.getRestClient();
+        return await octokit.rest.issues.createComment({
+            owner: "vertesia",
+            repo: "studio",
+            issue_number: pull_number,
+            body
         });
     }
 
