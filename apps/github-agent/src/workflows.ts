@@ -25,12 +25,6 @@ export async function helloWorkflow() {
     await helloActivity();
 }
 
-/**
- * The app instance: https://github.com/organizations/vertesia/settings/apps/vertesia-code-review
- * The app installation: https://github.com/organizations/vertesia/settings/installations/61005138
- */
-const GITHUB_CODE_REVIEW_APP_ID = "1144331";
-
 /* ----------
  Pull Request Review Workflow
  ---------- */

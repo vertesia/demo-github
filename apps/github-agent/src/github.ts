@@ -3,10 +3,10 @@ import { Endpoints } from '@octokit/types';
 import { App as OctoApp, Octokit } from 'octokit';
 
 /**
- * The app instance: https://github.com/organizations/vertesia/settings/apps/vertesia-agent-deployer
- * The app installation: https://github.com/organizations/vertesia/settings/installations/59231199
+ * The app instance: https://github.com/organizations/vertesia/settings/apps/vertesia-code-review
+ * The app installation: https://github.com/organizations/vertesia/settings/installations/61005138
  */
-const GITHUB_DEPLOYER_APP_ID = "1104028";
+const GITHUB_CODE_REVIEW_APP_ID = "1144331";
 
 /**
  * Get the private key to sign the JWT token
@@ -57,7 +57,7 @@ export class VertesiaGithubApp {
     static _instance: VertesiaGithubApp | null = null;
     static async create(privateKey: string) {
         const app = new OctoApp({
-            appId: GITHUB_DEPLOYER_APP_ID,
+            appId: GITHUB_CODE_REVIEW_APP_ID,
             privateKey
         });
         const installation = await app.octokit.rest.apps.getOrgInstallation({ org: "vertesia" });
