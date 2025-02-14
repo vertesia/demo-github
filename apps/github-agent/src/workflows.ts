@@ -118,7 +118,7 @@ function toGithubComment(spec: DeploymentSpec): string {
     const deployedClouds = spec.aws ? "GCP and AWS" : "GCP";
     const content = '```json\n' + JSON.stringify(spec, null, 2) + '\n```';
 
-    return `Your dev environment ${envCode} is deployed to ${deployedClouds}. Expand the details section below to see additional information.
+    return `Your dev environment ${envCode} will be deployed to ${deployedClouds}.
 
 <details><summary><b>Click here</b> to learn more about your environment.</summary>
 
