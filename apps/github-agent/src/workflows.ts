@@ -111,6 +111,7 @@ type AwsDeploymentSpec = {
 type TemporalDeploymentSpec = {
     namespace: string;
     zenoTaskQueue: string;
+    httpUrl: string;
 }
 
 function toGithubComment(spec: DeploymentSpec): string {
@@ -156,6 +157,7 @@ function computeDeploymentSpec(branch: string): DeploymentSpec | undefined {
             temporal: {
                 namespace: `${env}.i16ci`,
                 zenoTaskQueue: 'zeno-content',
+                httpUrl: `https://cloud.temporal.io/namespaces/${env}.i16ci/workflows`,
             }
         };
     }
@@ -180,6 +182,7 @@ function computeDeploymentSpec(branch: string): DeploymentSpec | undefined {
         temporal: {
             namespace: `dev.i16ci`,
             zenoTaskQueue: 'zeno-content',
+            httpUrl: `https://cloud.temporal.io/namespaces/dev.i16ci/workflows`,
         },
         aws: undefined,
     }
