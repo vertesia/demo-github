@@ -1,4 +1,4 @@
-// import { createSecretProvider, SupportedCloudEnvironments } from '@dglabs/cloud';
+import { createSecretProvider, SupportedCloudEnvironments } from '@dglabs/cloud';
 // import { Endpoints } from '@octokit/types';
 // import { App as OctoApp, Octokit } from 'octokit';
 
@@ -8,14 +8,14 @@
  */
 export const GITHUB_CODE_REVIEW_APP_ID = "1144331";
 
-// /**
-//  * Get the private key to sign the JWT token
-//  * @returns
-//  */
-// async function getVertesiaGithubAppKey() {
-//     const vault = createSecretProvider(process.env.CLOUD as SupportedCloudEnvironments ?? SupportedCloudEnvironments.gcp)
-//     return await vault.getSecret('github-vertesia-agent-deployer');
-// }
+/**
+ * Get the private key to sign the JWT token
+ * @returns
+ */
+async function getVertesiaGithubAppKey() {
+    const vault = createSecretProvider(process.env.CLOUD as SupportedCloudEnvironments ?? SupportedCloudEnvironments.gcp)
+    return await vault.getSecret('github-vertesia-agent-deployer');
+}
 
 
 // export class VertesiaGithubApp {
