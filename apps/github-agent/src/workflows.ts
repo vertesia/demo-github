@@ -115,20 +115,15 @@ type TemporalDeploymentSpec = {
 
 function toGithubComment(spec: DeploymentSpec): string {
     const envCode = '`' + spec.environment + '`';
-    const gcpStudioApi = spec.gcp ? `<${spec.gcp.studioApiBaseUrl}>` : '-';
-    const gcpZenoApi = spec.gcp ? `<${spec.gcp.zenoApiBaseUrl}>` : '-';
-    const gcpTaskQueue = spec.temporal ? spec.temporal.zenoTaskQueue : '-';
+    const deployedClouds = spec.aws ? "GCP and AWS" : "GCP";
+    const content = '```json' + JSON.stringify(spec, null, 2) + '```';
 
-    const awsStudioApi = spec.aws ? `<${spec.aws.studioApiBaseUrl}>` : '-';
-    const awsZenoApi = spec.aws ? `<${spec.aws.zenoApiBaseUrl}>` : '-';
-    const awsTaskQueue = '-';
+    return `Your dev environment ${envCode} is deployed to ${deployedClouds}. Expand the details section below to see additional information.
 
-    return `Information on your dev environment ${envCode}:
+<details><summary><b>Click here</b> to learn more about your environment.</summary>
 
-|     | Studio API | Zeno API | Zeno Task Queue |
-| --- | --- | --- | --- |
-| GCP | ${gcpStudioApi} | ${gcpZenoApi} | ${gcpTaskQueue} |
-| AWS | ${awsStudioApi} | ${awsZenoApi} | ${awsTaskQueue} |
+${content}
+</details>
 `;
 }
 
@@ -170,7 +165,7 @@ function computeDeploymentSpec(branch: string): DeploymentSpec | undefined {
         return undefined;
     }
 
-    const env = 'dev' + branch.replace(/[^a-zA-Z0-9]/g, '-');
+    const env = 'dev-' + branch.replace(/[^a-zA-Z0-9]/g, '-');
     let spec: DeploymentSpec = {
         environment: env,
         gcp: {
@@ -181,6 +176,10 @@ function computeDeploymentSpec(branch: string): DeploymentSpec | undefined {
             kubeDeployment: `studio-server-${env}`,
             studioApiBaseUrl: `https://studio-server-${env}.api.vertesia.io`,
             zenoApiBaseUrl: `https://zeno-server-${env}.api.vertesia.io`,
+        },
+        temporal: {
+            namespace: `dev.i16ci`,
+            zenoTaskQueue: 'zeno-content',
         },
         aws: undefined,
     }
