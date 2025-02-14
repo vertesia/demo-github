@@ -89,9 +89,9 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
 
 type DeploymentSpec = {
     environment: string;
-    gcp?: GcpDeploymentSpec;
-    aws?: AwsDeploymentSpec;
-    temporal?: TemporalDeploymentSpec;
+    gcp: GcpDeploymentSpec;
+    aws: AwsDeploymentSpec | undefined;
+    temporal: TemporalDeploymentSpec;
 }
 type GcpDeploymentSpec = {
     cloudRunStudioServerName: string;
@@ -111,6 +111,7 @@ type AwsDeploymentSpec = {
 type TemporalDeploymentSpec = {
     namespace: string;
     zenoTaskQueue: string;
+    httpUrl: string;
 }
 
 function toGithubComment(spec: DeploymentSpec): string {
@@ -143,7 +144,7 @@ function computeDeploymentSpec(branch: string): DeploymentSpec | undefined {
                 cloudRunZenoServerName: `zeno-server-${env}`,
                 kubeClusterName: 'composable-workers',
                 kubeNamespace: 'default',
-                kubeDeployment: `studio-server-${env}`,
+                kubeDeployment: `${env}-workers`,
                 studioApiBaseUrl: `https://studio-server-${env}.api.vertesia.io`,
                 zenoApiBaseUrl: `https://zeno-server-${env}.api.vertesia.io`,
             },
@@ -156,6 +157,7 @@ function computeDeploymentSpec(branch: string): DeploymentSpec | undefined {
             temporal: {
                 namespace: `${env}.i16ci`,
                 zenoTaskQueue: 'zeno-content',
+                httpUrl: `https://cloud.temporal.io/namespaces/${env}.i16ci/workflows`,
             }
         };
     }
@@ -171,15 +173,16 @@ function computeDeploymentSpec(branch: string): DeploymentSpec | undefined {
         gcp: {
             cloudRunStudioServerName: `studio-server-${env}`,
             cloudRunZenoServerName: `zeno-server-${env}`,
-            kubeClusterName: 'composable-workers',
+            kubeClusterName: 'workers-dev',
             kubeNamespace: 'default',
-            kubeDeployment: `studio-server-${env}`,
+            kubeDeployment: `${env}-workers`,
             studioApiBaseUrl: `https://studio-server-${env}.api.vertesia.io`,
             zenoApiBaseUrl: `https://zeno-server-${env}.api.vertesia.io`,
         },
         temporal: {
             namespace: `dev.i16ci`,
             zenoTaskQueue: 'zeno-content',
+            httpUrl: `https://cloud.temporal.io/namespaces/dev.i16ci/workflows`,
         },
         aws: undefined,
     }
