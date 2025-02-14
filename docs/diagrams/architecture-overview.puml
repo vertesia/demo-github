@@ -40,9 +40,9 @@ System_Ext(sys_github, "GitHub", "Organizations and repositories subscribed to t
 
 System_Boundary(sys_composable, "Vertesia") {
     System_Boundary(sys_composable_nginx, "https://github.vertesia.dev") {
-        Container(vertesia_github_server, "GitHub Server", "", "Webhook for GitHub.")
+        Container(vertesia_github_server, "GitHub Server", "Typescript", "Webhook for GitHub, powered by Vercel Functions.")
     }
-    Container(vertesia_github_agent, "GitHub Agent", "", "Temporal worker for GitHub.")
+    Container(vertesia_github_agent, "GitHub Agent", "Typescript", "Temporal worker for GitHub.")
 }
 
 System_Boundary(sys_temporal, "https://cloud.temploral.io") {
@@ -50,7 +50,7 @@ System_Boundary(sys_temporal, "https://cloud.temploral.io") {
 }
 
 ' Clients
-vertesia_users ---> vertesia_github_server: send\nevents
+vertesia_users ...> vertesia_github_server: send\nevents\n(testing)
 vertesia_users -r-> sys_github: uses
 sys_github ---> vertesia_github_server: send\nevents
 
