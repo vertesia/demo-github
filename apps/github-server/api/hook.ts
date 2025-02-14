@@ -44,6 +44,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     case 'pull_request':
       await handlePullRequest(req.body);
       break;
+    case 'issue_comment':
+      if (req.body.issue.pull_request) {
+        await handlePullRequest(req.body);
+      }
+      break;
     default:
       console.log('Unhandled event type');
   }
