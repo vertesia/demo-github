@@ -52,13 +52,18 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
     });
 
     let comment = undefined;
+    let skipReason = undefined;
     if (event.pull_request.user.login === 'mincong-h' && event.repository.full_name === 'vertesia/demo-github') {
         comment = 'Hello from Temporal Workflow!';
     } else if (event.pull_request.user.login === 'mincong-h' && event.repository.full_name === 'vertesia/studio') {
         const spec = computeDeploymentSpec(event.pull_request.head.ref);
         if (spec) {
             comment = toGithubComment(spec);
+        } else {
+            skipReason = 'this branch is not a dev branch.';
         }
+    } else {
+        skipReason = 'this PR is not part of the test.';
     }
 
     if (comment) {
@@ -69,7 +74,7 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
             message: comment,
         });
     } else {
-        log.debug('Comment is skipped for this pull request');
+        log.debug(`Comment is skipped for this pull request: ${skipReason}`);
     }
 
     await condition(() => event.pull_request.state === 'closed' || event.pull_request.merged);
@@ -130,16 +135,10 @@ function toGithubComment(spec: DeploymentSpec): string {
 /**
  * Compute the deployment spec based on the git ref. Assumes the Git repository is "vertesia/studio".
  *
- * @param gitRef the Git reference, e.g., "refs/heads/main"
+ * @param branch the branch name, e.g., "fix-123"
  * @returns an optional deployment spec
  */
-function computeDeploymentSpec(gitRef: string): DeploymentSpec | undefined {
-    const isBranch = gitRef.startsWith('refs/heads/');
-    if (!isBranch) {
-        return undefined;
-    }
-
-    const branch = gitRef.substring('refs/heads/'.length);
+function computeDeploymentSpec(branch: string): DeploymentSpec | undefined {
     if (branch === 'main' || branch === 'preview') {
         const env = branch === 'main' ? 'staging' : 'preview';
         return {
@@ -164,6 +163,11 @@ function computeDeploymentSpec(gitRef: string): DeploymentSpec | undefined {
                 zenoTaskQueue: 'zeno-content',
             }
         };
+    }
+
+    const isDevBranch = branch.startsWith('demo') || branch.includes('feature') || branch.includes('fix');
+    if (!isDevBranch) {
+        return undefined;
     }
 
     const env = 'dev' + branch.replace(/[^a-zA-Z0-9]/g, '-');
