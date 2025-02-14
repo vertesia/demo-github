@@ -6,6 +6,7 @@ import {
     condition,
 } from "@temporalio/workflow";
 import * as activities from "./activities.js";
+import { GITHUB_CODE_REVIEW_APP_ID } from "./github.js";
 
 const {
     helloActivity,
@@ -49,6 +50,8 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
         log.info('Signal received with data:', data);
         event = data.githubEvent;
     });
+
+    log.info(`Installing GitHub application ${GITHUB_CODE_REVIEW_APP_ID}`);
 
     await condition(() => event.pull_request.state === 'closed' || event.pull_request.merged);
 
