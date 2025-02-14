@@ -18,6 +18,9 @@ importers:
       '@dglabs/agent-runner':
         specifier: 0.9.3
         version: 0.9.3(@aws-sdk/client-sts@3.716.0)
+      '@dglabs/cloud':
+        specifier: 0.9.3
+        version: 0.9.3(@aws-sdk/client-sts@3.716.0)
       '@temporalio/activity':
         specifier: 1.11.7
         version: 1.11.7
@@ -31,9 +34,6 @@ importers:
         specifier: 4.1.1
         version: 4.1.1
     devDependencies:
-      '@dglabs/cloud':
-        specifier: 0.9.3
-        version: 0.9.3(@aws-sdk/client-sts@3.716.0)
       '@octokit/types':
         specifier: 13.8.0
         version: 13.8.0
@@ -196,15 +196,15 @@ packages:
     resolution: {integrity: sha512-7Te4SAyyHUXqXS1c/2eWGLGVPlnVtJhp95Z1nLPTMoqSHYGXWIQIC46ydZkKpyKjQlwlq23hvHn/mdk2kkqEuQ==}
     engines: {node: '>=12.0.0'}
 
-  '@datadog/libdatadog@0.3.0':
-    resolution: {integrity: sha512-TbP8+WyXfh285T17FnLeLUOPl4SbkRYMqKgcmknID2mXHNrbt5XJgW9bnDgsrrtu31Q7FjWWw2WolgRLWyzLRA==}
+  '@datadog/libdatadog@0.4.0':
+    resolution: {integrity: sha512-kGZfFVmQInzt6J4FFGrqMbrDvOxqwk3WqhAreS6n9b/De+iMVy/NMu3V7uKsY5zAvz+uQw0liDJm3ZDVH/MVVw==}
 
-  '@datadog/native-appsec@8.3.0':
-    resolution: {integrity: sha512-RYHbSJ/MwJcJaLzaCaZvUyNLUKFbMshayIiv4ckpFpQJDiq1T8t9iM2k7008s75g1vRuXfsRNX7MaLn4aoFuWA==}
+  '@datadog/native-appsec@8.4.0':
+    resolution: {integrity: sha512-LC47AnpVLpQFEUOP/nIIs+i0wLb8XYO+et3ACaJlHa2YJM3asR4KZTqQjDQNy08PTAUbVvYWKwfSR1qVsU/BeA==}
     engines: {node: '>=16'}
 
-  '@datadog/native-iast-rewriter@2.6.1':
-    resolution: {integrity: sha512-zv7cr/MzHg560jhAnHcO7f9pLi4qaYrBEcB+Gla0xkVouYSDsp8cGXIGG4fiGdAMHdt7SpDNS6+NcEAqD/v8Ig==}
+  '@datadog/native-iast-rewriter@2.8.0':
+    resolution: {integrity: sha512-DKmtvlmCld9RIJwDcPKWNkKYWYQyiuOrOtynmBppJiUv/yfCOuZtsQV4Zepj40H33sLiQyi5ct6dbWl53vxqkA==}
     engines: {node: '>= 10'}
 
   '@datadog/native-iast-taint-tracking@3.2.0':
@@ -214,8 +214,8 @@ packages:
     resolution: {integrity: sha512-yOBi4x0OQRaGNPZ2bx9TGvDIgEdQ8fkudLTFAe7gEM1nAlvFmbE5YfpH8WenEtTSEBwojSau06m2q7axtEEmCg==}
     engines: {node: '>=16'}
 
-  '@datadog/pprof@5.4.1':
-    resolution: {integrity: sha512-IvpL96e/cuh8ugP5O8Czdup7XQOLHeIDgM5pac5W7Lc1YzGe5zTtebKFpitvb1CPw1YY+1qFx0pWGgKP2kOfHg==}
+  '@datadog/pprof@5.5.1':
+    resolution: {integrity: sha512-3pZVYqc5YkZJOj9Rc8kQ/wG4qlygcnnwFU/w0QKX6dEdJh+1+dWniuUu+GSEjy/H0jc14yhdT2eJJf/F2AnHNw==}
     engines: {node: '>=16'}
 
   '@datadog/sketches-js@2.1.1':
@@ -1429,8 +1429,8 @@ packages:
     resolution: {integrity: sha512-UV33cugmCC49a5uWAApM+6Ev9ZdvIUMTrtCO9fj96TPGOQiea54oeO3tiEVdVeo3J9N2UdJEmbS4zOkkEA35uQ==}
     engines: {node: '>=12.17'}
 
-  dd-trace@5.30.0:
-    resolution: {integrity: sha512-rKNuh/uLgGw3CjpBK5TkhSX/2ErVTO2/b+FQlgKXJSx/h7GFD8AzGEj3VKKAm1ANLLLjFqS9+ulLmFhgtxXsPg==}
+  dd-trace@5.36.0:
+    resolution: {integrity: sha512-okaqSKaDKLynUt9Jgpoj/0g7FXk5sFNHP5ZelB84g/vmQdDmpzZYXPo6HFY6ZbQT7NOHMZ/vNV46LZIjZc0Tvg==}
     engines: {node: '>=18'}
 
   debug@4.4.0:
@@ -1708,6 +1708,9 @@ packages:
 
   fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
+
+  fast-fifo@1.3.2:
+    resolution: {integrity: sha512-/d9sfos4yxzpwkDkuN7k2SqFKtYNmCTzgfEpz82x34IM9/zc8KGxQoXg1liNC/izpRM/MBdt44Nmx41ZWqk+FQ==}
 
   fast-glob@3.3.3:
     resolution: {integrity: sha512-7MptL8U0cqcFdzIzwOTHoilX9x5BrNqye7Z/LuC7kCMRio1EMSyqRK3BEAUD7sXRq4iT4AzTVuZdhgQ2TCvYLg==}
@@ -2679,6 +2682,9 @@ packages:
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
 
+  ttl-set@1.0.0:
+    resolution: {integrity: sha512-2fuHn/UR+8Z9HK49r97+p2Ru1b5Eewg2QqPrU14BVCQ9QoyU3+vLLZk2WEiyZ9sgJh6W8G1cZr9I2NBLywAHrA==}
+
   typescript@4.9.5:
     resolution: {integrity: sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==}
     engines: {node: '>=4.2.0'}
@@ -3281,13 +3287,13 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@datadog/libdatadog@0.3.0': {}
+  '@datadog/libdatadog@0.4.0': {}
 
-  '@datadog/native-appsec@8.3.0':
+  '@datadog/native-appsec@8.4.0':
     dependencies:
       node-gyp-build: 3.9.0
 
-  '@datadog/native-iast-rewriter@2.6.1':
+  '@datadog/native-iast-rewriter@2.8.0':
     dependencies:
       lru-cache: 7.18.3
       node-gyp-build: 4.8.4
@@ -3301,7 +3307,7 @@ snapshots:
       node-addon-api: 6.1.0
       node-gyp-build: 3.9.0
 
-  '@datadog/pprof@5.4.1':
+  '@datadog/pprof@5.5.1':
     dependencies:
       delay: 5.0.0
       node-gyp-build: 3.9.0
@@ -3364,7 +3370,7 @@ snapshots:
 
   '@dglabs/logger@0.9.3':
     dependencies:
-      dd-trace: 5.30.0
+      dd-trace: 5.36.0
       pino: 8.21.0
       pino-datadog-transport: 3.0.4
       pino-pretty: 11.3.0
@@ -4672,14 +4678,14 @@ snapshots:
 
   dc-polyfill@0.1.6: {}
 
-  dd-trace@5.30.0:
+  dd-trace@5.36.0:
     dependencies:
-      '@datadog/libdatadog': 0.3.0
-      '@datadog/native-appsec': 8.3.0
-      '@datadog/native-iast-rewriter': 2.6.1
+      '@datadog/libdatadog': 0.4.0
+      '@datadog/native-appsec': 8.4.0
+      '@datadog/native-iast-rewriter': 2.8.0
       '@datadog/native-iast-taint-tracking': 3.2.0
       '@datadog/native-metrics': 3.1.0
-      '@datadog/pprof': 5.4.1
+      '@datadog/pprof': 5.5.1
       '@datadog/sketches-js': 2.1.1
       '@isaacs/ttlcache': 1.4.1
       '@opentelemetry/api': 1.8.0
@@ -4705,6 +4711,7 @@ snapshots:
       shell-quote: 1.8.2
       source-map: 0.7.4
       tlhunter-sorted-set: 0.1.0
+      ttl-set: 1.0.0
 
   debug@4.4.0:
     dependencies:
@@ -4929,6 +4936,8 @@ snapshots:
   fast-copy@3.0.2: {}
 
   fast-deep-equal@3.1.3: {}
+
+  fast-fifo@1.3.2: {}
 
   fast-glob@3.3.3:
     dependencies:
@@ -5942,6 +5951,10 @@ snapshots:
   ts-toolbelt@6.15.5: {}
 
   tslib@2.8.1: {}
+
+  ttl-set@1.0.0:
+    dependencies:
+      fast-fifo: 1.3.2
 
   typescript@4.9.5: {}
 
