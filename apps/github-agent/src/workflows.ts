@@ -109,6 +109,7 @@ type TemporalDeploymentSpec = {
 }
 
 function toGithubComment(spec: DeploymentSpec): string {
+    const envCode = '`' + spec.environment + '`';
     const gcpStudioApi = spec.gcp ? `<${spec.gcp.studioApiBaseUrl}>` : '-';
     const gcpZenoApi = spec.gcp ? `<${spec.gcp.zenoApiBaseUrl}>` : '-';
     const gcpTaskQueue = spec.temporal ? spec.temporal.zenoTaskQueue : '-';
@@ -117,7 +118,7 @@ function toGithubComment(spec: DeploymentSpec): string {
     const awsZenoApi = spec.aws ? `<${spec.aws.zenoApiBaseUrl}>` : '-';
     const awsTaskQueue = '-';
 
-    return `Information on your dev environment:
+    return `Information on your dev environment ${envCode}:
 
 |     | Studio API | Zeno API | Zeno Task Queue |
 | --- | --- | --- | --- |
