@@ -117,7 +117,7 @@ function toGithubComment(spec: DeploymentSpec): string {
     const awsZenoApi = spec.aws ? `<${spec.aws.zenoApiBaseUrl}>` : '-';
     const awsTaskQueue = '-';
 
-    return `There is a development environment provisionned for this branch, see the deployment details below:
+    return `Information on your dev environment:
 
 |     | Studio API | Zeno API | Zeno Task Queue |
 | --- | --- | --- | --- |
