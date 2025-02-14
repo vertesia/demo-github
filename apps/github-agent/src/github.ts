@@ -14,13 +14,14 @@ export const GITHUB_CODE_REVIEW_APP_ID = "1144331";
  */
 async function getVertesiaGithubAppKey() {
     const vault = createSecretProvider(process.env.CLOUD as SupportedCloudEnvironments ?? SupportedCloudEnvironments.gcp)
-    return await vault.getSecret('github-vertesia-agent-deployer');
+    return await vault.getSecret('github-vertesia-agent-code-review');
 }
 
 
-// export class VertesiaGithubApp {
-//     constructor(public app: OctoApp, public installation: Endpoints["GET /orgs/{org}/installation"]["response"]["data"]) {
-//     }
+export class VertesiaGithubApp {
+    // constructor(public app: OctoApp, public installation: Endpoints["GET /orgs/{org}/installation"]["response"]["data"]) {
+    // }
+    constructor() {}
 
 //     get installationId() {
 //         return this.installation.id;
@@ -54,21 +55,22 @@ async function getVertesiaGithubAppKey() {
 //         });
 //     }
 
-//     static _instance: VertesiaGithubApp | null = null;
-//     static async create(privateKey: string) {
-//         const app = new OctoApp({
-//             appId: GITHUB_CODE_REVIEW_APP_ID,
-//             privateKey
-//         });
-//         const installation = await app.octokit.rest.apps.getOrgInstallation({ org: "vertesia" });
-//         return new VertesiaGithubApp(app, installation.data);
-//     }
+    static _instance: VertesiaGithubApp | null = null;
+    static async create(_: string) {
+        // const app = new OctoApp({
+        //     appId: GITHUB_CODE_REVIEW_APP_ID,
+        //     privateKey
+        // });
+        // const installation = await app.octokit.rest.apps.getOrgInstallation({ org: "vertesia" });
+        // return new VertesiaGithubApp(app, installation.data);
+        return new VertesiaGithubApp();
+    }
 
-//     static async getInstance() {
-//         if (!VertesiaGithubApp._instance) {
-//             const privateKey = await getVertesiaGithubAppKey();
-//             VertesiaGithubApp._instance = await VertesiaGithubApp.create(privateKey);
-//         }
-//         return VertesiaGithubApp._instance;
-//     }
-// }
+    static async getInstance() {
+        if (!VertesiaGithubApp._instance) {
+            const privateKey = await getVertesiaGithubAppKey();
+            VertesiaGithubApp._instance = await VertesiaGithubApp.create(privateKey);
+        }
+        return VertesiaGithubApp._instance;
+    }
+}
