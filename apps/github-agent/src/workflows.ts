@@ -51,12 +51,22 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
         event = data.githubEvent;
     });
 
+    let comment = undefined;
     if (event.pull_request.user.login === 'mincong-h' && event.repository.full_name === 'vertesia/demo-github') {
+        comment = 'Hello from Temporal Workflow!';
+    } else if (event.pull_request.user.login === 'mincong-h' && event.repository.full_name === 'vertesia/studio') {
+        const spec = computeDeploymentSpec(event.pull_request.head.ref);
+        if (spec) {
+            comment = toGithubComment(spec);
+        }
+    }
+
+    if (comment) {
         await commentOnPullRequest({
             org: event.repository.owner.login,
             repo: event.repository.name,
             pullRequestNumber: Number(event.pull_request.number),
-            message: 'Hello from Temporal Workflow!',
+            message: comment,
         });
     } else {
         log.debug('Comment is skipped for this pull request');
@@ -70,4 +80,112 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
         log.info(`Pull request is closed (state: ${event.pull_request.state}, merged: ${event.pull_request.merged})`);
     }
     return {};
+}
+
+type DeploymentSpec = {
+    environment: string;
+    gcp?: GcpDeploymentSpec;
+    aws?: AwsDeploymentSpec;
+    temporal?: TemporalDeploymentSpec;
+}
+type GcpDeploymentSpec = {
+    cloudRunStudioServerName: string;
+    cloudRunZenoServerName: string;
+    kubeClusterName: string;
+    kubeNamespace: string;
+    kubeDeployment: string;
+    studioApiBaseUrl: string;
+    zenoApiBaseUrl: string;
+}
+type AwsDeploymentSpec = {
+    appRunnerStudioServerName: string;
+    appRunnerZenoServerName: string;
+    studioApiBaseUrl: string;
+    zenoApiBaseUrl: string;
+}
+type TemporalDeploymentSpec = {
+    namespace: string;
+    zenoTaskQueue: string;
+}
+
+function toGithubComment(spec: DeploymentSpec): string {
+    const gcpStudioApi = spec.gcp ? `<${spec.gcp.studioApiBaseUrl}>` : '-';
+    const gcpZenoApi = spec.gcp ? `<${spec.gcp.zenoApiBaseUrl}>` : '-';
+    const gcpTaskQueue = spec.temporal ? spec.temporal.zenoTaskQueue : '-';
+
+    const awsStudioApi = spec.aws ? `<${spec.aws.studioApiBaseUrl}>` : '-';
+    const awsZenoApi = spec.aws ? `<${spec.aws.zenoApiBaseUrl}>` : '-';
+    const awsTaskQueue = '-';
+
+    return `There is a development environment provisionned for this branch, see the deployment details below:
+
+|     | Studio API | Zeno API | Zeno Task Queue |
+| --- | --- | --- | --- |
+| GCP | ${gcpStudioApi} | ${gcpZenoApi} | ${gcpTaskQueue} |
+| AWS | ${awsStudioApi} | ${awsZenoApi} | ${awsTaskQueue} |
+`;
+}
+
+/**
+ * Compute the deployment spec based on the git ref. Assumes the Git repository is "vertesia/studio".
+ *
+ * @param gitRef the Git reference, e.g., "refs/heads/main"
+ * @returns an optional deployment spec
+ */
+function computeDeploymentSpec(gitRef: string): DeploymentSpec | undefined {
+    const isBranch = gitRef.startsWith('refs/heads/');
+    if (!isBranch) {
+        return undefined;
+    }
+
+    const branch = gitRef.substring('refs/heads/'.length);
+    if (branch === 'main' || branch === 'preview') {
+        const env = branch === 'main' ? 'staging' : 'preview';
+        return {
+            environment: env,
+            gcp: {
+                cloudRunStudioServerName: `studio-server-${env}`,
+                cloudRunZenoServerName: `zeno-server-${env}`,
+                kubeClusterName: 'composable-workers',
+                kubeNamespace: 'default',
+                kubeDeployment: `studio-server-${env}`,
+                studioApiBaseUrl: `https://studio-server-${env}.api.vertesia.io`,
+                zenoApiBaseUrl: `https://zeno-server-${env}.api.vertesia.io`,
+            },
+            aws: {
+                appRunnerStudioServerName: `studio-server-${env}`,
+                appRunnerZenoServerName: `zeno-server-${env}`,
+                studioApiBaseUrl: `https://studio-server-${env}.aws.api.vertesia.io`,
+                zenoApiBaseUrl: `https://zeno-server-${env}.aws.api.vertesia.io`,
+            },
+            temporal: {
+                namespace: `${env}.i16ci`,
+                zenoTaskQueue: 'zeno-content',
+            }
+        };
+    }
+
+    const env = 'dev' + branch.replace(/[^a-zA-Z0-9]/g, '-');
+    let spec: DeploymentSpec = {
+        environment: env,
+        gcp: {
+            cloudRunStudioServerName: `studio-server-${env}`,
+            cloudRunZenoServerName: `zeno-server-${env}`,
+            kubeClusterName: 'composable-workers',
+            kubeNamespace: 'default',
+            kubeDeployment: `studio-server-${env}`,
+            studioApiBaseUrl: `https://studio-server-${env}.api.vertesia.io`,
+            zenoApiBaseUrl: `https://zeno-server-${env}.api.vertesia.io`,
+        },
+        aws: undefined,
+    }
+    if (branch.includes('aws')) {
+        spec.aws = {
+            appRunnerStudioServerName: `studio-server-${env}`,
+            appRunnerZenoServerName: `zeno-server-${env}`,
+            studioApiBaseUrl: `https://studio-server-${env}.aws.api.vertesia.io`,
+            zenoApiBaseUrl: `https://zeno-server-${env}.aws.api.vertesia.io`,
+        };
+    }
+    return spec;
 }
