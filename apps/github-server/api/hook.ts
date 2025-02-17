@@ -37,16 +37,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(401).json({ error: 'Invalid signature' });
   }
 
-  const event = req.headers['x-github-event'];
-  console.log(`Received GitHub event: ${event}. Payload:`, req.body);
+  const eventType = req.headers['x-github-event'];
+  console.log(`Received GitHub event: ${eventType}. Payload:`, req.body);
 
-  switch (event) {
+  switch (eventType) {
     case 'pull_request':
-      await handlePullRequest(req.body);
+      await handlePullRequest(eventType, req.body);
       break;
     case 'issue_comment':
       if (req.body.issue.pull_request) {
-        await handlePullRequest(req.body);
+        await handlePullRequestComment(eventType, req.body);
       }
       break;
     default:
@@ -56,7 +56,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   return res.status(200).json({ message: 'Webhook received' });
 }
 
-async function handlePullRequest(event: any) {
+async function handlePullRequest(eventType: string, event: any) {
   const repoUrl = event.repository.html_url;
 
   if (!supportedRepoUrls.includes(repoUrl)) {
@@ -67,8 +67,8 @@ async function handlePullRequest(event: any) {
   const workflowId = `${event.repository.full_name}/pull/${event.number}`;
   console.log(`[pull_request] Handling pull request "${event.pull_request.html_url}" as "${workflowId}"`);
   const client = await getTemporalClient();
-
   const arg = { githubEvent: event };
+
   if (event.action === 'opened') {
     const handle = await client.workflow.start(temporalWorkflowType, {
       workflowId: workflowId,
@@ -82,8 +82,28 @@ async function handlePullRequest(event: any) {
       'updatePullRequest',
       arg,
     );
-    console.log(`[pull_request] Signal sent to existing workflow: ${workflowId}`);
+    console.log(`[pull_request] Event ${eventType} (${event.action}) sent to existing workflow: ${workflowId}`);
   }
+}
+
+async function handlePullRequestComment(eventType: string, event: any) {
+  const repoUrl = event.repository.html_url;
+
+  if (!supportedRepoUrls.includes(repoUrl)) {
+    console.log('[pull_request_comment] Skipped, unsupported repository:', repoUrl);
+    return;
+  }
+
+  const workflowId = `${event.repository.full_name}/pull/${event.number}`;
+  const client = await getTemporalClient();
+  const arg = { githubEvent: event };
+
+  const handle = await client.workflow.getHandle(workflowId);
+  handle.signal(
+    'updatePullRequestComment',
+    arg,
+  );
+  console.log(`[pull_request_comment] Event ${eventType} (${event.action}) sent to existing workflow: ${workflowId}`);
 }
 
 async function getTemporalClient(): Promise<Client> {
