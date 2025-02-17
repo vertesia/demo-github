@@ -31,7 +31,13 @@ export async function helloWorkflow() {
  ---------- */
 
 export const updatePullRequestSignal = defineSignal<[ReviewPullRequestRequest]>('updatePullRequest');
+export const updatePullRequestCommentSignal = defineSignal<[ReviewPullRequestRequest]>('updatePullRequestComment');
 export type ReviewPullRequestRequest = {
+    /**
+     * The type of event that triggered this workflow in the GitHub API. This is part of the header
+     * "x-github-event" of the webhook.
+     */
+    githubEventType: string;
     /**
      * The event that triggered this workflow in the GitHub API.
      *

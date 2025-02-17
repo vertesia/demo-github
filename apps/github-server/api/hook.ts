@@ -67,7 +67,10 @@ async function handlePullRequest(eventType: string, event: any) {
   const workflowId = `${event.repository.full_name}/pull/${event.number}`;
   console.log(`[pull_request] Handling pull request "${event.pull_request.html_url}" as "${workflowId}"`);
   const client = await getTemporalClient();
-  const arg = { githubEvent: event };
+  const arg = {
+    githubEventType: eventType,
+    githubEvent: event
+  };
 
   if (event.action === 'opened') {
     const handle = await client.workflow.start(temporalWorkflowType, {
@@ -96,7 +99,10 @@ async function handlePullRequestComment(eventType: string, event: any) {
 
   const workflowId = `${event.repository.full_name}/pull/${event.number}`;
   const client = await getTemporalClient();
-  const arg = { githubEvent: event };
+  const arg = {
+    githubEventType: eventType,
+    githubEvent: event
+  };
 
   const handle = await client.workflow.getHandle(workflowId);
   handle.signal(
