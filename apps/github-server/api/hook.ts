@@ -46,7 +46,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       break;
     case 'issue_comment':
       if (req.body.issue.pull_request) {
-        await handlePullRequestComment(eventType, req.body);
+        await handlePullRequest(eventType, req.body);
       }
       break;
     default:
@@ -56,6 +56,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   return res.status(200).json({ message: 'Webhook received' });
 }
 
+/**
+ * This function dispatches different types of event related to a pull request (PR) to Temporal workflows.
+ *
+ * @param eventType the type of event, e.g., "pull_request" or "issue_comment"
+ * @param event the playload of the event
+ */
 async function handlePullRequest(eventType: string, event: any) {
   const repoUrl = event.repository.html_url;
 
@@ -87,29 +93,6 @@ async function handlePullRequest(eventType: string, event: any) {
     );
     console.log(`[pull_request] Event ${eventType} (${event.action}) sent to existing workflow: ${workflowId}`);
   }
-}
-
-async function handlePullRequestComment(eventType: string, event: any) {
-  const repoUrl = event.repository.html_url;
-
-  if (!supportedRepoUrls.includes(repoUrl)) {
-    console.log('[pull_request_comment] Skipped, unsupported repository:', repoUrl);
-    return;
-  }
-
-  const workflowId = `${event.repository.full_name}/pull/${event.number}`;
-  const client = await getTemporalClient();
-  const arg = {
-    githubEventType: eventType,
-    githubEvent: event
-  };
-
-  const handle = await client.workflow.getHandle(workflowId);
-  handle.signal(
-    'updatePullRequestComment',
-    arg,
-  );
-  console.log(`[pull_request_comment] Event ${eventType} (${event.action}) sent to existing workflow: ${workflowId}`);
 }
 
 async function getTemporalClient(): Promise<Client> {
