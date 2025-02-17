@@ -248,19 +248,15 @@ async function handleCommentEvent(event: any) {
     }
 }
 
-function extractStudioUiUrl(content: string): string | null {
+export function extractStudioUiUrl(content: string): string | null {
     const rows = content.split('\n');
-    let captureNextUrl = false;
     for (const row of rows) {
         // note: "unified"  is the name of the Studio UI in Vercel
         if (row.includes('| **unified**')) {
-            captureNextUrl = true;
-        } else if (captureNextUrl) {
             const urlMatch = row.match(/\[Visit Preview\]\((https?:\/\/[^)]+)\)/);
             if (urlMatch) {
                 return urlMatch[1];
             }
-            captureNextUrl = false;
         }
     }
     return null;
