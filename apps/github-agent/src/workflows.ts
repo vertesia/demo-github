@@ -49,6 +49,7 @@ export type ReviewPullRequestResponse = {
 export async function reviewPullRequest(request: ReviewPullRequestRequest): Promise<ReviewPullRequestResponse> {
     log.info("Entering reviewPullRequest workflow:", request);
     let prEvent = request.githubEvent;
+    const prBranch = prEvent.pull_request.head.ref;
     let commentEvent = undefined;
 
     // Register the signal handler
@@ -58,7 +59,7 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
             prEvent = data.githubEvent;
         } else if (data.githubEventType === 'issue_comment') {
             commentEvent = data.githubEvent;
-            await handleCommentEvent(commentEvent);
+            await handleCommentEvent(commentEvent, prBranch);
         } else {
             // backward compatibility
             prEvent = data.githubEvent;
@@ -70,7 +71,7 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
     if (prEvent.pull_request.user.login === 'mincong-h' && prEvent.repository.full_name === 'vertesia/demo-github') {
         comment = 'Hello from Temporal Workflow!';
     } else if (prEvent.pull_request.user.login === 'mincong-h' && prEvent.repository.full_name === 'vertesia/studio') {
-        const spec = computeDeploymentSpec(prEvent.pull_request.head.ref);
+        const spec = computeDeploymentSpec(prBranch);
         if (spec) {
             comment = toGithubComment(spec);
         } else {
@@ -221,7 +222,7 @@ function computeDeploymentSpec(branch: string): DeploymentSpec | undefined {
     return spec;
 }
 
-async function handleCommentEvent(event: any) {
+async function handleCommentEvent(event: any, prBranch: string) {
     if (event.comment.user.login !== 'vercel[bot]') {
         log.debug('Skip comment event from user:', event.comment.user.login);
         return;
@@ -233,7 +234,7 @@ async function handleCommentEvent(event: any) {
         return;
     }
     log.debug(`Extracted Studio UI URL: ${url}`);
-    const spec = computeDeploymentSpec(event.pull_request.head.ref);
+    const spec = computeDeploymentSpec(prBranch);
     if (spec) {
         spec.vercel = {
             studioUiUrl: url,
