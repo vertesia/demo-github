@@ -70,8 +70,9 @@ async function handlePullRequest(eventType: string, event: any) {
     return;
   }
 
-  const workflowId = `${event.repository.full_name}/pull/${event.number}`;
-  console.log(`[pull_request] Handling pull request "${event.pull_request.html_url}" as "${workflowId}"`);
+  const prId = eventType === 'pull_request' ? event.number : event.issue.number;
+  const workflowId = `${event.repository.full_name}/pull/${prId}`;
+  console.log(`[pull_request] Event ${eventType} (${event.action}) is for workflow "${workflowId}"`);
   const client = await getTemporalClient();
   const arg = {
     githubEventType: eventType,
@@ -84,7 +85,7 @@ async function handlePullRequest(eventType: string, event: any) {
       taskQueue: temporalTaskQueue,
       args: [arg],
     });
-    console.log(`[pull_request] Started workflow "${workflowId}" with run ID ${handle.firstExecutionRunId}`);
+    console.log(`[pull_request] Event ${eventType} (${event.action}) is used to start the workflow "${workflowId}" with run ID ${handle.firstExecutionRunId}`);
   } else {
     const handle = await client.workflow.getHandle(workflowId);
     handle.signal(
