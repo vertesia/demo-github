@@ -37,12 +37,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(401).json({ error: 'Invalid signature' });
   }
 
-  const event = req.headers['x-github-event'];
-  console.log(`Received GitHub event: ${event}. Payload:`, req.body);
+  const eventType = req.headers['x-github-event'];
+  console.log(`Received GitHub event: ${eventType}. Payload:`, req.body);
 
-  switch (event) {
+  switch (eventType) {
     case 'pull_request':
-      await handlePullRequest(req.body);
+      await handlePullRequest(eventType, req.body);
+      break;
+    case 'issue_comment':
+      if (req.body.issue.pull_request) {
+        await handlePullRequest(eventType, req.body);
+      }
       break;
     default:
       console.log('Unhandled event type');
@@ -51,7 +56,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   return res.status(200).json({ message: 'Webhook received' });
 }
 
-async function handlePullRequest(event: any) {
+/**
+ * This function dispatches different types of event related to a pull request (PR) to Temporal workflows.
+ *
+ * @param eventType the type of event, e.g., "pull_request" or "issue_comment"
+ * @param event the playload of the event
+ */
+async function handlePullRequest(eventType: string, event: any) {
   const repoUrl = event.repository.html_url;
 
   if (!supportedRepoUrls.includes(repoUrl)) {
@@ -62,8 +73,11 @@ async function handlePullRequest(event: any) {
   const workflowId = `${event.repository.full_name}/pull/${event.number}`;
   console.log(`[pull_request] Handling pull request "${event.pull_request.html_url}" as "${workflowId}"`);
   const client = await getTemporalClient();
+  const arg = {
+    githubEventType: eventType,
+    githubEvent: event
+  };
 
-  const arg = { githubEvent: event };
   if (event.action === 'opened') {
     const handle = await client.workflow.start(temporalWorkflowType, {
       workflowId: workflowId,
@@ -77,7 +91,7 @@ async function handlePullRequest(event: any) {
       'updatePullRequest',
       arg,
     );
-    console.log(`[pull_request] Signal sent to existing workflow: ${workflowId}`);
+    console.log(`[pull_request] Event ${eventType} (${event.action}) sent to existing workflow: ${workflowId}`);
   }
 }
 
