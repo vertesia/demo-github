@@ -31,13 +31,12 @@ export async function helloWorkflow() {
  ---------- */
 
 export const updatePullRequestSignal = defineSignal<[ReviewPullRequestRequest]>('updatePullRequest');
-export const updatePullRequestCommentSignal = defineSignal<[ReviewPullRequestRequest]>('updatePullRequestComment');
 export type ReviewPullRequestRequest = {
     /**
      * The type of event that triggered this workflow in the GitHub API. This is part of the header
      * "x-github-event" of the webhook.
      */
-    githubEventType: string;
+    githubEventType: string | undefined;
     /**
      * The event that triggered this workflow in the GitHub API.
      *
@@ -49,20 +48,29 @@ export type ReviewPullRequestResponse = {
 }
 export async function reviewPullRequest(request: ReviewPullRequestRequest): Promise<ReviewPullRequestResponse> {
     log.info("Entering reviewPullRequest workflow:", request);
-    let event = request.githubEvent;
+    let prEvent = request.githubEvent;
+    let commentEvent = undefined;
 
     // Register the signal handler
-    setHandler(updatePullRequestSignal, (data: ReviewPullRequestRequest) => {
+    setHandler(updatePullRequestSignal, async (data: ReviewPullRequestRequest) => {
         log.info('Signal received with data:', data);
-        event = data.githubEvent;
+        if (data.githubEventType === 'pull_request') {
+            prEvent = data.githubEvent;
+        } else if (data.githubEventType === 'issue_comment') {
+            commentEvent = data.githubEvent;
+            await handleCommentEvent(commentEvent);
+        } else {
+            // backward compatibility
+            prEvent = data.githubEvent;
+        }
     });
 
     let comment = undefined;
     let skipReason = undefined;
-    if (event.pull_request.user.login === 'mincong-h' && event.repository.full_name === 'vertesia/demo-github') {
+    if (prEvent.pull_request.user.login === 'mincong-h' && prEvent.repository.full_name === 'vertesia/demo-github') {
         comment = 'Hello from Temporal Workflow!';
-    } else if (event.pull_request.user.login === 'mincong-h' && event.repository.full_name === 'vertesia/studio') {
-        const spec = computeDeploymentSpec(event.pull_request.head.ref);
+    } else if (prEvent.pull_request.user.login === 'mincong-h' && prEvent.repository.full_name === 'vertesia/studio') {
+        const spec = computeDeploymentSpec(prEvent.pull_request.head.ref);
         if (spec) {
             comment = toGithubComment(spec);
         } else {
@@ -74,21 +82,21 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
 
     if (comment) {
         await commentOnPullRequest({
-            org: event.repository.owner.login,
-            repo: event.repository.name,
-            pullRequestNumber: Number(event.pull_request.number),
+            org: prEvent.repository.owner.login,
+            repo: prEvent.repository.name,
+            pullRequestNumber: Number(prEvent.pull_request.number),
             message: comment,
         });
     } else {
         log.debug(`Comment is skipped for this pull request: ${skipReason}`);
     }
 
-    await condition(() => event.pull_request.state === 'closed' || event.pull_request.merged);
+    await condition(() => prEvent.pull_request.state === 'closed' || prEvent.pull_request.merged);
 
-    if (event.pull_request.merged) {
-        log.info(`Pull request is merged (state: ${event.pull_request.state}, merged: ${event.pull_request.merged})`);
+    if (prEvent.pull_request.merged) {
+        log.info(`Pull request is merged (state: ${prEvent.pull_request.state}, merged: ${prEvent.pull_request.merged})`);
     } else {
-        log.info(`Pull request is closed (state: ${event.pull_request.state}, merged: ${event.pull_request.merged})`);
+        log.info(`Pull request is closed (state: ${prEvent.pull_request.state}, merged: ${prEvent.pull_request.merged})`);
     }
     return {};
 }
@@ -98,6 +106,7 @@ type DeploymentSpec = {
     gcp: GcpDeploymentSpec;
     aws: AwsDeploymentSpec | undefined;
     temporal: TemporalDeploymentSpec;
+    vercel: VercelDeploymentSpec | undefined;
 }
 type GcpDeploymentSpec = {
     cloudRunStudioServerName: string;
@@ -119,17 +128,24 @@ type TemporalDeploymentSpec = {
     zenoTaskQueue: string;
     httpUrl: string;
 }
+type VercelDeploymentSpec = {
+    studioUiUrl: string;
+}
 
 function toGithubComment(spec: DeploymentSpec): string {
     const envCode = '`' + spec.environment + '`';
     const deployedClouds = spec.aws ? "GCP and AWS" : "GCP";
-    const content = '```json\n' + JSON.stringify(spec, null, 2) + '\n```';
+    const specJson = '```json\n' + JSON.stringify(spec, null, 2) + '\n```';
+    let vercel = '';
+    if (spec.vercel) {
+        vercel = ` The Studio UI is available at <${spec.vercel.studioUiUrl}>.`;
+    }
 
-    return `Your dev environment ${envCode} will be deployed to ${deployedClouds}.
+    return `Your dev environment ${envCode} will be deployed to ${deployedClouds}.${vercel}
 
 <details><summary><b>Click here</b> to learn more about your environment.</summary>
 
-${content}
+${specJson}
 </details>
 `;
 }
@@ -164,7 +180,8 @@ function computeDeploymentSpec(branch: string): DeploymentSpec | undefined {
                 namespace: `${env}.i16ci`,
                 zenoTaskQueue: 'zeno-content',
                 httpUrl: `https://cloud.temporal.io/namespaces/${env}.i16ci/workflows`,
-            }
+            },
+            vercel: undefined,
         };
     }
 
@@ -191,6 +208,7 @@ function computeDeploymentSpec(branch: string): DeploymentSpec | undefined {
             httpUrl: `https://cloud.temporal.io/namespaces/dev.i16ci/workflows`,
         },
         aws: undefined,
+        vercel: undefined,
     }
     if (branch.includes('aws')) {
         spec.aws = {
@@ -201,4 +219,49 @@ function computeDeploymentSpec(branch: string): DeploymentSpec | undefined {
         };
     }
     return spec;
+}
+
+async function handleCommentEvent(event: any) {
+    if (event.comment.user.login !== 'vercel[bot]') {
+        log.debug('Skip comment event from user:', event.comment.user.login);
+        return;
+    }
+
+    const url = extractStudioUiUrl(event.comment.body);
+    if (!url) {
+        log.warn('Failed to extract Studio UI URL from comment:', { comment: event.comment.body });
+        return;
+    }
+    log.debug(`Extracted Studio UI URL: ${url}`);
+    const spec = computeDeploymentSpec(event.pull_request.head.ref);
+    if (spec) {
+        spec.vercel = {
+            studioUiUrl: url,
+        }
+        const comment = toGithubComment(spec);
+        await commentOnPullRequest({
+            org: event.repository.owner.login,
+            repo: event.repository.name,
+            pullRequestNumber: Number(event.pull_request.number),
+            message: comment,
+        });
+    }
+}
+
+function extractStudioUiUrl(content: string): string | null {
+    const rows = content.split('\n');
+    let captureNextUrl = false;
+    for (const row of rows) {
+        // note: "unified"  is the name of the Studio UI in Vercel
+        if (row.includes('| **unified**')) {
+            captureNextUrl = true;
+        } else if (captureNextUrl) {
+            const urlMatch = row.match(/\[Visit Preview\]\((https?:\/\/[^)]+)\)/);
+            if (urlMatch) {
+                return urlMatch[1];
+            }
+            captureNextUrl = false;
+        }
+    }
+    return null;
 }
