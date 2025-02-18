@@ -69,16 +69,6 @@ export class VertesiaGithubApp {
         });
     }
 
-    async getDiff(owner: string, repo: string, pull_number: number) {
-        const response = await fetch(diffUrl, {
-            method: "GET",
-            headers: {
-                Accept: "application/vnd.github.v3.diff",
-                Authorization: `token ${process.env.GITHUB_TOKEN}`, // Authentication for private repos
-            },
-        });
-    }
-
     static _instance: VertesiaGithubApp | null = null;
     static async create(privateKey: string) {
         const app = new OctoApp({
