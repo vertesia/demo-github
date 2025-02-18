@@ -1,3 +1,4 @@
+import { VertesiaClient } from "@vertesia/client"
 import { log } from "@temporalio/activity";
 import { VertesiaGithubApp } from "./github.js";
 
@@ -56,15 +57,28 @@ export type GeneratePullRequestSummaryResponse = {
 }
 export async function generatePullRequestSummary(request: GeneratePullRequestSummaryRequest): Promise<GeneratePullRequestSummaryResponse> {
     const app = await VertesiaGithubApp.getInstance();
-    const response = await app.getPullRequestDiff(request.owner, request.repo, request.pullRequestNumber);
-    let diff = response.data as unknown as string;
+    const diffResp = await app.getPullRequestDiff(request.owner, request.repo, request.pullRequestNumber);
+    let diff = diffResp.data as unknown as string;
     log.info(`Got diff for pull request ${request.owner}/${request.repo}/${request.pullRequestNumber}: ${diff.length} characters`);
 
-    // TODO: use LLM to generate a summary
+    const vertesiaClient = new VertesiaClient({
+        apikey: 'token', // FIXME
+        serverUrl: 'https://studio-server-staging.api.vertesia.io',
+        storeUrl: 'https://zeno-server-staging-api.vertesia.io',
+    });
+    const execResp = await vertesiaClient.interactions.executeByName<any, string>(
+        'SummarizeCodeDiff',
+        {
+            data: {
+                diff: diff,
+            }
+        },
+    );
 
-    if (diff.length > 100) {
-        log.warn("Diff is too long, truncating", { length: diff.length });
-        diff = diff.substring(0, 1000) + "...";
+    let summary = execResp.result
+    if (summary.length > 100) {
+        log.warn("Summary is too long, truncating", { length: summary.length });
+        summary = summary.substring(0, 1000) + "...";
     }
     return {
         summary: diff,
