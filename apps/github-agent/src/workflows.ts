@@ -47,14 +47,14 @@ export type ReviewPullRequestRequest = {
 export type ReviewPullRequestResponse = {
 }
 export async function reviewPullRequest(request: ReviewPullRequestRequest): Promise<ReviewPullRequestResponse> {
-    log.info("Entering reviewPullRequest workflow:", request);
+    log.info("Entering reviewPullRequest workflow", { request });
     let prEvent = request.githubEvent;
     const prBranch = prEvent.pull_request.head.ref;
     let commentEvent = undefined;
 
     // Register the signal handler
     setHandler(updatePullRequestSignal, async (data: ReviewPullRequestRequest) => {
-        log.info('Signal received with data:', data);
+        log.info('Signal updatePullRequestSignal received', { request: data });
         if (data.githubEventType === 'pull_request') {
             prEvent = data.githubEvent;
         } else if (data.githubEventType === 'issue_comment') {
@@ -223,8 +223,9 @@ function computeDeploymentSpec(branch: string): DeploymentSpec | undefined {
 }
 
 async function handleCommentEvent(event: any, prBranch: string) {
+    log.info('Handling comment event', { event, prBranch });
     if (event.comment.user.login !== 'vercel[bot]') {
-        log.debug('Skip comment event from user:', event.comment.user.login);
+        log.info('Skip comment event from user:', event.comment.user.login);
         return;
     }
 
@@ -233,7 +234,7 @@ async function handleCommentEvent(event: any, prBranch: string) {
         log.warn('Failed to extract Studio UI URL from comment:', { comment: event.comment.body });
         return;
     }
-    log.debug(`Extracted Studio UI URL: ${url}`);
+    log.info(`Extracted Studio UI URL: ${url}`);
     const spec = computeDeploymentSpec(prBranch);
     if (spec) {
         spec.vercel = {
@@ -246,6 +247,8 @@ async function handleCommentEvent(event: any, prBranch: string) {
             pullRequestNumber: Number(event.pull_request.number),
             message: comment,
         });
+    } else {
+        log.warn(`Failed to compute deployment spec from branch: ${prBranch}`);
     }
 }
 
