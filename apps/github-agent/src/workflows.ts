@@ -1,11 +1,13 @@
 import {
+    condition,
     defineSignal,
     log,
     proxyActivities,
     setHandler,
-    condition,
+    workflowInfo,
 } from "@temporalio/workflow";
 import * as activities from "./activities.js";
+import { isAssistantEnabled } from "./flags.js";
 
 const {
     helloActivity,
@@ -46,13 +48,6 @@ export type ReviewPullRequestRequest = {
 }
 export type ReviewPullRequestResponse = {
 }
-type PullRequestContext = {
-    org: string;
-    repo: string;
-    number: number;
-    branch: string;
-    commentId: number | undefined;
-}
 export async function reviewPullRequest(request: ReviewPullRequestRequest): Promise<ReviewPullRequestResponse> {
     log.info("Entering reviewPullRequest workflow", { request });
     let prEvent = request.githubEvent;
@@ -81,12 +76,14 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
 
     let comment = undefined;
     let skipReason = undefined;
-    if (prEvent.pull_request.user.login === 'mincong-h' && prEvent.repository.full_name === 'vertesia/demo-github') {
-        comment = 'Hello from Temporal Workflow!';
-    } else if (prEvent.pull_request.user.login === 'mincong-h' && prEvent.repository.full_name === 'vertesia/studio') {
-        const spec = computeDeploymentSpec(ctx.branch);
-        if (spec) {
-            comment = toGithubComment(spec);
+    let isEnabled = isAssistantEnabled({
+        repoFullName: prEvent.repository.full_name,
+        userId: prEvent.pull_request.user.login,
+    });
+    if (isEnabled) {
+        const assistantCtx = computeAssistantContext(ctx);
+        if (assistantCtx.deployment) {
+            comment = toGithubComment(assistantCtx);
         } else {
             skipReason = 'this branch is not a dev branch.';
         }
@@ -117,6 +114,31 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
     return {};
 }
 
+type AssistantContext = {
+    /**
+     * The deployment specification of the development environment.
+     *
+     * Undefined if this is not a dev branch.
+     */
+    deployment: DeploymentSpec | undefined;
+    /**
+     * The Temporal workflow execution information of the AI assistant.
+     */
+    execution: TemporalExecution;
+    /**
+     * The pull request context.
+     */
+    pullRequest: PullRequestContext;
+}
+
+type PullRequestContext = {
+    org: string;
+    repo: string;
+    number: number;
+    branch: string;
+    commentId: number | undefined;
+}
+
 type DeploymentSpec = {
     environment: string;
     gcp: GcpDeploymentSpec;
@@ -124,6 +146,7 @@ type DeploymentSpec = {
     temporal: TemporalDeploymentSpec;
     vercel: VercelDeploymentSpec | undefined;
 }
+
 type GcpDeploymentSpec = {
     cloudRunStudioServerName: string;
     cloudRunZenoServerName: string;
@@ -133,25 +156,40 @@ type GcpDeploymentSpec = {
     studioApiBaseUrl: string;
     zenoApiBaseUrl: string;
 }
+
 type AwsDeploymentSpec = {
     appRunnerStudioServerName: string;
     appRunnerZenoServerName: string;
     studioApiBaseUrl: string;
     zenoApiBaseUrl: string;
 }
+
 type TemporalDeploymentSpec = {
     namespace: string;
     zenoTaskQueue: string;
     httpUrl: string;
 }
+
 type VercelDeploymentSpec = {
     studioUiUrl: string;
 }
 
-function toGithubComment(spec: DeploymentSpec): string {
+type TemporalExecution = {
+    namespace: string;
+    service: string;
+    taskQueue: string;
+    workflowType: string;
+    workflowId: string;
+    runId: string;
+}
+
+function toGithubComment(ctx: AssistantContext): string {
+    // note: we assume that the deployment spec is always defined for dev branches
+    const spec = ctx.deployment!;
+
     const envCode = '`' + spec.environment + '`';
     const deployedClouds = spec.aws ? "GCP and AWS" : "GCP";
-    const specJson = '```json\n' + JSON.stringify(spec, null, 2) + '\n```';
+    const contextJson = '```json\n' + JSON.stringify(ctx, null, 2) + '\n```';
     let vercel = '';
     if (spec.vercel) {
         vercel = ` The Studio UI is available at <${spec.vercel.studioUiUrl}>.`;
@@ -161,9 +199,26 @@ function toGithubComment(spec: DeploymentSpec): string {
 
 <details><summary><b>Click here</b> to learn more about your environment.</summary>
 
-${specJson}
+${contextJson}
 </details>
 `;
+}
+
+function computeAssistantContext(pullRequestCtx: PullRequestContext): AssistantContext {
+    const deployment = computeDeploymentSpec(pullRequestCtx.branch);
+    const info = workflowInfo();
+    return {
+        deployment: deployment!,
+        execution: {
+            namespace: info.namespace,
+            service: 'vertesia_github-agent',
+            taskQueue: info.taskQueue,
+            workflowId: info.workflowId,
+            workflowType: info.workflowType,
+            runId: info.runId,
+        },
+        pullRequest: pullRequestCtx,
+    }
 }
 
 /**
@@ -253,12 +308,12 @@ async function handleCommentEvent(ctx: PullRequestContext, event: any) {
         return;
     }
     log.info(`Extracted Studio UI URL: ${url}`);
-    const spec = computeDeploymentSpec(ctx.branch);
-    if (spec) {
-        spec.vercel = {
+    const assistantCtx = computeAssistantContext(ctx);
+    if (assistantCtx.deployment) {
+        assistantCtx.deployment.vercel = {
             studioUiUrl: url,
         }
-        const comment = toGithubComment(spec);
+        const comment = toGithubComment(assistantCtx);
         await commentOnPullRequest({
             org: event.repository.owner.login,
             repo: event.repository.name,
