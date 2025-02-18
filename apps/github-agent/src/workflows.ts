@@ -186,7 +186,7 @@ function computeDeploymentSpec(branch: string): DeploymentSpec | undefined {
         };
     }
 
-    const isDevBranch = branch.startsWith('demo') || branch.includes('feature') || branch.includes('fix');
+    const isDevBranch = branch.startsWith('demo') || branch.includes('feat') || branch.includes('fix');
     if (!isDevBranch) {
         return undefined;
     }
