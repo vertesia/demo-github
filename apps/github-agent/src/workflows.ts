@@ -129,6 +129,10 @@ type AssistantContext = {
      * The pull request context.
      */
     pullRequest: PullRequestContext;
+    /**
+     * The code difference of the pull request.
+     */
+    codeDiff?: CodeDiff;
 }
 
 type PullRequestContext = {
@@ -137,6 +141,11 @@ type PullRequestContext = {
     number: number;
     branch: string;
     commentId: number | undefined;
+}
+
+type CodeDiff = {
+    commitMessages: string[]
+    codeDiff: string
 }
 
 type DeploymentSpec = {
@@ -184,12 +193,19 @@ type TemporalExecution = {
 }
 
 function toGithubComment(ctx: AssistantContext): string {
-    // note: we assume that the deployment spec is always defined for dev branches
+    // We assume that the deployment spec is always defined for dev branches.
     const spec = ctx.deployment!;
 
     const envCode = '`' + spec.environment + '`';
     const deployedClouds = spec.aws ? "GCP and AWS" : "GCP";
-    const contextJson = '```json\n' + JSON.stringify(ctx, null, 2) + '\n```';
+
+    // We exclude the code diff from the comment to keep it concise.
+    const displayCtx = {
+        deployment: ctx.deployment,
+        pullRequest: ctx.pullRequest,
+        execution: ctx.execution,
+    }
+    const contextJson = '```json\n' + JSON.stringify(displayCtx, null, 2) + '\n```';
     let vercel = '';
     if (spec.vercel) {
         vercel = ` The Studio UI is available at <${spec.vercel.studioUiUrl}>.`;
