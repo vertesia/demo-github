@@ -1,5 +1,6 @@
-import { VertesiaClient } from "@vertesia/client"
+import { createSecretProvider, SupportedCloudEnvironments } from '@dglabs/cloud';
 import { log } from "@temporalio/activity";
+import { VertesiaClient } from "@vertesia/client";
 import { VertesiaGithubApp } from "./github.js";
 
 export async function helloActivity() {
@@ -61,8 +62,9 @@ export async function generatePullRequestSummary(request: GeneratePullRequestSum
     let diff = diffResp.data as unknown as string;
     log.info(`Got diff for pull request ${request.owner}/${request.repo}/${request.pullRequestNumber}: ${diff.length} characters`);
 
+    const apiKey = await getVertesiaApiKey();
     const vertesiaClient = new VertesiaClient({
-        apikey: 'token', // FIXME
+        apikey: apiKey,
         serverUrl: 'https://studio-server-staging.api.vertesia.io',
         storeUrl: 'https://zeno-server-staging-api.vertesia.io',
     });
@@ -83,4 +85,9 @@ export async function generatePullRequestSummary(request: GeneratePullRequestSum
     return {
         summary: diff,
     };
+}
+
+async function getVertesiaApiKey() {
+    const vault = createSecretProvider(process.env.CLOUD as SupportedCloudEnvironments ?? SupportedCloudEnvironments.gcp)
+    return await vault.getSecret('release-notes-api-key');
 }
