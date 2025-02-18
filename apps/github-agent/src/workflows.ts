@@ -7,6 +7,7 @@ import {
     workflowInfo,
 } from "@temporalio/workflow";
 import * as activities from "./activities.js";
+import { isAssistantEnabled } from "./flags.js";
 
 const {
     helloActivity,
@@ -75,12 +76,14 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
 
     let comment = undefined;
     let skipReason = undefined;
-    if (prEvent.pull_request.user.login === 'mincong-h' && prEvent.repository.full_name === 'vertesia/demo-github') {
-        comment = 'Hello from Temporal Workflow!';
-    } else if (prEvent.pull_request.user.login === 'mincong-h' && prEvent.repository.full_name === 'vertesia/studio') {
-        const spec = computeAssistantContext(ctx);
-        if (spec) {
-            comment = toGithubComment(spec);
+    let isEnabled = isAssistantEnabled({
+        repoFullName: prEvent.repository.full_name,
+        userId: prEvent.pull_request.user.login,
+    });
+    if (isEnabled) {
+        const assistantCtx = computeAssistantContext(ctx);
+        if (assistantCtx.deployment) {
+            comment = toGithubComment(assistantCtx);
         } else {
             skipReason = 'this branch is not a dev branch.';
         }
