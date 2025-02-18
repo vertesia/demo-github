@@ -69,6 +69,18 @@ export class VertesiaGithubApp {
         });
     }
 
+    async getPullRequestDiff(owner: string, repo: string, pull_number: number) {
+        const octokit = await this.getRestClient();
+        return await octokit.rest.pulls.get({
+            owner: owner,
+            repo: repo,
+            pull_number: pull_number,
+            headers: {
+                accept: "application/vnd.github.v3.diff",
+            }
+        });
+    }
+
     static _instance: VertesiaGithubApp | null = null;
     static async create(privateKey: string) {
         const app = new OctoApp({

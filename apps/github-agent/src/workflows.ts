@@ -304,7 +304,9 @@ async function handlePullRequestEvent(ctx: AssistantContext, prEvent: any, userF
     log.info(`Handling pull_request event (${prEvent.action})`, { event: prEvent });
     if (userFlags.isDiffSummaryEnabled) {
         const resp = await generatePullRequestSummary({
-            codeDiffUrl: ctx.pullRequest.diffUrl,
+            owner: ctx.pullRequest.org,
+            repo: ctx.pullRequest.repo,
+            pullRequestNumber: ctx.pullRequest.number,
         });
         log.info(`Diff summary of the PR: ${resp.summary}`);
         ctx.summary = resp.summary;
