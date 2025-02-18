@@ -43,6 +43,12 @@ export class VertesiaGithubApp {
         });
     }
 
+    async getToken() {
+        return await this.app.octokit.rest.apps.createInstallationAccessToken({
+            installation_id: this.installationId,
+        });
+    }
+
     async createComment(owner: string, repo: string, pull_number: number, body: string) {
         const octokit = await this.getRestClient();
         return await octokit.rest.issues.createComment({
@@ -64,11 +70,12 @@ export class VertesiaGithubApp {
     }
 
     async getDiff(owner: string, repo: string, pull_number: number) {
-        const octokit = await this.getRestClient();
-        return await octokit.rest.pulls.get({
-            owner: owner,
-            repo: repo,
-            pull_number: pull_number,
+        const response = await fetch(diffUrl, {
+            method: "GET",
+            headers: {
+                Accept: "application/vnd.github.v3.diff",
+                Authorization: `token ${process.env.GITHUB_TOKEN}`, // Authentication for private repos
+            },
         });
     }
 
