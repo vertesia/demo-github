@@ -43,13 +43,23 @@ export class VertesiaGithubApp {
         });
     }
 
-    async commentOnPullRequest(owner: string, repo: string, pull_number: number, body: string) {
+    async createComment(owner: string, repo: string, pull_number: number, body: string) {
         const octokit = await this.getRestClient();
         return await octokit.rest.issues.createComment({
             owner: owner,
             repo: repo,
             issue_number: pull_number,
-            body
+            body: body,
+        });
+    }
+
+    async updateComment(owner: string, repo: string, comment_id: number, body: string) {
+        const octokit = await this.getRestClient();
+        return await octokit.rest.issues.updateComment({
+            owner: owner,
+            repo: repo,
+            comment_id: comment_id,
+            body: body,
         });
     }
 

@@ -51,6 +51,7 @@ type PullRequestContext = {
     repo: string;
     number: number;
     branch: string;
+    commentId: number | undefined;
 }
 export async function reviewPullRequest(request: ReviewPullRequestRequest): Promise<ReviewPullRequestResponse> {
     log.info("Entering reviewPullRequest workflow", { request });
@@ -61,6 +62,7 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
         repo: prEvent.repository.name,
         number: Number(prEvent.pull_request.number),
         branch: prEvent.pull_request.head.ref,
+        commentId: undefined,
     };
 
     // Register the signal handler
@@ -93,12 +95,14 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
     }
 
     if (comment) {
-        await commentOnPullRequest({
+        const resp = await commentOnPullRequest({
             org: prEvent.repository.owner.login,
             repo: prEvent.repository.name,
             pullRequestNumber: Number(prEvent.pull_request.number),
             message: comment,
+            commentId: ctx.commentId,
         });
+        ctx.commentId = resp.commentId;
     } else {
         log.info(`Comment is skipped for this pull request: ${skipReason}`, { pull_request_ctx: ctx });
     }
@@ -260,6 +264,7 @@ async function handleCommentEvent(ctx: PullRequestContext, event: any) {
             repo: event.repository.name,
             pullRequestNumber: ctx.number,
             message: comment,
+            commentId: ctx.commentId,
         });
     } else {
         log.warn(`Failed to compute deployment spec from branch: ${ctx.branch}`, { pull_request_ctx: ctx });

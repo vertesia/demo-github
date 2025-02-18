@@ -10,20 +10,38 @@ export type CommentOnPullRequestRequest = {
     repo: string,
     pullRequestNumber: number,
     message: string,
+    commentId: number | undefined,
 }
 export type CommentOnPullRequestResponse = {
+    commentId: number,
 }
 export async function commentOnPullRequest(request: CommentOnPullRequestRequest): Promise<CommentOnPullRequestResponse> {
     log.debug("Setting up GitHub App client");
     const app = await VertesiaGithubApp.getInstance();
     const id = `${request.org}/${request.repo}/${request.pullRequestNumber}`;
-    log.info(`Commenting on pull request: ${id}`, { request });
-    const response = await app.commentOnPullRequest(
-        request.org,
-        request.repo,
-        request.pullRequestNumber,
-        request.message,
-    );
-    log.info(`Commented on pull request ${id}`, { request, response });
-    return {};
+    if (request.commentId) {
+        log.info(`Updating comment on pull request: ${id}`, { request });
+        const response = await app.updateComment(
+            request.org,
+            request.repo,
+            request.commentId,
+            request.message,
+        );
+        log.info(`Comment ${request.commentId} updated on pull request ${id}`, { request, response });
+        return {
+            commentId: request.commentId,
+        };
+    } else {
+        log.info(`Creating comment on pull request: ${id}`, { request });
+        const response = await app.createComment(
+            request.org,
+            request.repo,
+            request.pullRequestNumber,
+            request.message,
+        );
+        log.info(`Comment ${response.data.id} created on pull request ${id}`, { request, response });
+        return {
+            commentId: response.data.id,
+        };
+    }
 }
