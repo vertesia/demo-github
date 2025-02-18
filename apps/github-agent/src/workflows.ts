@@ -46,20 +46,31 @@ export type ReviewPullRequestRequest = {
 }
 export type ReviewPullRequestResponse = {
 }
+type PullRequestContext = {
+    org: string;
+    repo: string;
+    number: number;
+    branch: string;
+}
 export async function reviewPullRequest(request: ReviewPullRequestRequest): Promise<ReviewPullRequestResponse> {
     log.info("Entering reviewPullRequest workflow", { request });
     let prEvent = request.githubEvent;
-    const prBranch = prEvent.pull_request.head.ref;
     let commentEvent = undefined;
+    const ctx: PullRequestContext = {
+        org: prEvent.repository.owner.login,
+        repo: prEvent.repository.name,
+        number: Number(prEvent.pull_request.number),
+        branch: prEvent.pull_request.head.ref,
+    };
 
     // Register the signal handler
     setHandler(updatePullRequestSignal, async (data: ReviewPullRequestRequest) => {
-        log.info('Signal updatePullRequestSignal received', { request: data });
+        log.info('Signal updatePullRequestSignal received', { request: data, pull_request_ctx: ctx });
         if (data.githubEventType === 'pull_request') {
             prEvent = data.githubEvent;
         } else if (data.githubEventType === 'issue_comment') {
             commentEvent = data.githubEvent;
-            await handleCommentEvent(commentEvent, prBranch);
+            await handleCommentEvent(ctx, commentEvent);
         } else {
             // backward compatibility
             prEvent = data.githubEvent;
@@ -71,7 +82,7 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
     if (prEvent.pull_request.user.login === 'mincong-h' && prEvent.repository.full_name === 'vertesia/demo-github') {
         comment = 'Hello from Temporal Workflow!';
     } else if (prEvent.pull_request.user.login === 'mincong-h' && prEvent.repository.full_name === 'vertesia/studio') {
-        const spec = computeDeploymentSpec(prBranch);
+        const spec = computeDeploymentSpec(ctx.branch);
         if (spec) {
             comment = toGithubComment(spec);
         } else {
@@ -89,15 +100,15 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
             message: comment,
         });
     } else {
-        log.debug(`Comment is skipped for this pull request: ${skipReason}`);
+        log.info(`Comment is skipped for this pull request: ${skipReason}`, { pull_request_ctx: ctx });
     }
 
     await condition(() => prEvent.pull_request.state === 'closed' || prEvent.pull_request.merged);
 
     if (prEvent.pull_request.merged) {
-        log.info(`Pull request is merged (state: ${prEvent.pull_request.state}, merged: ${prEvent.pull_request.merged})`);
+        log.info(`Pull request is merged (state: ${prEvent.pull_request.state}, merged: ${prEvent.pull_request.merged})`, { pull_request_ctx: ctx });
     } else {
-        log.info(`Pull request is closed (state: ${prEvent.pull_request.state}, merged: ${prEvent.pull_request.merged})`);
+        log.info(`Pull request is closed (state: ${prEvent.pull_request.state}, merged: ${prEvent.pull_request.merged})`, { pull_request_ctx: ctx });
     }
     return {};
 }
@@ -222,20 +233,23 @@ function computeDeploymentSpec(branch: string): DeploymentSpec | undefined {
     return spec;
 }
 
-async function handleCommentEvent(event: any, prBranch: string) {
-    log.info('Handling comment event', { event, prBranch });
+async function handleCommentEvent(ctx: PullRequestContext, event: any) {
+    log.info('Handling comment event', { event, pull_request_ctx: ctx });
     if (event.comment.user.login !== 'vercel[bot]') {
-        log.info('Skip comment event from user:', event.comment.user.login);
+        log.info(`Skip comment event from user: ${event.comment.user.login}`, { pull_request_ctx: ctx });
         return;
     }
 
     const url = extractStudioUiUrl(event.comment.body);
     if (!url) {
-        log.warn('Failed to extract Studio UI URL from comment:', { comment: event.comment.body });
+        log.warn('Failed to extract Studio UI URL from comment:', {
+            comment: event.comment.body,
+            pull_request_ctx: ctx,
+        });
         return;
     }
     log.info(`Extracted Studio UI URL: ${url}`);
-    const spec = computeDeploymentSpec(prBranch);
+    const spec = computeDeploymentSpec(ctx.branch);
     if (spec) {
         spec.vercel = {
             studioUiUrl: url,
@@ -244,11 +258,11 @@ async function handleCommentEvent(event: any, prBranch: string) {
         await commentOnPullRequest({
             org: event.repository.owner.login,
             repo: event.repository.name,
-            pullRequestNumber: Number(event.pull_request.number),
+            pullRequestNumber: ctx.number,
             message: comment,
         });
     } else {
-        log.warn(`Failed to compute deployment spec from branch: ${prBranch}`);
+        log.warn(`Failed to compute deployment spec from branch: ${ctx.branch}`, { pull_request_ctx: ctx });
     }
 }
 
