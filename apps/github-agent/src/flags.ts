@@ -1,4 +1,4 @@
-type UserFeatures = {
+export type UserFeatures = {
     isDeploymentSummaryEnabled: boolean;
     isDiffSummaryEnabled: boolean;
 }

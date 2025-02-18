@@ -7,11 +7,12 @@ import {
     workflowInfo,
 } from "@temporalio/workflow";
 import * as activities from "./activities.js";
-import { getUserFlags } from "./flags.js";
+import { getUserFlags, UserFeatures } from "./flags.js";
 
 const {
-    helloActivity,
     commentOnPullRequest,
+    generatePullRequestSummary,
+    helloActivity,
 } = proxyActivities<typeof activities>({
     startToCloseTimeout: "5 minute",
     retry: {
@@ -66,25 +67,25 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
         };
     }
 
-    const ctx = computePullRequestContext(prEvent);
-    const assistantCtx = computeAssistantContext(ctx);
-    if (!assistantCtx.deployment) {
+    const prCtx = computePullRequestContext(prEvent);
+    const ctx = computeAssistantContext(prCtx);
+    if (!ctx.deployment) {
         return {
             status: 'skipped',
             reason: 'This branch is not a dev branch.',
         }
     }
 
-    const initialComment = toGithubComment(assistantCtx);
-    ctx.commentId = await upsertComment(ctx, initialComment);
+    prCtx.commentId = await handlePullRequestEvent(ctx, prEvent, userFlags);
 
     // Register the signal handler
     setHandler(updatePullRequestSignal, async (updateReq: ReviewPullRequestRequest) => {
         log.info('Signal updatePullRequestSignal received', { request: updateReq, pull_request_ctx: ctx });
         if (updateReq.githubEventType === 'pull_request') {
             prEvent = updateReq.githubEvent;
+            await handlePullRequestEvent(ctx, prEvent, userFlags);
         } else if (updateReq.githubEventType === 'issue_comment') {
-            await handleCommentEvent(assistantCtx, updateReq.githubEvent);
+            await handleCommentEvent(ctx, updateReq.githubEvent);
         }
     });
 
@@ -113,6 +114,10 @@ type AssistantContext = {
      * The pull request context.
      */
     pullRequest: PullRequestContext;
+    /**
+     * The summary of the pull request.
+     */
+    summary?: string;
 }
 
 type PullRequestContext = {
@@ -288,30 +293,51 @@ function computeDeploymentSpec(branch: string): DeploymentSpec | undefined {
     return spec;
 }
 
-async function handleCommentEvent(assistantCtx: AssistantContext, event: any) {
-    log.info('Handling comment event', { event, pull_request_ctx: assistantCtx.pullRequest });
-    if (event.comment.user.login !== 'vercel[bot]') {
-        log.info(`Skip comment event from user: ${event.comment.user.login}`, { pull_request_ctx: assistantCtx.pullRequest });
+async function handlePullRequestEvent(ctx: AssistantContext, prEvent: any, userFlags: UserFeatures): Promise<number> {
+    // Only handle the events when the PR is not closed or merged.
+    if (prEvent.action === 'closed' || prEvent.pull_request.merged) {
+        return -1;
+    }
+
+    log.info(`Handling pull_request event (${prEvent.action})`, { event: prEvent });
+    if (userFlags.isDiffSummaryEnabled) {
+        const resp = await generatePullRequestSummary({
+            codeDiffUrl: ctx.pullRequest.diffUrl,
+        });
+        log.info(`Diff summary of the PR: ${resp.summary}`);
+        ctx.summary = resp.summary;
+    } else {
+        log.info('Diff summary is disabled for this user');
+    }
+
+    const comment = toGithubComment(ctx);
+    return await upsertComment(ctx.pullRequest, comment);
+}
+
+async function handleCommentEvent(ctx: AssistantContext, commentEvent: any) {
+    log.info('Handling comment event', { event: commentEvent, pull_request_ctx: ctx });
+    if (commentEvent.comment.user.login !== 'vercel[bot]') {
+        log.info(`Skip comment event from user: ${commentEvent.comment.user.login}`, { pull_request_ctx: ctx });
         return;
     }
 
-    const url = extractStudioUiUrl(event.comment.body);
+    const url = extractStudioUiUrl(commentEvent.comment.body);
     if (!url) {
         log.warn('Failed to extract Studio UI URL from comment:', {
-            comment: event.comment.body,
-            pull_request_ctx: assistantCtx.pullRequest,
+            comment: commentEvent.comment.body,
+            pull_request_ctx: ctx,
         });
         return;
     }
     log.info(`Extracted Studio UI URL: ${url}`);
-    if (assistantCtx.deployment) {
-        assistantCtx.deployment.vercel = {
+    if (ctx.deployment) {
+        ctx.deployment.vercel = {
             studioUiUrl: url,
         }
     }
 
-    const comment = toGithubComment(assistantCtx);
-    await upsertComment(assistantCtx.pullRequest, comment);
+    const comment = toGithubComment(ctx);
+    await upsertComment(ctx.pullRequest, comment);
 }
 
 async function upsertComment(ctx: PullRequestContext, comment: string): Promise<number> {

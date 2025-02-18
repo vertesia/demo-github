@@ -65,8 +65,14 @@ export async function generatePullRequestSummary(request: GeneratePullRequestSum
         log.error(`Failed to fetch diff from ${request.codeDiffUrl}: ${response.status} ${response.statusText}`);
         throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
     }
-    const diff = await response.text();
+    let diff = await response.text();
+
     // TODO: use LLM to generate a summary
+
+    if (diff.length > 100) {
+        log.warn("Diff is too long, truncating", { length: diff.length });
+        diff = diff.substring(0, 1000) + "...";
+    }
     return {
         summary: diff,
     };
