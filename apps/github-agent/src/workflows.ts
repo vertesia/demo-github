@@ -185,8 +185,10 @@ function toGithubComment(ctx: AssistantContext): string {
         vercel = ` The Studio UI is available at <${spec.vercel.studioUiUrl}>.`;
     }
 
-    return `Your dev environment ${envCode} will be deployed to ${deployedClouds}.${vercel}
+    const summary = ctx.summary ? `\n\n${ctx.summary}\n\n` : '';
 
+    return `Your dev environment ${envCode} will be deployed to ${deployedClouds}.${vercel}
+${summary}
 <details><summary><b>Click here</b> to learn more about your environment.</summary>
 
 ${contextJson}
