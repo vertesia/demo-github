@@ -76,7 +76,7 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
         }
     }
 
-    prCtx.commentId = await handlePullRequestEvent(ctx, prEvent, userFlags);
+    await handlePullRequestEvent(ctx, prEvent, userFlags);
 
     // Register the signal handler
     setHandler(updatePullRequestSignal, async (updateReq: ReviewPullRequestRequest) => {
@@ -295,10 +295,10 @@ function computeDeploymentSpec(branch: string): DeploymentSpec | undefined {
     return spec;
 }
 
-async function handlePullRequestEvent(ctx: AssistantContext, prEvent: any, userFlags: UserFeatures): Promise<number> {
+async function handlePullRequestEvent(ctx: AssistantContext, prEvent: any, userFlags: UserFeatures) {
     // Only handle the events when the PR is not closed or merged.
     if (prEvent.action === 'closed' || prEvent.pull_request.merged) {
-        return -1;
+        return;
     }
 
     log.info(`Handling pull_request event (${prEvent.action})`, { event: prEvent });
@@ -313,7 +313,11 @@ async function handlePullRequestEvent(ctx: AssistantContext, prEvent: any, userF
     }
 
     const comment = toGithubComment(ctx);
-    return await upsertComment(ctx.pullRequest, comment);
+    const commentId = await upsertComment(ctx.pullRequest, comment);
+
+    if (!ctx.pullRequest.commentId) {
+        ctx.pullRequest.commentId = commentId;
+    }
 }
 
 async function handleCommentEvent(ctx: AssistantContext, commentEvent: any) {
