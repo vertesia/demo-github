@@ -57,8 +57,8 @@ export type GeneratePullRequestSummaryResponse = {
 export async function generatePullRequestSummary(request: GeneratePullRequestSummaryRequest): Promise<GeneratePullRequestSummaryResponse> {
     const app = await VertesiaGithubApp.getInstance();
     const response = await app.getPullRequestDiff(request.owner, request.repo, request.pullRequestNumber);
-    log.info(`Got diff for pull request ${request.owner}/${request.repo}/${request.pullRequestNumber}`, { response });
-    let diff = "placeholder";
+    let diff = response.data as unknown as string;
+    log.info(`Got diff for pull request ${request.owner}/${request.repo}/${request.pullRequestNumber}: ${diff.length} characters`);
 
     // TODO: use LLM to generate a summary
 
