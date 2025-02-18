@@ -1,4 +1,5 @@
 const enabledUserIds = [
+    'antoine-regnier',
     'mincong-h',
 ];
 
