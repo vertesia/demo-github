@@ -57,6 +57,7 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
         repo: prEvent.repository.name,
         number: Number(prEvent.pull_request.number),
         branch: prEvent.pull_request.head.ref,
+        diffUrl: prEvent.pull_request.diff_url,
         commentId: undefined,
     };
 
@@ -106,11 +107,8 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
 
     await condition(() => prEvent.pull_request.state === 'closed' || prEvent.pull_request.merged);
 
-    if (prEvent.pull_request.merged) {
-        log.info(`Pull request is merged (state: ${prEvent.pull_request.state}, merged: ${prEvent.pull_request.merged})`, { pull_request_ctx: ctx });
-    } else {
-        log.info(`Pull request is closed (state: ${prEvent.pull_request.state}, merged: ${prEvent.pull_request.merged})`, { pull_request_ctx: ctx });
-    }
+    const status = prEvent.pull_request.merged ? 'merged' : 'closed';
+    log.info(`Pull request is ${status} (state: ${prEvent.pull_request.state}, merged: ${prEvent.pull_request.merged})`, { pull_request_ctx: ctx });
     return {};
 }
 
@@ -132,7 +130,7 @@ type AssistantContext = {
     /**
      * The code difference of the pull request.
      */
-    codeDiff?: CodeDiff;
+    diff?: CodeDiff;
 }
 
 type PullRequestContext = {
@@ -140,6 +138,7 @@ type PullRequestContext = {
     repo: string;
     number: number;
     branch: string;
+    diffUrl: string;
     commentId: number | undefined;
 }
 
