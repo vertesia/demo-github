@@ -47,69 +47,55 @@ export type ReviewPullRequestRequest = {
     githubEvent: any;
 }
 export type ReviewPullRequestResponse = {
+    status: string;
+    reason: string | undefined;
 }
 export async function reviewPullRequest(request: ReviewPullRequestRequest): Promise<ReviewPullRequestResponse> {
     log.info("Entering reviewPullRequest workflow", { request });
     let prEvent = request.githubEvent;
-    let commentEvent = undefined;
-    const ctx: PullRequestContext = {
-        org: prEvent.repository.owner.login,
-        repo: prEvent.repository.name,
-        number: Number(prEvent.pull_request.number),
-        branch: prEvent.pull_request.head.ref,
-        diffUrl: prEvent.pull_request.diff_url,
-        commentId: undefined,
-    };
+
     const userFlags = getUserFlags({
         repoFullName: prEvent.repository.full_name,
         userId: prEvent.pull_request.user.login,
     });
+    if (!userFlags) {
+        log.info(`Skip the pull request from user: ${prEvent.pull_request.user.login}`);
+        return {
+            status: 'skipped',
+            reason: 'Code review is disabled for this PR.',
+        };
+    }
+
+    const ctx = computePullRequestContext(prEvent);
+    const assistantCtx = computeAssistantContext(ctx);
+    if (!assistantCtx.deployment) {
+        return {
+            status: 'skipped',
+            reason: 'This branch is not a dev branch.',
+        }
+    }
+
+    const initialComment = toGithubComment(assistantCtx);
+    ctx.commentId = await upsertComment(ctx, initialComment);
 
     // Register the signal handler
-    setHandler(updatePullRequestSignal, async (data: ReviewPullRequestRequest) => {
-        log.info('Signal updatePullRequestSignal received', { request: data, pull_request_ctx: ctx });
-        if (data.githubEventType === 'pull_request') {
-            prEvent = data.githubEvent;
-        } else if (data.githubEventType === 'issue_comment') {
-            commentEvent = data.githubEvent;
-            await handleCommentEvent(ctx, commentEvent);
-        } else {
-            // backward compatibility
-            prEvent = data.githubEvent;
+    setHandler(updatePullRequestSignal, async (updateReq: ReviewPullRequestRequest) => {
+        log.info('Signal updatePullRequestSignal received', { request: updateReq, pull_request_ctx: ctx });
+        if (updateReq.githubEventType === 'pull_request') {
+            prEvent = updateReq.githubEvent;
+        } else if (updateReq.githubEventType === 'issue_comment') {
+            await handleCommentEvent(assistantCtx, updateReq.githubEvent);
         }
     });
-
-    let comment = undefined;
-    let skipReason = undefined;
-    if (userFlags) {
-        const assistantCtx = computeAssistantContext(ctx);
-        if (assistantCtx.deployment) {
-            comment = toGithubComment(assistantCtx);
-        } else {
-            skipReason = 'this branch is not a dev branch.';
-        }
-    } else {
-        skipReason = 'this PR is not part of the test.';
-    }
-
-    if (comment) {
-        const resp = await commentOnPullRequest({
-            org: prEvent.repository.owner.login,
-            repo: prEvent.repository.name,
-            pullRequestNumber: Number(prEvent.pull_request.number),
-            message: comment,
-            commentId: ctx.commentId,
-        });
-        ctx.commentId = resp.commentId;
-    } else {
-        log.info(`Comment is skipped for this pull request: ${skipReason}`, { pull_request_ctx: ctx });
-    }
 
     await condition(() => prEvent.pull_request.state === 'closed' || prEvent.pull_request.merged);
 
     const status = prEvent.pull_request.merged ? 'merged' : 'closed';
     log.info(`Pull request is ${status} (state: ${prEvent.pull_request.state}, merged: ${prEvent.pull_request.merged})`, { pull_request_ctx: ctx });
-    return {};
+    return {
+        status: status,
+        reason: undefined,
+    };
 }
 
 type AssistantContext = {
@@ -220,6 +206,17 @@ function computeAssistantContext(pullRequestCtx: PullRequestContext): AssistantC
     }
 }
 
+function computePullRequestContext(prEvent: any): PullRequestContext {
+    return {
+        org: prEvent.repository.owner.login,
+        repo: prEvent.repository.name,
+        number: Number(prEvent.pull_request.number),
+        branch: prEvent.pull_request.head.ref,
+        diffUrl: prEvent.pull_request.diff_url,
+        commentId: undefined,
+    };
+}
+
 /**
  * Compute the deployment spec based on the git ref. Assumes the Git repository is "vertesia/studio".
  *
@@ -291,10 +288,10 @@ function computeDeploymentSpec(branch: string): DeploymentSpec | undefined {
     return spec;
 }
 
-async function handleCommentEvent(ctx: PullRequestContext, event: any) {
-    log.info('Handling comment event', { event, pull_request_ctx: ctx });
+async function handleCommentEvent(assistantCtx: AssistantContext, event: any) {
+    log.info('Handling comment event', { event, pull_request_ctx: assistantCtx.pullRequest });
     if (event.comment.user.login !== 'vercel[bot]') {
-        log.info(`Skip comment event from user: ${event.comment.user.login}`, { pull_request_ctx: ctx });
+        log.info(`Skip comment event from user: ${event.comment.user.login}`, { pull_request_ctx: assistantCtx.pullRequest });
         return;
     }
 
@@ -302,27 +299,30 @@ async function handleCommentEvent(ctx: PullRequestContext, event: any) {
     if (!url) {
         log.warn('Failed to extract Studio UI URL from comment:', {
             comment: event.comment.body,
-            pull_request_ctx: ctx,
+            pull_request_ctx: assistantCtx.pullRequest,
         });
         return;
     }
     log.info(`Extracted Studio UI URL: ${url}`);
-    const assistantCtx = computeAssistantContext(ctx);
     if (assistantCtx.deployment) {
         assistantCtx.deployment.vercel = {
             studioUiUrl: url,
         }
-        const comment = toGithubComment(assistantCtx);
-        await commentOnPullRequest({
-            org: event.repository.owner.login,
-            repo: event.repository.name,
-            pullRequestNumber: ctx.number,
-            message: comment,
-            commentId: ctx.commentId,
-        });
-    } else {
-        log.warn(`Failed to compute deployment spec from branch: ${ctx.branch}`, { pull_request_ctx: ctx });
     }
+
+    const comment = toGithubComment(assistantCtx);
+    await upsertComment(assistantCtx.pullRequest, comment);
+}
+
+async function upsertComment(ctx: PullRequestContext, comment: string): Promise<number> {
+    const response = await commentOnPullRequest({
+        org: ctx.org,
+        repo: ctx.repo,
+        pullRequestNumber: ctx.number,
+        message: comment,
+        commentId: ctx.commentId,
+    });
+    return response.commentId;
 }
 
 export function extractStudioUiUrl(content: string): string | null {
