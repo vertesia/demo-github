@@ -1,6 +1,7 @@
 const enabledUserIds = [
     'antoine-regnier',
     'mincong-h',
+    'yangchi-tw',
 ];
 
 type isAssistantEnabledOptions = {
