@@ -30,6 +30,9 @@ importers:
       '@temporalio/workflow':
         specifier: 1.11.7
         version: 1.11.7
+      '@vertesia/client':
+        specifier: ^0.50.1
+        version: 0.50.1
       octokit:
         specifier: 4.1.1
         version: 4.1.1
@@ -1089,6 +1092,12 @@ packages:
   '@vercel/static-config@3.0.0':
     resolution: {integrity: sha512-2qtvcBJ1bGY0dYGYh3iM7yGKkk971FujLEDXzuW5wcZsPr1GSEjO/w2iSr3qve6nDDtBImsGoDEnus5FI4+fIw==}
 
+  '@vertesia/api-fetch-client@0.50.1':
+    resolution: {integrity: sha512-X3fUkzbGIwqVjCwXShKzyBFxkzv0KNIW2BICbFi+OqZpZuS0sh0DtdUiXr3t3jzKbLpzv0BsaA37gt4143AFsw==}
+
+  '@vertesia/client@0.50.1':
+    resolution: {integrity: sha512-QG0VHBhJbjYKLsR+XrZa1Lj1rF518NxAQDrE7hZJAnFQQObaWa0yn3F9M6gFX2zZ/+LGIqhj/VS21ITa6ZzI3w==}
+
   '@vertesia/common@0.50.1':
     resolution: {integrity: sha512-yF6YcxS9zBGEYUUYKLHuKMj75E8qFBEu12aZbBJ/7PZ6tFUyFOuKZrYy59fwGRUWhzhWpHb4D5I2BytsVcsV/Q==}
 
@@ -1692,6 +1701,14 @@ packages:
   events@3.3.0:
     resolution: {integrity: sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==}
     engines: {node: '>=0.8.x'}
+
+  eventsource-parser@1.1.2:
+    resolution: {integrity: sha512-v0eOBUbiaFojBu2s2NPBfYUoRR9GjcDNvCXVaqEf5vVfpIAh9f8RCo4vXTP8c63QRKCFwoLpMpTdPwwhEKVgzA==}
+    engines: {node: '>=14.18'}
+
+  eventsource@2.0.2:
+    resolution: {integrity: sha512-IzUmBGPR3+oUG9dUeXynyNmf91/3zUSJg1lCktzKw47OXuhco54U3r9B7O4XX+Rb1Itm9OZ2b0RkTs10bICOxA==}
+    engines: {node: '>=12.0.0'}
 
   expect-type@1.1.0:
     resolution: {integrity: sha512-bFi65yM+xZgk+u/KRIpekdSYkTB5W1pEf0Lt8Q8Msh7b+eQ7LXVtIB1Bkm4fvclDEL1b2CZkMhv2mOeF8tMdkA==}
@@ -4328,6 +4345,17 @@ snapshots:
       json-schema-to-ts: 1.6.4
       ts-morph: 12.0.0
 
+  '@vertesia/api-fetch-client@0.50.1':
+    dependencies:
+      eventsource-parser: 1.1.2
+
+  '@vertesia/client@0.50.1':
+    dependencies:
+      '@llumiverse/core': 0.15.0
+      '@vertesia/api-fetch-client': 0.50.1
+      '@vertesia/common': 0.50.1
+      eventsource: 2.0.2
+
   '@vertesia/common@0.50.1':
     dependencies:
       '@llumiverse/core': 0.15.0
@@ -4926,6 +4954,10 @@ snapshots:
   event-target-shim@5.0.1: {}
 
   events@3.3.0: {}
+
+  eventsource-parser@1.1.2: {}
+
+  eventsource@2.0.2: {}
 
   expect-type@1.1.0: {}
 
