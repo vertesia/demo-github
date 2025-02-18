@@ -75,9 +75,9 @@ export class VertesiaGithubApp {
             owner: owner,
             repo: repo,
             pull_number: pull_number,
-            headers: {
-                accept: "application/vnd.github.v3.diff",
-            }
+            mediaType: {
+                format: "diff",
+            },
         });
     }
 
