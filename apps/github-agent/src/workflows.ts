@@ -7,7 +7,7 @@ import {
     workflowInfo,
 } from "@temporalio/workflow";
 import * as activities from "./activities.js";
-import { isAssistantEnabled } from "./flags.js";
+import { getUserFlags } from "./flags.js";
 
 const {
     helloActivity,
@@ -60,6 +60,10 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
         diffUrl: prEvent.pull_request.diff_url,
         commentId: undefined,
     };
+    const userFlags = getUserFlags({
+        repoFullName: prEvent.repository.full_name,
+        userId: prEvent.pull_request.user.login,
+    });
 
     // Register the signal handler
     setHandler(updatePullRequestSignal, async (data: ReviewPullRequestRequest) => {
@@ -77,11 +81,7 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
 
     let comment = undefined;
     let skipReason = undefined;
-    let isEnabled = isAssistantEnabled({
-        repoFullName: prEvent.repository.full_name,
-        userId: prEvent.pull_request.user.login,
-    });
-    if (isEnabled) {
+    if (userFlags) {
         const assistantCtx = computeAssistantContext(ctx);
         if (assistantCtx.deployment) {
             comment = toGithubComment(assistantCtx);

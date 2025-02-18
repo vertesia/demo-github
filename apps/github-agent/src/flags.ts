@@ -1,16 +1,33 @@
-const enabledUserIds = [
-    'antoine-regnier',
-    'mincong-h',
-    'yangchi-tw',
-];
+type UserFeatures = {
+    isDeploymentSummaryEnabled: boolean;
+    isDiffSummaryEnabled: boolean;
+}
 
-type isAssistantEnabledOptions = {
+const enabledUsers: Record<string, UserFeatures> = {
+    'antoine-regnier': {
+        isDeploymentSummaryEnabled: true,
+        isDiffSummaryEnabled: false,
+    },
+    'mincong-h': {
+        isDeploymentSummaryEnabled: true,
+        isDiffSummaryEnabled: true,
+    },
+    'yangchi-tw': {
+        isDeploymentSummaryEnabled: true,
+        isDiffSummaryEnabled: false,
+    },
+};
+
+type getUserFlagsOptions = {
     repoFullName: string;
     userId: string;
 }
-export function isAssistantEnabled(opts: isAssistantEnabledOptions): boolean {
+export function getUserFlags(opts: getUserFlagsOptions): UserFeatures | undefined {
     if (opts.repoFullName !== 'vertesia/studio') {
-        return false;
+        return undefined;
     }
-    return enabledUserIds.includes(opts.userId);
+    if (!enabledUsers[opts.userId]) {
+        return undefined;
+    }
+    return enabledUsers[opts.userId];
 }
