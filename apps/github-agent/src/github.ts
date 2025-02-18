@@ -43,6 +43,12 @@ export class VertesiaGithubApp {
         });
     }
 
+    async getToken() {
+        return await this.app.octokit.rest.apps.createInstallationAccessToken({
+            installation_id: this.installationId,
+        });
+    }
+
     async createComment(owner: string, repo: string, pull_number: number, body: string) {
         const octokit = await this.getRestClient();
         return await octokit.rest.issues.createComment({
