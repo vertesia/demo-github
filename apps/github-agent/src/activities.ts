@@ -78,9 +78,9 @@ export async function generatePullRequestSummary(request: GeneratePullRequestSum
     );
 
     let summary = execResp.result
-    if (summary.length > 100) {
+    if (summary.length > 5000) {
         log.warn("Summary is too long, truncating", { length: summary.length });
-        summary = summary.substring(0, 1000) + "...";
+        summary = summary.substring(0, 5000) + "...";
     }
     return {
         summary: diff,
