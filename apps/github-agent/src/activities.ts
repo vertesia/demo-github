@@ -72,7 +72,7 @@ export async function generatePullRequestSummary(request: GeneratePullRequestSum
         'SummarizeCodeDiff',
         {
             data: {
-                diff: diff,
+                code_diff: diff,
             }
         },
     );
