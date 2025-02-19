@@ -368,6 +368,11 @@ async function handleCommentEvent(ctx: AssistantContext, commentEvent: any) {
         await upsertVertesiaComment(ctx, commentEvent);
         return;
     }
+    const body = commentEvent.comment.body as string;
+    if (!commentEvent.comment.user.login.startsWith('vertesia') && body.toLowerCase().includes('vertesia, please review')) {
+        await startCodeReview(ctx, commentEvent);
+        return;
+    }
 
     log.info(`Skip comment event from user: ${commentEvent.comment.user.login}`, { pull_request_ctx: ctx });
     return;
@@ -416,4 +421,9 @@ export function extractStudioUiUrl(content: string): string | null {
         }
     }
     return null;
+}
+
+export async function startCodeReview(ctx: AssistantContext, commentEvent: any) {
+    // TODO
+    return;
 }
