@@ -19,7 +19,7 @@ const {
     retry: {
         initialInterval: '5s',
         backoffCoefficient: 2,
-        maximumAttempts: 5,
+        maximumAttempts: 3,
         maximumInterval: 100 * 30 * 1000, //ms
         nonRetryableErrorTypes: [],
     },
@@ -213,11 +213,11 @@ ${specJson}
 
 function computeAssistantContext(prEvent: any): AssistantContext {
     const pullRequest = computePullRequestContext(prEvent);
-    // fixme
-    const deployment = computeDeploymentSpec(prEvent.pull_request.head.ref);
+    const repo = getRepoFeatures(pullRequest.org, pullRequest.repo);
     const info = workflowInfo();
-    return {
-        deployment: deployment!,
+
+    const ctx: AssistantContext = {
+        deployment: undefined,
         execution: {
             namespace: info.namespace,
             service: 'vertesia_github-agent',
@@ -228,6 +228,12 @@ function computeAssistantContext(prEvent: any): AssistantContext {
         },
         pullRequest: pullRequest,
     }
+
+    if (repo.supportDeploymentSummary) {
+        ctx.deployment = computeDeploymentSpec(prEvent.pull_request.head.ref);
+    }
+
+    return ctx;
 }
 
 function computePullRequestContext(prEvent: any): PullRequestContext {
