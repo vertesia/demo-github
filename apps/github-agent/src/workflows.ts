@@ -68,13 +68,6 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
     }
 
     const ctx = computeAssistantContext(prEvent);
-    if (!ctx.deployment) {
-        return {
-            status: 'skipped',
-            reason: 'This branch is not a dev branch.',
-        }
-    }
-
     await handlePullRequestEvent(ctx, prEvent, userFlags);
 
     // Register the signal handler
