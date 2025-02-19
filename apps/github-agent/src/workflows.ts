@@ -61,10 +61,19 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
         userId: prEvent.pull_request.user.login,
     });
     if (!userFlags) {
-        log.info(`Skip the pull request from user: ${prEvent.pull_request.user.login}`);
+        log.info(`Skip the pull request for user: ${prEvent.pull_request.user.login}`);
         return {
             status: 'skipped',
             reason: 'Code review is disabled for this PR.',
+        };
+    }
+    if (prEvent.pull_request.base.ref === 'preview') {
+        // We don't support code review for the preview branch because it has too many changes.
+        // Also, the commits have been reviewed.
+        log.info(`Skip the pull request for branch: ${prEvent.pull_request.base.ref}`);
+        return {
+            status: 'skipped',
+            reason: 'Code review is not available for the preview branch.',
         };
     }
 
