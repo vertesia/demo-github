@@ -17,7 +17,6 @@ async function getVertesiaGithubAppKey() {
     return await vault.getSecret('github-vertesia-agent-code-review-v2');
 }
 
-
 export class VertesiaGithubApp {
     constructor(public app: OctoApp, public installation: Endpoints["GET /orgs/{org}/installation"]["response"]["data"]) {
     }

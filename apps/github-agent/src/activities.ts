@@ -2,6 +2,7 @@ import { createSecretProvider, SupportedCloudEnvironments } from '@dglabs/cloud'
 import { log } from "@temporalio/activity";
 import { VertesiaClient } from "@vertesia/client";
 import { VertesiaGithubApp } from "./github.js";
+import { getRepoFeatures } from './repos.js';
 
 export async function helloActivity() {
     log.info("Hello, World!");
@@ -73,6 +74,7 @@ export async function generatePullRequestSummary(request: GeneratePullRequestSum
         {
             data: {
                 code_diff: diff,
+                code_structure: getRepoFeatures(request.owner, request.repo).codeStructure,
             }
         },
     );

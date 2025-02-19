@@ -8,6 +8,7 @@ import {
 } from "@temporalio/workflow";
 import * as activities from "./activities.js";
 import { getUserFlags, UserFeatures } from "./flags.js";
+import { getRepoFeatures } from "./repos.js";
 
 const {
     commentOnPullRequest,
@@ -18,7 +19,7 @@ const {
     retry: {
         initialInterval: '5s',
         backoffCoefficient: 2,
-        maximumAttempts: 5,
+        maximumAttempts: 3,
         maximumInterval: 100 * 30 * 1000, //ms
         nonRetryableErrorTypes: [],
     },
@@ -60,22 +61,23 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
         userId: prEvent.pull_request.user.login,
     });
     if (!userFlags) {
-        log.info(`Skip the pull request from user: ${prEvent.pull_request.user.login}`);
+        log.info(`Skip the pull request for user: ${prEvent.pull_request.user.login}`);
         return {
             status: 'skipped',
             reason: 'Code review is disabled for this PR.',
         };
     }
-
-    const prCtx = computePullRequestContext(prEvent);
-    const ctx = computeAssistantContext(prCtx);
-    if (!ctx.deployment) {
+    if (prEvent.pull_request.base.ref === 'preview') {
+        // We don't support code review for the preview branch because it has too many changes.
+        // Also, the commits have been reviewed.
+        log.info(`Skip the pull request for branch: ${prEvent.pull_request.base.ref}`);
         return {
             status: 'skipped',
-            reason: 'This branch is not a dev branch.',
-        }
+            reason: 'Code review is not available for the preview branch.',
+        };
     }
 
+    const ctx = computeAssistantContext(prEvent);
     await handlePullRequestEvent(ctx, prEvent, userFlags);
 
     // Register the signal handler
@@ -174,39 +176,57 @@ type TemporalExecution = {
 }
 
 function toGithubComment(ctx: AssistantContext): string {
-    // We assume that the deployment spec is always defined for dev branches.
-    const spec = ctx.deployment!;
+    const repo = getRepoFeatures(ctx.pullRequest.org, ctx.pullRequest.repo);
 
-    const envCode = '`' + spec.environment + '`';
-    const deployedClouds = spec.aws ? "GCP and AWS" : "GCP";
-    const contextJson = '```json\n' + JSON.stringify(ctx, null, 2) + '\n```';
-    let vercel = '';
-    if (spec.vercel) {
-        vercel = ` The Studio UI is available at <${spec.vercel.studioUiUrl}>.`;
+    // Use headers to distinguish different sections
+    const includeHeader = repo.supportMultipleFeatures;
+
+    let comment = '';
+    if (repo.supportDiffSummary) {
+        comment += toGithubCommentDiffSummary(ctx.summary, includeHeader);
     }
+    if (repo.supportDeploymentSummary) {
+        comment += '\n\n';
+        comment += toGithubCommentDeployment(ctx.deployment, includeHeader);
+    }
+    return comment.trim();
+}
 
-    const summarySection = ctx.summary ? `## Summary\n\n${ctx.summary}` : '';
+function toGithubCommentDiffSummary(summary: string | undefined, includeHeader: boolean): string {
+    const optionalHeader = includeHeader ? '## Summary\n\n' : '';
+    const content = summary ? summary : '_Summary is not available yet._';
+    return `${optionalHeader}${content}`;
+}
 
-    const deploymentSection = `## Deployment
+function toGithubCommentDeployment(spec: DeploymentSpec | undefined, includeHeader: boolean): string {
+    const optionalHeader = includeHeader ? '## Deployment\n\n' : '';
+    if (spec) {
+        const envCode = '`' + spec.environment + '`';
+        const deployedClouds = spec.aws ? "GCP and AWS" : "GCP";
+        const specJson = '```json\n' + JSON.stringify(spec, null, 2) + '\n```';
+        let optionalVercel = '';
+        if (spec.vercel) {
+            optionalVercel = ` The Studio UI is available at <${spec.vercel.studioUiUrl}>.`;
+        }
 
-Your dev environment ${envCode} will be deployed to ${deployedClouds}.${vercel}
+        return `${optionalHeader}Your dev environment ${envCode} will be deployed to ${deployedClouds}.${optionalVercel}
 
 <details><summary><b>Click here</b> to learn more about your environment.</summary>
 
-${contextJson}
-</details>
-`;
-
-    return `\
-${summarySection}
-${deploymentSection}`;
+${specJson}
+</details>`;
+    } else {
+        return `${optionalHeader}Your pull request does not contain a dev environment. To enable a dev environment, please create a branch with the prefix "demo-", or contains keyword "feat" or "fix".`;
+    }
 }
 
-function computeAssistantContext(pullRequestCtx: PullRequestContext): AssistantContext {
-    const deployment = computeDeploymentSpec(pullRequestCtx.branch);
+function computeAssistantContext(prEvent: any): AssistantContext {
+    const pullRequest = computePullRequestContext(prEvent);
+    const repo = getRepoFeatures(pullRequest.org, pullRequest.repo);
     const info = workflowInfo();
-    return {
-        deployment: deployment!,
+
+    const ctx: AssistantContext = {
+        deployment: undefined,
         execution: {
             namespace: info.namespace,
             service: 'vertesia_github-agent',
@@ -215,8 +235,14 @@ function computeAssistantContext(pullRequestCtx: PullRequestContext): AssistantC
             workflowType: info.workflowType,
             runId: info.runId,
         },
-        pullRequest: pullRequestCtx,
+        pullRequest: pullRequest,
     }
+
+    if (repo.supportDeploymentSummary) {
+        ctx.deployment = computeDeploymentSpec(prEvent.pull_request.head.ref);
+    }
+
+    return ctx;
 }
 
 function computePullRequestContext(prEvent: any): PullRequestContext {
@@ -242,11 +268,11 @@ function computeDeploymentSpec(branch: string): DeploymentSpec | undefined {
         return {
             environment: env,
             gcp: {
-                cloudRunStudioServerName: `studio-server-${env}`,
-                cloudRunZenoServerName: `zeno-server-${env}`,
+                cloudRunStudioServerName: `studio-server-${env} `,
+                cloudRunZenoServerName: `zeno-server-${env} `,
                 kubeClusterName: 'composable-workers',
                 kubeNamespace: 'default',
-                kubeDeployment: `${env}-workers`,
+                kubeDeployment: `${env} -workers`,
                 studioApiBaseUrl: `https://studio-server-${env}.api.vertesia.io`,
                 zenoApiBaseUrl: `https://zeno-server-${env}.api.vertesia.io`,
             },
