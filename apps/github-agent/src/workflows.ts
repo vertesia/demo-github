@@ -364,15 +364,20 @@ async function handlePullRequestEvent(ctx: AssistantContext, prEvent: any, userF
 
 async function handleCommentEvent(ctx: AssistantContext, commentEvent: any) {
     log.info('Handling comment event', { event: commentEvent, pull_request_ctx: ctx });
-    if (commentEvent.comment.user.login !== 'vercel[bot]') {
-        log.info(`Skip comment event from user: ${commentEvent.comment.user.login}`, { pull_request_ctx: ctx });
+    if (commentEvent.comment.user.login === 'vercel[bot]') {
+        await upsertVertesiaComment(ctx, commentEvent);
         return;
     }
 
-    const url = extractStudioUiUrl(commentEvent.comment.body);
+    log.info(`Skip comment event from user: ${commentEvent.comment.user.login}`, { pull_request_ctx: ctx });
+    return;
+}
+
+async function upsertVertesiaComment(ctx: AssistantContext, vercelCommentEvent: any) {
+    const url = extractStudioUiUrl(vercelCommentEvent.comment.body);
     if (!url) {
         log.warn('Failed to extract Studio UI URL from comment:', {
-            comment: commentEvent.comment.body,
+            comment: vercelCommentEvent.comment.body,
             pull_request_ctx: ctx,
         });
         return;
