@@ -69,6 +69,11 @@ export class VertesiaGithubApp {
         });
     }
 
+    /**
+     * Get a raw diff of a pull request.
+     *
+     * @see https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#get-a-pull-request
+     */
     async getPullRequestDiff(owner: string, repo: string, pull_number: number) {
         const octokit = await this.getRestClient();
         return await octokit.rest.pulls.get({
