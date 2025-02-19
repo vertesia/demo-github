@@ -8,7 +8,7 @@ import {
 } from "@temporalio/workflow";
 import * as activities from "./activities.js";
 import { getUserFlags, UserFeatures } from "./flags.js";
-import { getRepoFeatures } from "./repos.js";
+import { getRepoFeatures, supportCodeReview } from "./repos.js";
 
 const {
     commentOnPullRequest,
@@ -55,6 +55,14 @@ export type ReviewPullRequestResponse = {
 export async function reviewPullRequest(request: ReviewPullRequestRequest): Promise<ReviewPullRequestResponse> {
     log.info("Entering reviewPullRequest workflow", { request });
     let prEvent = request.githubEvent;
+
+    if (!supportCodeReview(prEvent.repository.owner.login, prEvent.repository.name)) {
+        log.info(`Skip the pull request for repo: ${prEvent.repository.full_name}`);
+        return {
+            status: 'skipped',
+            reason: 'Code review is disabled for this repo.',
+        };
+    }
 
     const userFlags = getUserFlags({
         repoFullName: prEvent.repository.full_name,

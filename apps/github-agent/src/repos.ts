@@ -20,25 +20,7 @@ The Git repository is a pnpm workspace, organized in the following ways:
 `;
 
 const repoFeatures: Record<string, RepoSpec> = {
-    'vertesia/composableai': {
-        supportMultipleFeatures: false,
-        supportDeploymentSummary: false,
-        supportDiffSummary: true,
-        codeStructure: undefined,
-    },
     'vertesia/demo-github': {
-        supportMultipleFeatures: false,
-        supportDeploymentSummary: false,
-        supportDiffSummary: true,
-        codeStructure: undefined,
-    },
-    'vertesia/llumiverse': {
-        supportMultipleFeatures: false,
-        supportDeploymentSummary: false,
-        supportDiffSummary: true,
-        codeStructure: undefined,
-    },
-    'vertesia/memory': {
         supportMultipleFeatures: false,
         supportDeploymentSummary: false,
         supportDiffSummary: true,
@@ -63,4 +45,8 @@ export function getRepoFeatures(owner: string, repo: string): RepoSpec {
         };
     }
     return repoFeatures[fullName];
+}
+
+export function supportCodeReview(owner: string, repo: string): boolean {
+    return repoFeatures[`${owner}/${repo}`] !== undefined;
 }

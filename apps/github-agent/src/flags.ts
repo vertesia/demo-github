@@ -23,9 +23,6 @@ type getUserFlagsOptions = {
     userId: string;
 }
 export function getUserFlags(opts: getUserFlagsOptions): UserFeatures | undefined {
-    if (opts.repoFullName !== 'vertesia/studio') {
-        return undefined;
-    }
     if (!enabledUsers[opts.userId]) {
         return undefined;
     }
