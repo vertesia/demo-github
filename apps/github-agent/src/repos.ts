@@ -36,6 +36,7 @@ export function getRepoFeatures(owner: string, repo: string): RepoFeatures {
     const fullName = `${owner}/${repo}`;
     if (!repoFeatures[fullName]) {
         return {
+            supportMultipleFeatures: false,
             supportDeploymentSummary: false,
             supportDiffSummary: false,
         };
