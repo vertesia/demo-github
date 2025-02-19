@@ -259,8 +259,8 @@ function computeDeploymentSpec(branch: string): DeploymentSpec | undefined {
         return {
             environment: env,
             gcp: {
-                cloudRunStudioServerName: `studio - server - ${env} `,
-                cloudRunZenoServerName: `zeno - server - ${env} `,
+                cloudRunStudioServerName: `studio-server-${env} `,
+                cloudRunZenoServerName: `zeno-server-${env} `,
                 kubeClusterName: 'composable-workers',
                 kubeNamespace: 'default',
                 kubeDeployment: `${env} -workers`,
