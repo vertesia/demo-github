@@ -90,6 +90,27 @@ export async function generatePullRequestSummary(request: GeneratePullRequestSum
     };
 }
 
+export type ListFilesInPullRequestRequest = {
+    owner: string,
+    repo: string,
+    pullRequestNumber: number,
+}
+export type ListFilesInPullRequestResponse = {
+    fileCount: number,
+    files: string[],
+}
+export async function listFilesInPullRequest(request: ListFilesInPullRequestRequest): Promise<ListFilesInPullRequestResponse> {
+    const app = await VertesiaGithubApp.getInstance();
+    const filesResp = await app.listPullRequestFiles(request.owner, request.repo, request.pullRequestNumber);
+    let files: string[] = filesResp.data.map((f: any) => f.filename as string);
+    log.info(`Got ${files.length} files for pull request ${request.owner}/${request.repo}/${request.pullRequestNumber}`, { files: filesResp.data });
+
+    return {
+        fileCount: files.length,
+        files: files,
+    }
+}
+
 async function getVertesiaApiKey() {
     const vault = createSecretProvider(process.env.CLOUD as SupportedCloudEnvironments ?? SupportedCloudEnvironments.gcp)
     return await vault.getSecret('release-notes-api-key');
