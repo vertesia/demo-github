@@ -8,7 +8,7 @@ import {
 } from "@temporalio/workflow";
 import * as activities from "./activities.js";
 import { getUserFlags, UserFeatures } from "./flags.js";
-import { getRepoFeatures, supportCodeReview } from "./repos.js";
+import { getRepoFeatures, isAgentEnabled } from "./repos.js";
 
 const {
     commentOnPullRequest,
@@ -56,11 +56,11 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
     log.info("Entering reviewPullRequest workflow", { request });
     let prEvent = request.githubEvent;
 
-    if (!supportCodeReview(prEvent.repository.owner.login, prEvent.repository.name)) {
+    if (!isAgentEnabled(prEvent.repository.owner.login, prEvent.repository.name)) {
         log.info(`Skip the pull request for repo: ${prEvent.repository.full_name}`);
         return {
             status: 'skipped',
-            reason: 'Code review is disabled for this repo.',
+            reason: 'Agent is disabled for this repo.',
         };
     }
 
@@ -72,7 +72,7 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
         log.info(`Skip the pull request for user: ${prEvent.pull_request.user.login}`);
         return {
             status: 'skipped',
-            reason: 'Code review is disabled for this PR.',
+            reason: 'Agent is disabled for this PR.',
         };
     }
     if (prEvent.pull_request.base.ref === 'preview') {
