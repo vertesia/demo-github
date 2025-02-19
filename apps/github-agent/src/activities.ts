@@ -76,14 +76,15 @@ export async function generatePullRequestSummary(request: GeneratePullRequestSum
             }
         },
     );
+    log.info("Got summary from Vertesia", { respose: execResp });
 
-    let summary = execResp.result
+    let summary = execResp.result;
     if (summary.length > 5000) {
         log.warn("Summary is too long, truncating", { length: summary.length });
         summary = summary.substring(0, 5000) + "...";
     }
     return {
-        summary: diff,
+        summary: summary,
     };
 }
 
