@@ -13,6 +13,7 @@ import { getRepoFeatures, isAgentEnabled } from "./repos.js";
 const {
     commentOnPullRequest,
     generatePullRequestSummary,
+    listFilesInPullRequest,
     helloActivity,
 } = proxyActivities<typeof activities>({
     startToCloseTimeout: "5 minute",
@@ -370,7 +371,7 @@ async function handleCommentEvent(ctx: AssistantContext, commentEvent: any) {
     }
     const body = commentEvent.comment.body as string;
     if (!commentEvent.comment.user.login.startsWith('vertesia') && body.toLowerCase().includes('vertesia, please review')) {
-        await startCodeReview(ctx, commentEvent);
+        await startCodeReview(ctx);
         return;
     }
 
@@ -423,7 +424,10 @@ export function extractStudioUiUrl(content: string): string | null {
     return null;
 }
 
-export async function startCodeReview(ctx: AssistantContext, commentEvent: any) {
-    // TODO
-    return;
+export async function startCodeReview(ctx: AssistantContext) {
+    await listFilesInPullRequest({
+        org: ctx.pullRequest.org,
+        repo: ctx.pullRequest.repo,
+        pullRequestNumber: ctx.pullRequest.number,
+    });
 }

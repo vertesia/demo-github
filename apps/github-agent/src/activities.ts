@@ -91,7 +91,7 @@ export async function generatePullRequestSummary(request: GeneratePullRequestSum
 }
 
 export type ListFilesInPullRequestRequest = {
-    owner: string,
+    org: string,
     repo: string,
     pullRequestNumber: number,
 }
@@ -101,9 +101,9 @@ export type ListFilesInPullRequestResponse = {
 }
 export async function listFilesInPullRequest(request: ListFilesInPullRequestRequest): Promise<ListFilesInPullRequestResponse> {
     const app = await VertesiaGithubApp.getInstance();
-    const filesResp = await app.listPullRequestFiles(request.owner, request.repo, request.pullRequestNumber);
+    const filesResp = await app.listPullRequestFiles(request.org, request.repo, request.pullRequestNumber);
     let files: string[] = filesResp.data.map((f: any) => f.filename as string);
-    log.info(`Got ${files.length} files for pull request ${request.owner}/${request.repo}/${request.pullRequestNumber}`, { files: filesResp.data });
+    log.info(`Got ${files.length} files for pull request ${request.org}/${request.repo}/${request.pullRequestNumber}`, { files: filesResp.data });
 
     return {
         fileCount: files.length,
