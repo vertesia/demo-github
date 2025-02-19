@@ -185,15 +185,21 @@ function toGithubComment(ctx: AssistantContext): string {
         vercel = ` The Studio UI is available at <${spec.vercel.studioUiUrl}>.`;
     }
 
-    const summary = ctx.summary ? `\n\n${ctx.summary}\n\n` : '';
+    const summarySection = ctx.summary ? `## Summary\n\n${ctx.summary}` : '';
 
-    return `Your dev environment ${envCode} will be deployed to ${deployedClouds}.${vercel}
-${summary}
+    const devenvSection = `## Development Envionment
+
+Your dev environment ${envCode} will be deployed to ${deployedClouds}.${vercel}
+
 <details><summary><b>Click here</b> to learn more about your environment.</summary>
 
 ${contextJson}
 </details>
 `;
+
+    return `\
+${summarySection}
+${devenvSection}`;
 }
 
 function computeAssistantContext(pullRequestCtx: PullRequestContext): AssistantContext {
