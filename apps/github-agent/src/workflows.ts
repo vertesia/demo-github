@@ -8,6 +8,7 @@ import {
 } from "@temporalio/workflow";
 import * as activities from "./activities.js";
 import { getUserFlags, UserFeatures } from "./flags.js";
+import { getRepoFeatures } from "./repos.js";
 
 const {
     commentOnPullRequest,
@@ -166,36 +167,53 @@ type TemporalExecution = {
 }
 
 function toGithubComment(ctx: AssistantContext): string {
-    // We assume that the deployment spec is always defined for dev branches.
-    const spec = ctx.deployment!;
+    const repo = getRepoFeatures(ctx.pullRequest.org, ctx.pullRequest.repo);
 
-    const envCode = '`' + spec.environment + '`';
-    const deployedClouds = spec.aws ? "GCP and AWS" : "GCP";
-    const contextJson = '```json\n' + JSON.stringify(ctx, null, 2) + '\n```';
-    let vercel = '';
-    if (spec.vercel) {
-        vercel = ` The Studio UI is available at <${spec.vercel.studioUiUrl}>.`;
+    // Use headers to distinguish different sections
+    const includeHeader = repo.supportMultipleFeatures;
+
+    let comment = '';
+    if (repo.supportDiffSummary) {
+        comment += toGithubCommentDiffSummary(ctx.summary, includeHeader);
     }
+    if (repo.supportDeploymentSummary) {
+        comment += '\n\n';
+        comment += toGithubCommentDeployment(ctx.deployment, includeHeader);
+    }
+    return comment.trim();
+}
 
-    const summarySection = ctx.summary ? `## Summary\n\n${ctx.summary}` : '';
+function toGithubCommentDiffSummary(summary: string | undefined, includeHeader: boolean): string {
+    const optionalHeader = includeHeader ? '## Summary\n\n' : '';
+    const content = summary ? summary : '_Summary is not available yet._';
+    return `${optionalHeader}${content}`;
+}
 
-    const deploymentSection = `## Deployment
+function toGithubCommentDeployment(spec: DeploymentSpec | undefined, includeHeader: boolean): string {
+    const optionalHeader = includeHeader ? '## Deployment\n\n' : '';
+    if (spec) {
+        const envCode = '`' + spec.environment + '`';
+        const deployedClouds = spec.aws ? "GCP and AWS" : "GCP";
+        const specJson = '```json\n' + JSON.stringify(spec, null, 2) + '\n```';
+        let optionalVercel = '';
+        if (spec.vercel) {
+            optionalVercel = ` The Studio UI is available at <${spec.vercel.studioUiUrl}>.`;
+        }
 
-Your dev environment ${envCode} will be deployed to ${deployedClouds}.${vercel}
+        return `${optionalHeader}Your dev environment ${envCode} will be deployed to ${deployedClouds}.${optionalVercel}
 
 <details><summary><b>Click here</b> to learn more about your environment.</summary>
 
-${contextJson}
-</details>
-`;
-
-    return `\
-${summarySection}
-${deploymentSection}`;
+${specJson}
+</details>`;
+    } else {
+        return `${optionalHeader}Your pull request does not contain a dev environment. To enable a dev environment, please create a branch with the prefix "demo-", or contains keyword "feat" or "fix".`;
+    }
 }
 
 function computeAssistantContext(prEvent: any): AssistantContext {
     const pullRequest = computePullRequestContext(prEvent);
+    // fixme
     const deployment = computeDeploymentSpec(prEvent.pull_request.head.ref);
     const info = workflowInfo();
     return {
@@ -235,11 +253,11 @@ function computeDeploymentSpec(branch: string): DeploymentSpec | undefined {
         return {
             environment: env,
             gcp: {
-                cloudRunStudioServerName: `studio-server-${env}`,
-                cloudRunZenoServerName: `zeno-server-${env}`,
+                cloudRunStudioServerName: `studio - server - ${env} `,
+                cloudRunZenoServerName: `zeno - server - ${env} `,
                 kubeClusterName: 'composable-workers',
                 kubeNamespace: 'default',
-                kubeDeployment: `${env}-workers`,
+                kubeDeployment: `${env} -workers`,
                 studioApiBaseUrl: `https://studio-server-${env}.api.vertesia.io`,
                 zenoApiBaseUrl: `https://zeno-server-${env}.api.vertesia.io`,
             },
