@@ -67,8 +67,7 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
         };
     }
 
-    const prCtx = computePullRequestContext(prEvent);
-    const ctx = computeAssistantContext(prCtx);
+    const ctx = computeAssistantContext(prEvent);
     if (!ctx.deployment) {
         return {
             status: 'skipped',
@@ -202,8 +201,9 @@ ${summarySection}
 ${deploymentSection}`;
 }
 
-function computeAssistantContext(pullRequestCtx: PullRequestContext): AssistantContext {
-    const deployment = computeDeploymentSpec(pullRequestCtx.branch);
+function computeAssistantContext(prEvent: any): AssistantContext {
+    const pullRequest = computePullRequestContext(prEvent);
+    const deployment = computeDeploymentSpec(prEvent.pull_request.head.ref);
     const info = workflowInfo();
     return {
         deployment: deployment!,
@@ -215,7 +215,7 @@ function computeAssistantContext(pullRequestCtx: PullRequestContext): AssistantC
             workflowType: info.workflowType,
             runId: info.runId,
         },
-        pullRequest: pullRequestCtx,
+        pullRequest: pullRequest,
     }
 }
 
