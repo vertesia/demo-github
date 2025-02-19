@@ -43,6 +43,7 @@ System_Boundary(sys_composable, "Vertesia") {
         Container(vertesia_github_server, "GitHub Server", "Typescript", "Webhook for GitHub, powered by Vercel Functions.")
     }
     Container(vertesia_github_agent, "GitHub Agent", "Typescript", "Temporal worker for GitHub.")
+    Container(vertesia_studio_server, "Studio Server", "Typescript", "Interactions with LLMs.")
 }
 
 System_Boundary(sys_temporal, "https://cloud.temploral.io") {
@@ -58,7 +59,10 @@ sys_github -[hidden]l-> vertesia_users
 
 ' Backend
 vertesia_github_server -[hidden]r-> vertesia_github_agent
-vertesia_github_server <-d-> temporal_server
-vertesia_github_agent <-d-> temporal_server
-vertesia_github_agent -u-> sys_github: provides\ninformation
+vertesia_github_server -d-> temporal_server: start workflow,\nsignal workflow
+vertesia_github_agent <-d- temporal_server: pull workflow tasks
+vertesia_github_agent -r-> vertesia_studio_server: provides\ninformation
+vertesia_studio_server -l-> vertesia_github_agent: returns\nsummary\nand analysis
+vertesia_github_agent -u-> sys_github: provides assistance\n(summary, deployment,\nand code review)
+sys_github -d-> vertesia_github_agent: provides additional\ninformation
 @enduml
