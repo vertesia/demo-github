@@ -187,7 +187,7 @@ function toGithubComment(ctx: AssistantContext): string {
 
     const summarySection = ctx.summary ? `## Summary\n\n${ctx.summary}` : '';
 
-    const devenvSection = `## Development Envionment
+    const deploymentSection = `## Deployment
 
 Your dev environment ${envCode} will be deployed to ${deployedClouds}.${vercel}
 
@@ -199,7 +199,7 @@ ${contextJson}
 
     return `\
 ${summarySection}
-${devenvSection}`;
+${deploymentSection}`;
 }
 
 function computeAssistantContext(pullRequestCtx: PullRequestContext): AssistantContext {

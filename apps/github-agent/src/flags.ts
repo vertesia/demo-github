@@ -6,7 +6,7 @@ export type UserFeatures = {
 const enabledUsers: Record<string, UserFeatures> = {
     'antoine-regnier': {
         isDeploymentSummaryEnabled: true,
-        isDiffSummaryEnabled: false,
+        isDiffSummaryEnabled: true,
     },
     'mincong-h': {
         isDeploymentSummaryEnabled: true,
@@ -14,7 +14,7 @@ const enabledUsers: Record<string, UserFeatures> = {
     },
     'yangchi-tw': {
         isDeploymentSummaryEnabled: true,
-        isDiffSummaryEnabled: false,
+        isDiffSummaryEnabled: true,
     },
 };
 
