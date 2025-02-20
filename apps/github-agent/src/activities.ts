@@ -95,16 +95,30 @@ export type ListFilesInPullRequestRequest = {
     repo: string,
     pullRequestNumber: number,
 }
+export type ListFilesInPullRequestResponseFile = {
+    filename: string,
+    patch: string,
+    status: string,
+    additions: number,
+    deletions: number,
+    changes: number,
+}
 export type ListFilesInPullRequestResponse = {
     fileCount: number,
-    files: string[],
+    files: ListFilesInPullRequestResponseFile[],
 }
 export async function listFilesInPullRequest(request: ListFilesInPullRequestRequest): Promise<ListFilesInPullRequestResponse> {
     const app = await VertesiaGithubApp.getInstance();
     const filesResp = await app.listPullRequestFiles(request.org, request.repo, request.pullRequestNumber);
-    let files: string[] = filesResp.data.map((f: any) => {
-        // TODO Can we retrieve patch?
-        return f.filename as string;
+    let files: ListFilesInPullRequestResponseFile[] = filesResp.data.map((f: any) => {
+        return {
+            filename: f.filename,
+            patch: f.patch,
+            status: f.status,
+            additions: f.additions,
+            deletions: f.deletions,
+            changes: f.changes,
+        };
     });
     log.info(`Got ${files.length} files for pull request ${request.org}/${request.repo}/${request.pullRequestNumber}`, { files: filesResp.data });
 

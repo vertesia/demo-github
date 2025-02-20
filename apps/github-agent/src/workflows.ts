@@ -448,12 +448,15 @@ export async function startCodeReview(ctx: AssistantContext) {
     });
     resp.files.forEach((file) => {
         log.info(`Reviewing file: ${file}`);
+        if (file.status === 'removed') {
+            return;
+        }
         reviewPatch({
             org: ctx.pullRequest.org,
             repo: ctx.pullRequest.repo,
             pullRequestNumber: ctx.pullRequest.number,
-            filename: file,
-            patch: 'This is a test patch.',
+            filename: file.filename,
+            patch: file.patch,
             commit: ctx.pullRequest.commitSha!,
         })
     });
