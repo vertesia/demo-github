@@ -396,18 +396,21 @@ async function handleCommentEvent(ctx: AssistantContext, commentEvent: any) {
 }
 
 async function upsertVertesiaComment(ctx: AssistantContext, vercelCommentEvent: any) {
-    const url = extractStudioUiUrl(vercelCommentEvent.comment.body);
-    if (!url) {
-        log.warn('Failed to extract Studio UI URL from comment:', {
-            comment: vercelCommentEvent.comment.body,
-            pull_request_ctx: ctx,
-        });
-        return;
-    }
-    log.info(`Extracted Studio UI URL: ${url}`);
-    if (ctx.deployment) {
-        ctx.deployment.vercel = {
-            studioUiUrl: url,
+    const repo = getRepoFeatures(ctx.pullRequest.org, ctx.pullRequest.repo);
+    if (repo.supportDeploymentSummary) {
+        const url = extractStudioUiUrl(vercelCommentEvent.comment.body);
+        if (!url) {
+            log.warn('Failed to extract Studio UI URL from comment:', {
+                comment: vercelCommentEvent.comment.body,
+                pull_request_ctx: ctx,
+            });
+            return;
+        }
+        log.info(`Extracted Studio UI URL: ${url}`);
+        if (ctx.deployment) {
+            ctx.deployment.vercel = {
+                studioUiUrl: url,
+            }
         }
     }
 
