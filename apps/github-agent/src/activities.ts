@@ -111,6 +111,43 @@ export async function listFilesInPullRequest(request: ListFilesInPullRequestRequ
     }
 }
 
+export type ReviewPatchRequest = {
+    org: string,
+    repo: string,
+    pullRequestNumber: number,
+    filename: string,
+    patch: string,
+    commit: string,
+}
+export type ReviewPatchResponse = {
+    status: string,
+    reason: string,
+}
+export async function reviewPatch(request: ReviewPatchRequest): Promise<ReviewPatchResponse> {
+    // note: this is a test for understanding the GitHu API
+    if (request.filename !== "docs/test.md") {
+        return {
+            status: "skipped",
+            reason: "Unsupported file",
+        };
+    }
+    const app = await VertesiaGithubApp.getInstance();
+    const octokit = await app.getRestClient();
+    await octokit.rest.pulls.createReviewComment({
+        owner: request.org,
+        repo: request.repo,
+        pull_number: request.pullRequestNumber,
+        body: "This is a test review comment.",
+        path: request.filename,
+        line: 1,
+        commit_id: request.commit,
+    });
+    return {
+        status: "success",
+        reason: "Comment created",
+    };
+}
+
 async function getVertesiaApiKey() {
     const vault = createSecretProvider(process.env.CLOUD as SupportedCloudEnvironments ?? SupportedCloudEnvironments.gcp)
     return await vault.getSecret('release-notes-api-key');
