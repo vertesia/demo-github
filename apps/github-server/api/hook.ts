@@ -5,6 +5,7 @@ import * as dns from 'dns';
 
 const GITHUB_SECRET = process.env.GITHUB_SECRET || '';
 const supportedRepoUrls = [
+  'https://github.com/vertesia/composableai',
   'https://github.com/vertesia/demo-github',
   'https://github.com/vertesia/studio',
 ];
