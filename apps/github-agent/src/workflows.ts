@@ -380,11 +380,16 @@ async function handlePullRequestEvent(ctx: AssistantContext, prEvent: any, userF
 }
 
 async function handleCommentEvent(ctx: AssistantContext, commentEvent: any) {
-    log.info('Handling comment event', { event: commentEvent, pull_request_ctx: ctx });
+    log.info(`Handling comment event from ${commentEvent.comment.user.login}`, {
+        event: commentEvent,
+        pull_request_ctx: ctx,
+    });
+
     if (commentEvent.comment.user.login === 'vercel[bot]') {
         await upsertVertesiaComment(ctx, commentEvent);
         return;
     }
+
     const body = commentEvent.comment.body as string;
     if (!commentEvent.comment.user.login.startsWith('vertesia') && body.toLowerCase().includes('vertesia, please review')) {
         await startCodeReview(ctx);
