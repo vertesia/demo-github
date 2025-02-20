@@ -11,9 +11,13 @@ import { getUserFlags, UserFeatures } from "./flags.js";
 import { getRepoFeatures, isAgentEnabled } from "./repos.js";
 
 const {
+    // pull request
     commentOnPullRequest,
     generatePullRequestSummary,
     listFilesInPullRequest,
+    reviewPatch,
+
+    // test
     helloActivity,
 } = proxyActivities<typeof activities>({
     startToCloseTimeout: "5 minute",
@@ -437,9 +441,20 @@ export function extractStudioUiUrl(content: string): string | null {
 }
 
 export async function startCodeReview(ctx: AssistantContext) {
-    await listFilesInPullRequest({
+    const resp = await listFilesInPullRequest({
         org: ctx.pullRequest.org,
         repo: ctx.pullRequest.repo,
         pullRequestNumber: ctx.pullRequest.number,
+    });
+    resp.files.forEach((file) => {
+        log.info(`Reviewing file: ${file}`);
+        reviewPatch({
+            org: ctx.pullRequest.org,
+            repo: ctx.pullRequest.repo,
+            pullRequestNumber: ctx.pullRequest.number,
+            filename: file,
+            patch: 'This is a test patch.',
+            commit: ctx.pullRequest.commitSha!,
+        })
     });
 }
