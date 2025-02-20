@@ -16,6 +16,7 @@ const {
     generatePullRequestSummary,
     listFilesInPullRequest,
     reviewPatch,
+    createPullRequestReview,
 
     // test
     helloActivity,
@@ -454,18 +455,36 @@ export async function startCodeReview(ctx: AssistantContext) {
         repo: ctx.pullRequest.repo,
         pullRequestNumber: ctx.pullRequest.number,
     });
-    resp.files.forEach((file) => {
-        log.info(`Reviewing file: ${file.filename} (${file.status})`, { file });
-        if (file.status === 'removed') {
-            return;
-        }
-        reviewPatch({
-            org: ctx.pullRequest.org,
-            repo: ctx.pullRequest.repo,
-            pullRequestNumber: ctx.pullRequest.number,
-            filename: file.filename,
-            patch: file.patch,
-            commit: ctx.pullRequest.commitSha!,
-        })
+    // resp.files.forEach((file) => {
+    //     log.info(`Reviewing file: ${file.filename} (${file.status})`, { file });
+    //     if (file.status === 'removed') {
+    //         return;
+    //     }
+    //     reviewPatch({
+    //         org: ctx.pullRequest.org,
+    //         repo: ctx.pullRequest.repo,
+    //         pullRequestNumber: ctx.pullRequest.number,
+    //         filename: file.filename,
+    //         patch: file.patch,
+    //         commit: ctx.pullRequest.commitSha!,
+    //     })
+    // });
+    const comments: activities.CreatePullRequestReviewRequestComment[] = resp.files
+        .filter((file) => file.status !== 'removed')
+        .filter((file) => file.filename === 'docs/test.md')
+        .map((file) => {
+            return {
+                filename: file.filename,
+                patch: file.patch,
+                body: 'This is a test review comment.',
+                line: 1,
+            }
+        });
+
+    createPullRequestReview({
+        org: ctx.pullRequest.org,
+        repo: ctx.pullRequest.repo,
+        pullRequestNumber: ctx.pullRequest.number,
+        comments: comments,
     });
 }

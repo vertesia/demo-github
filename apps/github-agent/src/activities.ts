@@ -165,6 +165,45 @@ export async function reviewPatch(request: ReviewPatchRequest): Promise<ReviewPa
     };
 }
 
+export type CreatePullRequestReviewRequest = {
+    org: string,
+    repo: string,
+    pullRequestNumber: number,
+    comments: CreatePullRequestReviewRequestComment[],
+}
+export type CreatePullRequestReviewRequestComment = {
+    filename: string,
+    patch: string,
+    body: string,
+    line: number,
+}
+export type CreatePullRequestReviewResponse = {
+    status: string,
+    reason: string,
+}
+export async function createPullRequestReview(request: CreatePullRequestReviewRequest): Promise<CreatePullRequestReviewResponse> {
+    const app = await VertesiaGithubApp.getInstance();
+    const octokit = await app.getRestClient();
+    await octokit.rest.pulls.createReview({
+        owner: request.org,
+        repo: request.repo,
+        pull_number: request.pullRequestNumber,
+        body: "This is a test review comment.",
+        event: "APPROVE",
+        comments: request.comments.map((c) => {
+            return {
+                path: c.filename,
+                line: c.line,
+                body: c.body,
+            };
+        }),
+    });
+    return {
+        status: "success",
+        reason: "Test done.",
+    }
+}
+
 async function getVertesiaApiKey() {
     const vault = createSecretProvider(process.env.CLOUD as SupportedCloudEnvironments ?? SupportedCloudEnvironments.gcp)
     return await vault.getSecret('release-notes-api-key');
