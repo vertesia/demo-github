@@ -5,13 +5,13 @@ export type RepoSpec = {
     codeStructure: string | undefined;
 }
 
-const vertesiaStudioCodeStructure = `\
+const codeStructureStudio = `\
 The Git repository is a pnpm workspace, organized in the following ways:
 
-- All the applications are stored under the directory "./app/<app>", such as "./app/studio-server"
+- All the applications are stored under the directory "./apps/<app>", such as "./apps/studio-server"
   for the Studio Server.
 - All the packages are stored under the directory "./packages/<pkg>", such as "./packages/cloud".
-- The public documentation is a node.js application stored under the directory "./app/docs".
+- The public documentation is a node.js application stored under the directory "./apps/docs".
 - All the infrastructure changes are stored either under the directory "./infrastructure" or "./gcp".
 - Reactik is a custom library developed internally, where the source code is stored under the
   directory "./reactik", mainly used by the Studio UI (path "./app/composable-ui")
@@ -19,18 +19,25 @@ The Git repository is a pnpm workspace, organized in the following ways:
   the SDK and tools in a public Git repository.
 `;
 
+const codeStructureDemoGithub = `\
+The Git repository is a pnpm workspace, organized in the following ways:
+
+- The applications are stored under the directory "./apps/<app>", such as "./apps/github-agent".
+- The internal documentation is stored under the directory "./docs".
+`;
+
 const repoFeatures: Record<string, RepoSpec> = {
     'vertesia/demo-github': {
         supportMultipleFeatures: false,
         supportDeploymentSummary: false,
         supportDiffSummary: true,
-        codeStructure: undefined,
+        codeStructure: codeStructureDemoGithub,
     },
     'vertesia/studio': {
         supportMultipleFeatures: true,
         supportDeploymentSummary: true,
         supportDiffSummary: true,
-        codeStructure: vertesiaStudioCodeStructure,
+        codeStructure: codeStructureStudio,
     },
 };
 
