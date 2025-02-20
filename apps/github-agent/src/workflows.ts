@@ -447,7 +447,7 @@ export async function startCodeReview(ctx: AssistantContext) {
         pullRequestNumber: ctx.pullRequest.number,
     });
     resp.files.forEach((file) => {
-        log.info(`Reviewing file: ${file}`);
+        log.info(`Reviewing file: ${file.filename} (${file.status})`, { file });
         if (file.status === 'removed') {
             return;
         }
