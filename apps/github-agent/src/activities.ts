@@ -95,20 +95,74 @@ export type ListFilesInPullRequestRequest = {
     repo: string,
     pullRequestNumber: number,
 }
+export type ListFilesInPullRequestResponseFile = {
+    filename: string,
+    patch: string,
+    status: string,
+    additions: number,
+    deletions: number,
+    changes: number,
+}
 export type ListFilesInPullRequestResponse = {
     fileCount: number,
-    files: string[],
+    files: ListFilesInPullRequestResponseFile[],
 }
 export async function listFilesInPullRequest(request: ListFilesInPullRequestRequest): Promise<ListFilesInPullRequestResponse> {
     const app = await VertesiaGithubApp.getInstance();
     const filesResp = await app.listPullRequestFiles(request.org, request.repo, request.pullRequestNumber);
-    let files: string[] = filesResp.data.map((f: any) => f.filename as string);
+    let files: ListFilesInPullRequestResponseFile[] = filesResp.data.map((f: any) => {
+        return {
+            filename: f.filename,
+            patch: f.patch,
+            status: f.status,
+            additions: f.additions,
+            deletions: f.deletions,
+            changes: f.changes,
+        };
+    });
     log.info(`Got ${files.length} files for pull request ${request.org}/${request.repo}/${request.pullRequestNumber}`, { files: filesResp.data });
 
     return {
         fileCount: files.length,
         files: files,
     }
+}
+
+export type ReviewPatchRequest = {
+    org: string,
+    repo: string,
+    pullRequestNumber: number,
+    filename: string,
+    patch: string,
+    commit: string,
+}
+export type ReviewPatchResponse = {
+    status: string,
+    reason: string,
+}
+export async function reviewPatch(request: ReviewPatchRequest): Promise<ReviewPatchResponse> {
+    // note: this is a test for understanding the GitHu API
+    if (request.filename !== "docs/test.md") {
+        return {
+            status: "skipped",
+            reason: "Unsupported file",
+        };
+    }
+    const app = await VertesiaGithubApp.getInstance();
+    const octokit = await app.getRestClient();
+    await octokit.rest.pulls.createReviewComment({
+        owner: request.org,
+        repo: request.repo,
+        pull_number: request.pullRequestNumber,
+        body: "This is a test review comment.",
+        path: request.filename,
+        line: 1,
+        commit_id: request.commit,
+    });
+    return {
+        status: "success",
+        reason: "Comment created",
+    };
 }
 
 async function getVertesiaApiKey() {

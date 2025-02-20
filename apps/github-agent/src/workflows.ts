@@ -11,9 +11,13 @@ import { getUserFlags, UserFeatures } from "./flags.js";
 import { getRepoFeatures, isAgentEnabled } from "./repos.js";
 
 const {
+    // pull request
     commentOnPullRequest,
     generatePullRequestSummary,
     listFilesInPullRequest,
+    reviewPatch,
+
+    // test
     helloActivity,
 } = proxyActivities<typeof activities>({
     startToCloseTimeout: "5 minute",
@@ -138,6 +142,15 @@ type PullRequestContext = {
     branch: string;
     diffUrl: string;
     commentId: number | undefined;
+    /**
+     * This is the latest commit pushed to the pull request.
+     *
+     * This is useful for submitting a code review. On GitHub, each code review must be attached
+     * to a commit. This field is marked as optional for backward compatibility reason.
+     *
+     * FIXME: This should be required.
+     */
+    commitSha?: string;
 }
 
 type DeploymentSpec = {
@@ -262,6 +275,7 @@ function computePullRequestContext(prEvent: any): PullRequestContext {
         branch: prEvent.pull_request.head.ref,
         diffUrl: prEvent.pull_request.diff_url,
         commentId: undefined,
+        commitSha: prEvent.pull_request.head.sha,
     };
 }
 
@@ -358,6 +372,8 @@ async function handlePullRequestEvent(ctx: AssistantContext, prEvent: any, userF
     const comment = toGithubComment(ctx);
     const commentId = await upsertComment(ctx.pullRequest, comment);
 
+    // update context
+    ctx.pullRequest.commitSha = prEvent.pull_request.head.sha;
     if (!ctx.pullRequest.commentId) {
         ctx.pullRequest.commentId = commentId;
     }
@@ -425,9 +441,23 @@ export function extractStudioUiUrl(content: string): string | null {
 }
 
 export async function startCodeReview(ctx: AssistantContext) {
-    await listFilesInPullRequest({
+    const resp = await listFilesInPullRequest({
         org: ctx.pullRequest.org,
         repo: ctx.pullRequest.repo,
         pullRequestNumber: ctx.pullRequest.number,
+    });
+    resp.files.forEach((file) => {
+        log.info(`Reviewing file: ${file.filename} (${file.status})`, { file });
+        if (file.status === 'removed') {
+            return;
+        }
+        reviewPatch({
+            org: ctx.pullRequest.org,
+            repo: ctx.pullRequest.repo,
+            pullRequestNumber: ctx.pullRequest.number,
+            filename: file.filename,
+            patch: file.patch,
+            commit: ctx.pullRequest.commitSha!,
+        })
     });
 }
