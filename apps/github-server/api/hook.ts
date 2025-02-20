@@ -80,7 +80,7 @@ async function handlePullRequest(eventType: string, event: any) {
     githubEvent: event
   };
 
-  if (event.action === 'opened') {
+  if (event.action === 'opened' || event.action === 'reopened') {
     const handle = await client.workflow.start(temporalWorkflowType, {
       workflowId: workflowId,
       taskQueue: temporalTaskQueue,
