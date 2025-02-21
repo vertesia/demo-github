@@ -10,6 +10,26 @@ const enabledUsers: Record<string, UserFeatures> = {
         isDeploymentSummaryEnabled: true,
         isDiffSummaryEnabled: true,
     },
+    'bstefanescu': {
+        isCodeReviewEnabled: true,
+        isDeploymentSummaryEnabled: true,
+        isDiffSummaryEnabled: true,
+    },
+    'ebarroca': {
+        isCodeReviewEnabled: true,
+        isDeploymentSummaryEnabled: true,
+        isDiffSummaryEnabled: true,
+    },
+    'LeonRuggiero': {
+        isCodeReviewEnabled: true,
+        isDeploymentSummaryEnabled: true,
+        isDiffSummaryEnabled: true,
+    },
+    'loopingz': {
+        isCodeReviewEnabled: true,
+        isDeploymentSummaryEnabled: true,
+        isDiffSummaryEnabled: true,
+    },
     'mincong-h': {
         isCodeReviewEnabled: true,
         isDeploymentSummaryEnabled: true,
