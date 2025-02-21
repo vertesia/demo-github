@@ -15,7 +15,6 @@ const {
     commentOnPullRequest,
     generatePullRequestSummary,
     listFilesInPullRequest,
-    reviewPatch,
     createPullRequestReview,
 
     // test
