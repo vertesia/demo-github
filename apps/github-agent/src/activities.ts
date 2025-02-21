@@ -66,8 +66,8 @@ export async function generatePullRequestSummary(request: GeneratePullRequestSum
     const apiKey = await getVertesiaApiKey();
     const vertesiaClient = new VertesiaClient({
         apikey: apiKey,
-        serverUrl: 'https://studio-server-staging.api.vertesia.io',
-        storeUrl: 'https://zeno-server-staging-api.vertesia.io',
+        serverUrl: 'https://studio-server-preview.api.vertesia.io',
+        storeUrl: 'https://zeno-server-preview.api.vertesia.io',
     });
     const execResp = await vertesiaClient.interactions.executeByName<any, string>(
         'SummarizeCodeDiff',
