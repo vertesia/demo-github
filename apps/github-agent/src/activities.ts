@@ -3,6 +3,10 @@ import { log } from "@temporalio/activity";
 import { VertesiaClient } from "@vertesia/client";
 import { VertesiaGithubApp } from "./github.js";
 import { getRepoFeatures } from './repos.js';
+import {
+    VertesiaReviewFilePatchRequest,
+    VertesiaReviewFilePatchResponse,
+} from './vertesia.js';
 
 export async function helloActivity() {
     log.info("Hello, World!");
@@ -63,12 +67,7 @@ export async function generatePullRequestSummary(request: GeneratePullRequestSum
     let diff = diffResp.data as unknown as string;
     log.info(`Got diff for pull request ${request.owner}/${request.repo}/${request.pullRequestNumber}: ${diff.length} characters`);
 
-    const apiKey = await getVertesiaApiKey();
-    const vertesiaClient = new VertesiaClient({
-        apikey: apiKey,
-        serverUrl: 'https://studio-server-preview.api.vertesia.io',
-        storeUrl: 'https://zeno-server-preview.api.vertesia.io',
-    });
+    const vertesiaClient = await createVertesiaClient();
     const execResp = await vertesiaClient.interactions.executeByName<any, string>(
         'SummarizeCodeDiff',
         {
@@ -128,40 +127,58 @@ export async function listFilesInPullRequest(request: ListFilesInPullRequestRequ
     }
 }
 
-export type ReviewPatchRequest = {
-    org: string,
-    repo: string,
-    pullRequestNumber: number,
-    filename: string,
-    patch: string,
-    commit: string,
+export type PullRequestReviewComment = {
+    filePath: string,
+    body: string,
+    line?: number,
+    side?: string,
+    start_line?: number,
+    start_side?: string,
 }
-export type ReviewPatchResponse = {
+
+export type ReviewPullRequestPatchRequest = {
+    /**
+     * The file path of the file being reviewed. This is a relative path from the root of the
+     * repository.
+     */
+    filePath: string,
+    /**
+     * The patch applied to the file, extracted from the git-diff.
+     */
+    filePatch: string,
+}
+export type ReviewPullRequestPatchResponse = {
     status: string,
-    reason: string,
+    comments: PullRequestReviewComment[],
 }
-export async function reviewPatch(request: ReviewPatchRequest): Promise<ReviewPatchResponse> {
-    // note: this is a test for understanding the GitHu API
-    if (request.filename !== "docs/test.md") {
+export async function reviewPullRequestPatch(request: ReviewPullRequestPatchRequest): Promise<ReviewPullRequestPatchResponse> {
+    const vertesiaClient = await createVertesiaClient();
+    const params: VertesiaReviewFilePatchRequest = {
+        file_patch: request.filePatch,
+        file_path: request.filePath,
+    };
+    const execResp = await vertesiaClient.interactions.executeByName<
+        VertesiaReviewFilePatchRequest,
+        VertesiaReviewFilePatchResponse
+    >(
+        'GithubReviewFilePatch',
+        { data: params },
+    );
+
+    const comments: PullRequestReviewComment[] = execResp.result.comments.map((c) => {
         return {
-            status: "skipped",
-            reason: "Unsupported file",
+            filePath: request.filePath,
+            body: c.body,
+            line: c.line,
+            side: c.side,
+            start_line: c.start_line,
+            start_side: c.start_side,
         };
-    }
-    const app = await VertesiaGithubApp.getInstance();
-    const octokit = await app.getRestClient();
-    await octokit.rest.pulls.createReviewComment({
-        owner: request.org,
-        repo: request.repo,
-        pull_number: request.pullRequestNumber,
-        body: "This is a test review comment.",
-        path: request.filename,
-        line: 1,
-        commit_id: request.commit,
     });
+
     return {
         status: "success",
-        reason: "Comment created",
+        comments: comments,
     };
 }
 
@@ -169,13 +186,7 @@ export type CreatePullRequestReviewRequest = {
     org: string,
     repo: string,
     pullRequestNumber: number,
-    comments: CreatePullRequestReviewRequestComment[],
-}
-export type CreatePullRequestReviewRequestComment = {
-    filename: string,
-    patch: string,
-    body: string,
-    line: number,
+    comments: PullRequestReviewComment[],
 }
 export type CreatePullRequestReviewResponse = {
     status: string,
@@ -184,27 +195,38 @@ export type CreatePullRequestReviewResponse = {
 export async function createPullRequestReview(request: CreatePullRequestReviewRequest): Promise<CreatePullRequestReviewResponse> {
     const app = await VertesiaGithubApp.getInstance();
     const octokit = await app.getRestClient();
-    await octokit.rest.pulls.createReview({
+    const resp = await octokit.rest.pulls.createReview({
         owner: request.org,
         repo: request.repo,
         pull_number: request.pullRequestNumber,
-        body: "This is a test review comment.",
-        event: "APPROVE",
+        body: undefined, // Agent doesn't support body yet.
+        event: "COMMENT", // Agent doesn't have permission to approve or request changes.
         comments: request.comments.map((c) => {
             return {
-                path: c.filename,
-                line: c.line,
+                path: c.filePath,
                 body: c.body,
+                line: c.line,
+                side: c.side,
+                start_line: c.start_line,
+                start_side: c.start_side,
             };
         }),
     });
+
+    log.info(`Pull request review created: ${resp.data.html_url}`, { response: resp });
     return {
         status: "success",
-        reason: "Test done.",
+        reason: `Pull request review created: ${resp.data.html_url}`,
     }
 }
 
-async function getVertesiaApiKey() {
-    const vault = createSecretProvider(process.env.CLOUD as SupportedCloudEnvironments ?? SupportedCloudEnvironments.gcp)
-    return await vault.getSecret('release-notes-api-key');
+async function createVertesiaClient(): Promise<VertesiaClient> {
+    const vault = createSecretProvider(SupportedCloudEnvironments.gcp)
+    const apiKey = await vault.getSecret('release-notes-api-key');
+
+    return new VertesiaClient({
+        apikey: apiKey,
+        serverUrl: 'https://studio-server-preview.api.vertesia.io',
+        storeUrl: 'https://zeno-server-preview.api.vertesia.io',
+    });
 }

@@ -16,6 +16,7 @@ const {
     generatePullRequestSummary,
     listFilesInPullRequest,
     createPullRequestReview,
+    reviewPullRequestPatch,
 
     // test
     helloActivity,
@@ -454,31 +455,18 @@ export async function startCodeReview(ctx: AssistantContext) {
         repo: ctx.pullRequest.repo,
         pullRequestNumber: ctx.pullRequest.number,
     });
-    // resp.files.forEach((file) => {
-    //     log.info(`Reviewing file: ${file.filename} (${file.status})`, { file });
-    //     if (file.status === 'removed') {
-    //         return;
-    //     }
-    //     reviewPatch({
-    //         org: ctx.pullRequest.org,
-    //         repo: ctx.pullRequest.repo,
-    //         pullRequestNumber: ctx.pullRequest.number,
-    //         filename: file.filename,
-    //         patch: file.patch,
-    //         commit: ctx.pullRequest.commitSha!,
-    //     })
-    // });
-    const comments: activities.CreatePullRequestReviewRequestComment[] = resp.files
-        .filter((file) => file.status !== 'removed')
+    const commentPromises = resp.files
         .filter((file) => isCodeReviewEnabledForFile(file.filename))
-        .map((file) => {
-            return {
-                filename: file.filename,
-                patch: file.patch,
-                body: 'This is a test review comment.',
-                line: 1,
-            }
+        .filter((file) => file.status !== 'removed')
+        .map(async (file) => {
+            const resp = await reviewPullRequestPatch({
+                filePath: file.filename,
+                filePatch: file.patch,
+            });
+            return resp.comments;
         });
+    const commentsPerFile = await Promise.all(commentPromises);
+    const comments: activities.PullRequestReviewComment[] = commentsPerFile.reduce((acc, f) => acc.concat(f), []);
 
     createPullRequestReview({
         org: ctx.pullRequest.org,
