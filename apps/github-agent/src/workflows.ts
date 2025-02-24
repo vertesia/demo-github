@@ -7,7 +7,7 @@ import {
     workflowInfo,
 } from "@temporalio/workflow";
 import * as activities from "./activities.js";
-import { getUserFlags, UserFeatures } from "./flags.js";
+import { getUserFlags, UserFeatures, isCodeReviewEnabledForFile } from "./flags.js";
 import { getRepoFeatures, isAgentEnabled } from "./repos.js";
 
 const {
@@ -470,7 +470,7 @@ export async function startCodeReview(ctx: AssistantContext) {
     // });
     const comments: activities.CreatePullRequestReviewRequestComment[] = resp.files
         .filter((file) => file.status !== 'removed')
-        .filter((file) => file.filename === 'docs/test.md')
+        .filter((file) => isCodeReviewEnabledForFile(file.filename))
         .map((file) => {
             return {
                 filename: file.filename,
