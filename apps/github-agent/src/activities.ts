@@ -63,7 +63,7 @@ export type GeneratePullRequestSummaryRequest = {
 }
 export type GeneratePullRequestSummaryResponse = {
     summary: string,
-    breakDown?: string,
+    breakdown?: string,
 }
 export async function generatePullRequestSummary(request: GeneratePullRequestSummaryRequest): Promise<GeneratePullRequestSummaryResponse> {
     const app = await VertesiaGithubApp.getInstance();
@@ -78,7 +78,7 @@ export async function generatePullRequestSummary(request: GeneratePullRequestSum
 
     const vertesiaClient = await createVertesiaClient();
     let summary;
-    let breakDown;
+    let breakdown;
 
     if (request.isBreakdownEnabled) {
         const execResp = await vertesiaClient.interactions.executeByName<
@@ -91,12 +91,12 @@ export async function generatePullRequestSummary(request: GeneratePullRequestSum
         log.info("Got summary from Vertesia", { respose: execResp });
         summary = execResp.result.summary;
 
-        let breakDown = "Here is a breakdown of the changes:\n\n";
-        breakDown += `Path | Description\n`;
-        breakDown += `---- | -----------\n`;
+        let breakdown = "Here is a breakdown of the changes:\n\n";
+        breakdown += `Path | Description\n`;
+        breakdown += `---- | -----------\n`;
         for (let change of execResp.result.changes) {
             const id = '`' + change.path_or_glob + '`';
-            breakDown += `${id} | ${change.description}\n`;
+            breakdown += `${id} | ${change.description}\n`;
         }
     } else {
         const execResp = await vertesiaClient.interactions.executeByName<
@@ -117,7 +117,7 @@ export async function generatePullRequestSummary(request: GeneratePullRequestSum
 
     return {
         summary: summary,
-        breakDown: breakDown,
+        breakdown: breakdown,
     };
 }
 

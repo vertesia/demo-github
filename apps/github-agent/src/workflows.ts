@@ -140,9 +140,14 @@ type AssistantContext = {
      */
     pullRequest: PullRequestContext;
     /**
-     * The summary of the pull request.
+     * The summary of the code difference of the pull request.
      */
-    summary?: string;
+    summary?: DiffSummary;
+}
+
+type DiffSummary = {
+    summary: string;
+    breakdown?: string;
 }
 
 type PullRequestContext = {
@@ -227,9 +232,16 @@ function toGithubComment(ctx: AssistantContext): string {
     return comment.trim();
 }
 
-function toGithubCommentDiffSummary(summary: string | undefined, includeHeader: boolean): string {
+function toGithubCommentDiffSummary(summary: DiffSummary | undefined, includeHeader: boolean): string {
     const optionalHeader = includeHeader ? '## Summary\n\n' : '';
-    const content = summary ? summary : '_Summary is not available yet._';
+    if (!summary) {
+        return `${optionalHeader}_Summary is not available yet._`;
+    }
+
+    let content = `${optionalHeader}${summary.summary}`;
+    if (summary.breakdown) {
+        content += `\n\n${summary.breakdown}`;
+    }
     return `${optionalHeader}${content}`;
 }
 
@@ -378,7 +390,10 @@ async function handlePullRequestEvent(ctx: AssistantContext, prEvent: any, userF
             isBreakdownEnabled: userFlags.isDiffSummaryBreakdownEnabled,
         });
         log.info(`Diff summary of the PR: ${resp.summary}`);
-        ctx.summary = resp.summary;
+        ctx.summary = {
+            summary: resp.summary,
+            breakdown: resp.breakdown,
+        };
     } else {
         log.info('Diff summary is disabled for this user');
     }
