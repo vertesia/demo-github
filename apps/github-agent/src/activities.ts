@@ -320,6 +320,8 @@ export async function updateGitSubmodule(request: UpdateGitSubmoduleRequest): Pr
         ],
     });
 
+    log.info(`Tree created: ${treeResp.data.sha}`, { response: treeResp });
+
     const commitResp = await octokit.rest.git.createCommit({
         owner: request.org,
         repo: request.repo,
@@ -327,7 +329,7 @@ export async function updateGitSubmodule(request: UpdateGitSubmoduleRequest): Pr
         tree: treeResp.data.sha,
     });
 
-    log.info(`Submodule updated: ${commitResp.data.sha}`, { response: commitResp });
+    log.info(`Commit created: ${commitResp.data.sha}`, { response: commitResp });
     return {};
 }
 
