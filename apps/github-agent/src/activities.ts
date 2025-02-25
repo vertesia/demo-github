@@ -307,7 +307,8 @@ export type UpdateGitSubmoduleRequest = {
     repo: string,
 
     /**
-     * The commit SHA1 based on which the tree should be created.
+     * The commit SHA1 based on which the tree should be created. It is the parent of the new tree
+     * and new commit.
      *
      * @example "a3ea9d4a9b5e437f20285b5151c9babca12f50e0"
      */
@@ -360,6 +361,7 @@ export async function updateGitSubmodule(request: UpdateGitSubmoduleRequest): Pr
         repo: request.repo,
         message: request.commitMessage,
         tree: treeResp.data.sha,
+        parents: [request.sha],
     });
 
     log.info(`Commit created: ${commitResp.data.sha}`, { response: commitResp });
