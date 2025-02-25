@@ -91,7 +91,7 @@ export async function generatePullRequestSummary(request: GeneratePullRequestSum
         log.info("Got summary from Vertesia", { respose: execResp });
         summary = execResp.result.summary;
 
-        let breakdown = "Here is a breakdown of the changes:\n\n";
+        breakdown = "Here is a breakdown of the changes:\n\n";
         breakdown += `Path | Description\n`;
         breakdown += `---- | -----------\n`;
         for (let change of execResp.result.changes) {

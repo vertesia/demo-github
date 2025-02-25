@@ -242,7 +242,7 @@ function toGithubCommentDiffSummary(summary: DiffSummary | undefined, includeHea
     if (summary.breakdown) {
         content += `\n\n${summary.breakdown}`;
     }
-    return `${optionalHeader}${content}`;
+    return content;
 }
 
 function toGithubCommentDeployment(spec: DeploymentSpec | undefined, includeHeader: boolean): string {
