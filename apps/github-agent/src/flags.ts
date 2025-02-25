@@ -42,6 +42,13 @@ const enabledUsers: Record<string, UserFeatures> = {
     },
 };
 
+export const supportedExtensions = [
+    '.js',
+    '.jsx',
+    '.ts',
+    '.tsx',
+];
+
 type getUserFlagsOptions = {
     repoFullName: string;
     userId: string;
@@ -54,11 +61,5 @@ export function getUserFlags(opts: getUserFlagsOptions): UserFeatures | undefine
 }
 
 export function isCodeReviewEnabledForFile(filepath: string): boolean {
-    const supportedExtensions = [
-        '.ts',
-        '.tsx',
-        '.js',
-        '.jsx',
-    ];
     return supportedExtensions.some((ext) => filepath.endsWith(ext));
 }

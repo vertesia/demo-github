@@ -187,6 +187,7 @@ export type CreatePullRequestReviewRequest = {
     repo: string,
     pullRequestNumber: number,
     comments: PullRequestReviewComment[],
+    body?: string,
 }
 export type CreatePullRequestReviewResponse = {
     status: string,
@@ -199,7 +200,7 @@ export async function createPullRequestReview(request: CreatePullRequestReviewRe
         owner: request.org,
         repo: request.repo,
         pull_number: request.pullRequestNumber,
-        body: undefined, // Agent doesn't support body yet.
+        body: request.body,
         event: "COMMENT", // Agent doesn't have permission to approve or request changes.
         comments: request.comments.map((c) => {
             return {
