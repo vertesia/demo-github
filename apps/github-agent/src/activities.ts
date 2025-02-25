@@ -1,7 +1,7 @@
 import { createSecretProvider, SupportedCloudEnvironments } from '@dglabs/cloud';
 import { log } from "@temporalio/activity";
 import { VertesiaClient } from "@vertesia/client";
-import { VertesiaGithubApp } from "./github.js";
+import { VertesiaGithubApp } from "./activities/github.js";
 import { getRepoFeatures } from './repos.js';
 import {
     VertesiaReviewFilePatchRequest,
