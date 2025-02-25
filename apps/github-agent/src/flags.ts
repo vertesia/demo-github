@@ -48,6 +48,12 @@ const enabledUsers: Record<string, UserFeatures> = {
         isDiffSummaryEnabled: true,
         isDiffSummaryBreakdownEnabled: false,
     },
+    'placeholder': {
+        isCodeReviewEnabled: false,
+        isDeploymentSummaryEnabled: false,
+        isDiffSummaryEnabled: false,
+        isDiffSummaryBreakdownEnabled: false,
+    },
 };
 
 export const supportedExtensions = [
