@@ -9,7 +9,6 @@ import {
     VertesiaSummarizeCodeDiffResponse,
 } from './activities/vertesia.js';
 import { getRepoFeatures } from './repos.js';
-import { create } from 'domain';
 
 export async function helloActivity() {
     log.info("Hello, World!");
