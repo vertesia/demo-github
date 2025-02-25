@@ -1,4 +1,8 @@
-import { log } from "@temporalio/workflow";
+import {
+    log,
+    proxyActivities,
+} from "@temporalio/workflow";
+import * as activities from "../activities.js";
 
 export type UpdateSdkSubmoduleRequest = {
     /**
@@ -16,6 +20,19 @@ export type UpdateSdkSubmoduleRequest = {
      */
     pullRequestDescription?: string;
 };
+
+const {
+    createGitBranch,
+} = proxyActivities<typeof activities>({
+    startToCloseTimeout: "5 minute",
+    retry: {
+        initialInterval: '5s',
+        backoffCoefficient: 2,
+        maximumAttempts: 3,
+        maximumInterval: 100 * 30 * 1000, //ms
+        nonRetryableErrorTypes: [],
+    },
+});
 
 export type UpdateSdkSubmoduleResponse = {
     /**
@@ -38,9 +55,16 @@ export async function updateSdkSubmodule(request: UpdateSdkSubmoduleRequest): Pr
     log.info("Updating submodule", { request });
     const shortCommit = request.commit.slice(0, 7);
 
+    const resp = await createGitBranch({
+        org: "vertesia",
+        repo: "studio",
+        baseBranch: "main",
+        newBranch: `dep-${shortCommit}`,
+    })
+
     return {
-        ref: `refs/heads/dep-${shortCommit}`,
-        number: 123,
+        ref: resp.ref,
+        number: 1253,
         link: "https://github.com/vertesia/studio/pull/1253",
     };
 }

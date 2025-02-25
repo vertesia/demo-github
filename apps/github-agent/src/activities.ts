@@ -9,6 +9,7 @@ import {
     VertesiaSummarizeCodeDiffResponse,
 } from './activities/vertesia.js';
 import { getRepoFeatures } from './repos.js';
+import { create } from 'domain';
 
 export async function helloActivity() {
     log.info("Hello, World!");
@@ -258,28 +259,36 @@ export async function createPullRequestReview(request: CreatePullRequestReviewRe
 export type CreateGitBranchRequest = {
     org: string,
     repo: string,
-    sha: string,
-    branchName: string,
+    baseBranch: string,
+    newBranch: string,
 }
 export type CreateGitBranchResponse = {
     status: string,
-    reason: string,
+    ref: string,
+    sha: string,
 }
 export async function createGitBranch(request: CreateGitBranchRequest): Promise<CreateGitBranchResponse> {
-    log.info(`Creating branch ${request.branchName} from commit ${request.sha} in ${request.org}/${request.repo}`);
+    log.info(`Creating new branch ${request.newBranch} from the base branch ${request.baseBranch} in ${request.org}/${request.repo}`);
     const app = await VertesiaGithubApp.getInstance();
     const octokit = await app.getRestClient();
-    const resp = await octokit.rest.git.createRef({
+
+    const getResp = await octokit.rest.git.getRef({
         owner: request.org,
         repo: request.repo,
-        sha: request.sha,
-        ref: `refs/heads/${request.branchName}`,
+        ref: `heads/${request.baseBranch}`,
     });
-    log.info(`Branch created: ${resp.data.ref}`, { response: resp });
+    const createResp = await octokit.rest.git.createRef({
+        owner: request.org,
+        repo: request.repo,
+        sha: getResp.data.object.sha,
+        ref: `refs/heads/${request.newBranch}`,
+    });
 
+    log.info(`Branch created: ${createResp.data.ref} (${getResp.data.object.sha})`, { response: createResp });
     return {
         status: "success",
-        reason: "Branch created",
+        ref: createResp.data.ref,
+        sha: createResp.data.object.sha,
     }
 }
 
