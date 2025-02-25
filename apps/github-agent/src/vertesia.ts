@@ -71,3 +71,11 @@ export type VertesiaSummarizeCodeDiffResponseChange = {
     path_or_glob: string,
     description: string,
 }
+
+export type VertesiaMyNewRequest = {
+    name: string,
+}
+
+export type VertesiaMyNewResponse = {
+    message: string,
+}
