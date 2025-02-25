@@ -2,13 +2,13 @@ import { createSecretProvider, SupportedCloudEnvironments } from '@dglabs/cloud'
 import { log } from "@temporalio/activity";
 import { VertesiaClient } from "@vertesia/client";
 import { VertesiaGithubApp } from "./activities/github.js";
-import { getRepoFeatures } from './repos.js';
 import {
     VertesiaReviewFilePatchRequest,
     VertesiaReviewFilePatchResponse,
     VertesiaSummarizeCodeDiffRequest,
     VertesiaSummarizeCodeDiffResponse,
-} from './vertesia.js';
+} from './activities/vertesia.js';
+import { getRepoFeatures } from './repos.js';
 
 export async function helloActivity() {
     log.info("Hello, World!");
