@@ -6,6 +6,7 @@ import * as activities from "../activities.js";
 
 const {
     createGitBranch,
+    createPullRequest,
     getGitRef,
     updateGitSubmodule,
 } = proxyActivities<typeof activities>({
@@ -39,6 +40,11 @@ export type UpdateSdkSubmoduleRequest = {
      * The description of the pull request.
      */
     pullRequestDescription?: string;
+
+    /**
+     * Whether the workflow is running in test mode.
+     */
+    test?: boolean;
 };
 
 export type UpdateSdkSubmoduleResponse = {
@@ -90,9 +96,30 @@ export async function updateSdkSubmodule(request: UpdateSdkSubmoduleRequest): Pr
         branchName: `sdk-${shortCommit}`,
     });
 
+    let body = request.pullRequestDescription;
+    if (!body) {
+        body = `Update Git submodule composableai to commit https://github.com/vertesia/composableai/commit/${shortCommit}.`;
+        if (request.referralPullRequestUrl) {
+            body += ` This is related to:\n\n* ${request.referralPullRequestUrl}\n`;
+        }
+        if (request.test === true) {
+            body += "\n\nThis is a test pull request.";
+        }
+    }
+    const prResp = await createPullRequest({
+        org: "vertesia",
+        repo: "studio",
+        title: request.pullRequstTitle ?? `chore(deps): update composableai to ${shortCommit}`,
+        body: body,
+        head: branchResp.ref,
+        base: "main",
+        draft: request.test === true,
+    })
+
     return {
         ref: branchResp.ref,
         refUrl: branchResp.url,
-        // TODO add PR
+        pullRequestNumber: prResp.number,
+        pullRequestUrl: prResp.url,
     };
 }

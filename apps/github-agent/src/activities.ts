@@ -327,7 +327,7 @@ export async function createGitBranch(request: CreateGitBranchRequest): Promise<
     log.info(`Branch created: ${createResp.data.ref} (${request.sha})`, { response: createResp });
     return {
         ref: createResp.data.ref,
-        url: createResp.data.url,
+        url: `https://github.com/${request.org}/${request.repo}/tree/${request.branchName}`,
         sha: createResp.data.object.sha,
     }
 }
@@ -412,6 +412,40 @@ export async function updateGitSubmodule(request: UpdateGitSubmoduleRequest): Pr
         sha: commitResp.data.sha,
         url: commitResp.data.url,
     };
+}
+
+export type CreatePullRequestRequest = {
+    org: string,
+    repo: string,
+    title: string,
+    head: string,
+    base: string,
+    body: string,
+    draft?: boolean,
+}
+export type CreatePullRequestResponse = {
+    number: number,
+    url: string,
+}
+export async function createPullRequest(request: CreatePullRequestRequest): Promise<CreatePullRequestResponse> {
+    log.info(`Creating pull request in ${request.org}/${request.repo}`, { request: request });
+    const app = await VertesiaGithubApp.getInstance();
+    const octokit = await app.getRestClient();
+
+    const resp = await octokit.rest.pulls.create({
+        owner: request.org,
+        repo: request.repo,
+        title: request.title,
+        head: request.head,
+        base: request.base,
+        body: request.body,
+        draft: request.draft,
+    });
+
+    return {
+        number: resp.data.number,
+        url: resp.data.html_url,
+    }
 }
 
 async function createVertesiaClient(): Promise<VertesiaClient> {
