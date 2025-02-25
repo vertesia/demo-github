@@ -59,6 +59,7 @@ export type GeneratePullRequestSummaryRequest = {
     owner: string,
     repo: string,
     pullRequestNumber: number,
+    isBreakdownEnabled?: boolean,
 }
 export type GeneratePullRequestSummaryResponse = {
     summary: string,
@@ -76,27 +77,42 @@ export async function generatePullRequestSummary(request: GeneratePullRequestSum
     };
 
     const vertesiaClient = await createVertesiaClient();
-    const execResp = await vertesiaClient.interactions.executeByName<
-        VertesiaSummarizeCodeDiffRequest,
-        VertesiaSummarizeCodeDiffResponse
-    >(
-        'GithubSummarizeCodeDiff@3',
-        { data: vertesiaRequest },
-    );
-    log.info("Got summary from Vertesia", { respose: execResp });
+    let summary;
+    let breakDown;
 
-    let summary = execResp.result.summary;
+    if (request.isBreakdownEnabled) {
+        const execResp = await vertesiaClient.interactions.executeByName<
+            VertesiaSummarizeCodeDiffRequest,
+            VertesiaSummarizeCodeDiffResponse
+        >(
+            'GithubSummarizeCodeDiff@3',
+            { data: vertesiaRequest },
+        );
+        log.info("Got summary from Vertesia", { respose: execResp });
+        summary = execResp.result.summary;
+
+        let breakDown = "Here is a breakdown of the changes:\n\n";
+        breakDown += `Path | Description\n`;
+        breakDown += `---- | -----------\n`;
+        for (let change of execResp.result.changes) {
+            const id = '`' + change.path_or_glob + '`';
+            breakDown += `${id} | ${change.description}\n`;
+        }
+    } else {
+        const execResp = await vertesiaClient.interactions.executeByName<
+            any,
+            string
+        >(
+            'GithubSummarizeCodeDiff@2',
+            { data: vertesiaRequest },
+        );
+        log.info("Got summary from Vertesia", { respose: execResp });
+        summary = execResp.result;
+    }
+
     if (summary.length > 5000) {
         log.warn("Summary is too long, truncating", { length: summary.length });
         summary = summary.substring(0, 5000) + "...";
-    }
-
-    let breakDown = "Here is a breakdown of the changes:\n\n";
-    breakDown += `Path | Description\n`;
-    breakDown += `---- | -----------\n`;
-    for (let change of execResp.result.changes) {
-        const id = '`' + change.path_or_glob + '`';
-        breakDown += `${id} | ${change.description}\n`;
     }
 
     return {
