@@ -421,6 +421,7 @@ export type CreatePullRequestRequest = {
     head: string,
     base: string,
     body: string,
+    draft?: boolean,
 }
 export type CreatePullRequestResponse = {
     number: number,
@@ -438,6 +439,7 @@ export async function createPullRequest(request: CreatePullRequestRequest): Prom
         head: request.head,
         base: request.base,
         body: request.body,
+        draft: request.draft,
     });
 
     return {

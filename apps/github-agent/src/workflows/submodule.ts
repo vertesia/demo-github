@@ -40,6 +40,11 @@ export type UpdateSdkSubmoduleRequest = {
      * The description of the pull request.
      */
     pullRequestDescription?: string;
+
+    /**
+     * Whether the workflow is running in test mode.
+     */
+    test?: boolean;
 };
 
 export type UpdateSdkSubmoduleResponse = {
@@ -97,6 +102,9 @@ export async function updateSdkSubmodule(request: UpdateSdkSubmoduleRequest): Pr
         if (request.referralPullRequestUrl) {
             body += ` This is related to:\n\n* ${request.referralPullRequestUrl}\n`;
         }
+        if (request.test === true) {
+            body += "\n\nThis is a test pull request.";
+        }
     }
     const prResp = await createPullRequest({
         org: "vertesia",
@@ -105,6 +113,7 @@ export async function updateSdkSubmodule(request: UpdateSdkSubmoduleRequest): Pr
         body: body,
         head: branchResp.ref,
         base: "main",
+        draft: request.test === true,
     })
 
     return {
