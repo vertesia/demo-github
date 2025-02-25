@@ -6,6 +6,7 @@ import * as activities from "../activities.js";
 
 const {
     createGitBranch,
+    getGitRef,
     updateGitSubmodule,
 } = proxyActivities<typeof activities>({
     startToCloseTimeout: "5 minute",
@@ -47,41 +48,51 @@ export type UpdateSdkSubmoduleResponse = {
     ref: string;
 
     /**
-     * The number of the pull request.
+     * The URL to the Git reference.
      */
-    number?: number;
+    refUrl: string;
 
     /**
-     * The link to the pull request.
+     * The number of the pull request.
      */
-    link?: string;
+    pullRequestNumber?: number;
+
+    /**
+     * The URL to the pull request.
+     */
+    pullRequestUrl?: string;
 };
 
 export async function updateSdkSubmodule(request: UpdateSdkSubmoduleRequest): Promise<UpdateSdkSubmoduleResponse> {
     log.info("Updating submodule", { request });
     const shortCommit = request.commit.slice(0, 7);
-    const newBranch = `dep-${shortCommit}`;
 
-    const resp = await createGitBranch({
+    const refResp = await getGitRef({
         org: "vertesia",
         repo: "studio",
-        baseBranch: "main",
-        newBranch: newBranch,
+        ref: `heads/main`,
     });
-    const msg = request.referralPullRequestUrl ? `Update SDK (${request.referralPullRequestUrl})` : "Update SDK";
 
-    await updateGitSubmodule({
+    const msg = request.referralPullRequestUrl ? `Update SDK (${request.referralPullRequestUrl})` : "Update SDK";
+    const commitResp = await updateGitSubmodule({
         org: "vertesia",
         repo: "studio",
-        sha: resp.sha,
+        sha: refResp.sha,
         path: "composableai",
         submoduleSha: request.commit,
         commitMessage: msg,
     });
 
+    const branchResp = await createGitBranch({
+        org: "vertesia",
+        repo: "studio",
+        sha: commitResp.sha,
+        branchName: `dep-${shortCommit}`,
+    });
+
     return {
-        ref: resp.ref,
-        number: 1253,
-        link: "https://github.com/vertesia/studio/pull/1253",
+        ref: branchResp.ref,
+        refUrl: branchResp.url,
+        // TODO add PR
     };
 }
