@@ -134,6 +134,7 @@ export type PullRequestReviewComment = {
     side?: string,
     start_line?: number,
     start_side?: string,
+    position?: number,
 }
 
 export type ReviewPullRequestPatchRequest = {
@@ -207,6 +208,7 @@ export async function createPullRequestReview(request: CreatePullRequestReviewRe
                 path: c.filePath,
                 body: c.body,
                 line: c.line,
+                position: c.position,
                 side: c.side,
                 start_line: c.start_line,
                 start_side: c.start_side,
