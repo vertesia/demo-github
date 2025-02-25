@@ -219,6 +219,11 @@ function toGithubComment(ctx: AssistantContext): string {
         comment += '\n\n';
         comment += toGithubCommentDeployment(ctx.deployment, includeHeader);
     }
+    if (repo.supportCodeReview) {
+        comment += '\n\n';
+        comment += '## Code Review\n\n';
+        comment += 'You can start a code review by mentioning "Vertesia, please review".';
+    }
     return comment.trim();
 }
 
