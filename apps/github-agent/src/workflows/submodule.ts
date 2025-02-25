@@ -4,11 +4,30 @@ import {
 } from "@temporalio/workflow";
 import * as activities from "../activities.js";
 
+const {
+    createGitBranch,
+    updateGitSubmodule,
+} = proxyActivities<typeof activities>({
+    startToCloseTimeout: "5 minute",
+    retry: {
+        initialInterval: '5s',
+        backoffCoefficient: 2,
+        maximumAttempts: 3,
+        maximumInterval: 100 * 30 * 1000, //ms
+        nonRetryableErrorTypes: [],
+    },
+});
+
 export type UpdateSdkSubmoduleRequest = {
     /**
      * The commit SHA to update the submodule to.
      */
     commit: string;
+
+    /**
+     * The URL to the pull request that triggered the submodule update.
+     */
+    referralPullRequestUrl?: string;
 
     /**
      * The title of the pull request.
@@ -20,19 +39,6 @@ export type UpdateSdkSubmoduleRequest = {
      */
     pullRequestDescription?: string;
 };
-
-const {
-    createGitBranch,
-} = proxyActivities<typeof activities>({
-    startToCloseTimeout: "5 minute",
-    retry: {
-        initialInterval: '5s',
-        backoffCoefficient: 2,
-        maximumAttempts: 3,
-        maximumInterval: 100 * 30 * 1000, //ms
-        nonRetryableErrorTypes: [],
-    },
-});
 
 export type UpdateSdkSubmoduleResponse = {
     /**
@@ -54,13 +60,24 @@ export type UpdateSdkSubmoduleResponse = {
 export async function updateSdkSubmodule(request: UpdateSdkSubmoduleRequest): Promise<UpdateSdkSubmoduleResponse> {
     log.info("Updating submodule", { request });
     const shortCommit = request.commit.slice(0, 7);
+    const newBranch = `dep-${shortCommit}`;
 
     const resp = await createGitBranch({
         org: "vertesia",
         repo: "studio",
         baseBranch: "main",
-        newBranch: `dep-${shortCommit}`,
-    })
+        newBranch: newBranch,
+    });
+    const msg = request.referralPullRequestUrl ? `Update SDK (${request.referralPullRequestUrl})` : "Update SDK";
+
+    await updateGitSubmodule({
+        org: "vertesia",
+        repo: "studio",
+        branch: newBranch,
+        path: "composableai",
+        submoduleSha: request.commit,
+        commitMessage: msg,
+    });
 
     return {
         ref: resp.ref,

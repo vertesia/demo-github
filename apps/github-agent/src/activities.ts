@@ -291,6 +291,46 @@ export async function createGitBranch(request: CreateGitBranchRequest): Promise<
     }
 }
 
+export type UpdateGitSubmoduleRequest = {
+    org: string,
+    repo: string,
+    branch: string,
+    path: string,
+    submoduleSha: string,
+    commitMessage: string,
+}
+export type UpdateGitSubmoduleResponse = {
+}
+export async function updateGitSubmodule(request: UpdateGitSubmoduleRequest): Promise<UpdateGitSubmoduleResponse> {
+    log.info(`Updating submodule ${request.org}/${request.repo} to ${request.submoduleSha}`);
+    const app = await VertesiaGithubApp.getInstance();
+    const octokit = await app.getRestClient();
+
+    const treeResp = await octokit.rest.git.createTree({
+        owner: request.org,
+        repo: request.repo,
+        base_tree: request.branch,
+        tree: [
+            {
+                "path": request.path,
+                "mode": "160000",
+                "type": "commit",
+                "sha": request.submoduleSha,
+            }
+        ],
+    });
+
+    const commitResp = await octokit.rest.git.createCommit({
+        owner: request.org,
+        repo: request.repo,
+        message: request.commitMessage,
+        tree: treeResp.data.sha,
+    });
+
+    log.info(`Submodule updated: ${commitResp.data.sha}`, { response: commitResp });
+    return {};
+}
+
 async function createVertesiaClient(): Promise<VertesiaClient> {
     const vault = createSecretProvider(SupportedCloudEnvironments.gcp)
     const apiKey = await vault.getSecret('release-notes-api-key');
