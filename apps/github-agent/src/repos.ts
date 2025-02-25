@@ -1,5 +1,6 @@
 export type RepoSpec = {
     supportMultipleFeatures: boolean;
+    supportCodeReview: boolean;
     supportDeploymentSummary: boolean;
     supportDiffSummary: boolean;
     codeStructure: string | undefined;
@@ -29,18 +30,21 @@ The Git repository is a pnpm workspace, organized in the following ways:
 const repoFeatures: Record<string, RepoSpec> = {
     'vertesia/composableai': {
         supportMultipleFeatures: false,
+        supportCodeReview: true,
         supportDeploymentSummary: false,
         supportDiffSummary: true,
         codeStructure: undefined,
     },
     'vertesia/demo-github': {
         supportMultipleFeatures: false,
+        supportCodeReview: true,
         supportDeploymentSummary: false,
         supportDiffSummary: true,
         codeStructure: codeStructureDemoGithub,
     },
     'vertesia/studio': {
         supportMultipleFeatures: true,
+        supportCodeReview: true,
         supportDeploymentSummary: true,
         supportDiffSummary: true,
         codeStructure: codeStructureStudio,
@@ -52,6 +56,7 @@ export function getRepoFeatures(owner: string, repo: string): RepoSpec {
     if (!repoFeatures[fullName]) {
         return {
             supportMultipleFeatures: false,
+            supportCodeReview: false,
             supportDeploymentSummary: false,
             supportDiffSummary: false,
             codeStructure: undefined,
