@@ -523,3 +523,5 @@ export async function startCodeReview(ctx: AssistantContext) {
         });
     }
 }
+
+export * from "./workflows/submodule.js";
