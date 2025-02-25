@@ -9,9 +9,9 @@ import {
 import * as activities from "./activities.js";
 import {
     getUserFlags,
-    UserFeatures,
     isCodeReviewEnabledForFile,
     supportedExtensions,
+    UserFeatures,
 } from "./flags.js";
 import { getRepoFeatures, isAgentEnabled } from "./repos.js";
 
