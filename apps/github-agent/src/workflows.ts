@@ -97,11 +97,15 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
     // Register the signal handler
     setHandler(updatePullRequestSignal, async (updateReq: ReviewPullRequestRequest) => {
         log.info('Signal updatePullRequestSignal received', { request: updateReq, pull_request_ctx: ctx });
-        if (updateReq.githubEventType === 'pull_request') {
-            prEvent = updateReq.githubEvent;
-            await handlePullRequestEvent(ctx, prEvent, userFlags);
-        } else if (updateReq.githubEventType === 'issue_comment') {
-            await handleCommentEvent(ctx, updateReq.githubEvent);
+        try {
+            if (updateReq.githubEventType === 'pull_request') {
+                prEvent = updateReq.githubEvent;
+                await handlePullRequestEvent(ctx, prEvent, userFlags);
+            } else if (updateReq.githubEventType === 'issue_comment') {
+                await handleCommentEvent(ctx, updateReq.githubEvent);
+            }
+        } catch (err) {
+            log.error('Failed to handle the signal', { error: err, pull_request_ctx: ctx });
         }
     });
 
