@@ -87,7 +87,7 @@ export async function updateSdkSubmodule(request: UpdateSdkSubmoduleRequest): Pr
         org: "vertesia",
         repo: "studio",
         sha: commitResp.sha,
-        branchName: `dep-${shortCommit}`,
+        branchName: `sdk-${shortCommit}`,
     });
 
     return {
