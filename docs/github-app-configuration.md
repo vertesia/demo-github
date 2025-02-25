@@ -20,5 +20,14 @@ Workflow | Workflow run | Workflow run requested or completed on a repository. |
 
 ## Permissions
 
-* **Read** access to Dependabot alerts, actions, actions variables, administration, attestations api, checks, code, codespaces, codespaces lifecycle admin, codespaces metadata, commit statuses, deployments, discussions, environments, merge queues, metadata, packages, pages, repository advisories, repository custom properties, repository hooks, secret scanning alerts, and security events
-* **Read** and **write** access to issues, pull requests, and repository projects
+The list of permissions required for this application (see https://github.com/organizations/vertesia/settings/installations/61085579):
+
+* **Read** access to Dependabot alerts, actions, actions variables, administration, attestations api, checks, codespaces, codespaces lifecycle admin, codespaces metadata, commit statuses, deployments, discussions, environments, merge queues, metadata, packages, pages, repository advisories, repository custom properties, repository hooks, secret scanning alerts, and security events
+* **Read** and **write** access to code, issues, pull requests, and repository projects
+
+Reasons for having **read and write** permission:
+
+* **code**: this is necessary for creating a new branch and submitting changes to maintain certain files, such as the Git submodule of `composableai` in `studio`.
+* **issues**: this is necessary for creating automation around project management
+* **pull requests**: this is necessary for writing comments and creating a code review in a pull request.
+* **repository projects**: this is necessary for creating automation around project management
