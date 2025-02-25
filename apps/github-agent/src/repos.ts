@@ -29,14 +29,14 @@ The Git repository is a pnpm workspace, organized in the following ways:
 
 const repoFeatures: Record<string, RepoSpec> = {
     'vertesia/composableai': {
-        supportMultipleFeatures: false,
+        supportMultipleFeatures: true,
         supportCodeReview: true,
         supportDeploymentSummary: false,
         supportDiffSummary: true,
         codeStructure: undefined,
     },
     'vertesia/demo-github': {
-        supportMultipleFeatures: false,
+        supportMultipleFeatures: true,
         supportCodeReview: true,
         supportDeploymentSummary: false,
         supportDiffSummary: true,
