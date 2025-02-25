@@ -7,7 +7,12 @@ import {
     workflowInfo,
 } from "@temporalio/workflow";
 import * as activities from "./activities.js";
-import { getUserFlags, UserFeatures, isCodeReviewEnabledForFile } from "./flags.js";
+import {
+    getUserFlags,
+    UserFeatures,
+    isCodeReviewEnabledForFile,
+    supportedExtensions,
+} from "./flags.js";
 import { getRepoFeatures, isAgentEnabled } from "./repos.js";
 
 const {
@@ -469,11 +474,15 @@ export async function startCodeReview(ctx: AssistantContext) {
         });
     const commentsPerFile = await Promise.all(commentPromises);
     const comments: activities.PullRequestReviewComment[] = commentsPerFile.reduce((acc, f) => acc.concat(f), []);
+    const body = comments.length == 0
+        ? `Currently, the code review only supports the following file extensions: ${supportedExtensions.map(v => '`' + v + '`').join(', ')}.`
+        : undefined;
 
     createPullRequestReview({
         org: ctx.pullRequest.org,
         repo: ctx.pullRequest.repo,
         pullRequestNumber: ctx.pullRequest.number,
+        body: body,
         comments: comments,
     });
 }
