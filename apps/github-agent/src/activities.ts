@@ -255,6 +255,42 @@ export async function createPullRequestReview(request: CreatePullRequestReviewRe
     }
 }
 
+export type CreateGitBranchRequest = {
+    org: string,
+    repo: string,
+    baseBranch: string,
+    newBranch: string,
+}
+export type CreateGitBranchResponse = {
+    status: string,
+    ref: string,
+    sha: string,
+}
+export async function createGitBranch(request: CreateGitBranchRequest): Promise<CreateGitBranchResponse> {
+    log.info(`Creating new branch ${request.newBranch} from the base branch ${request.baseBranch} in ${request.org}/${request.repo}`);
+    const app = await VertesiaGithubApp.getInstance();
+    const octokit = await app.getRestClient();
+
+    const getResp = await octokit.rest.git.getRef({
+        owner: request.org,
+        repo: request.repo,
+        ref: `heads/${request.baseBranch}`,
+    });
+    const createResp = await octokit.rest.git.createRef({
+        owner: request.org,
+        repo: request.repo,
+        sha: getResp.data.object.sha,
+        ref: `refs/heads/${request.newBranch}`,
+    });
+
+    log.info(`Branch created: ${createResp.data.ref} (${getResp.data.object.sha})`, { response: createResp });
+    return {
+        status: "success",
+        ref: createResp.data.ref,
+        sha: createResp.data.object.sha,
+    }
+}
+
 async function createVertesiaClient(): Promise<VertesiaClient> {
     const vault = createSecretProvider(SupportedCloudEnvironments.gcp)
     const apiKey = await vault.getSecret('release-notes-api-key');
