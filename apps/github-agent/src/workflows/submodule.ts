@@ -73,7 +73,7 @@ export async function updateSdkSubmodule(request: UpdateSdkSubmoduleRequest): Pr
     await updateGitSubmodule({
         org: "vertesia",
         repo: "studio",
-        branch: newBranch,
+        sha: newBranch,
         path: "composableai",
         submoduleSha: request.commit,
         commitMessage: msg,
