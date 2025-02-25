@@ -69,7 +69,7 @@ export async function generatePullRequestSummary(request: GeneratePullRequestSum
 
     const vertesiaClient = await createVertesiaClient();
     const execResp = await vertesiaClient.interactions.executeByName<any, string>(
-        'SummarizeCodeDiff',
+        'GithubSummarizeCodeDiff',
         {
             data: {
                 code_diff: diff,

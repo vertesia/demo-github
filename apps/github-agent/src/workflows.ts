@@ -148,10 +148,8 @@ type PullRequestContext = {
      *
      * This is useful for submitting a code review. On GitHub, each code review must be attached
      * to a commit. This field is marked as optional for backward compatibility reason.
-     *
-     * FIXME: This should be required.
      */
-    commitSha?: string;
+    commitSha: string;
 }
 
 type DeploymentSpec = {
