@@ -52,3 +52,13 @@ export function getUserFlags(opts: getUserFlagsOptions): UserFeatures | undefine
     }
     return enabledUsers[opts.userId];
 }
+
+export function isCodeReviewEnabledForFile(filepath: string): boolean {
+    const supportedExtensions = [
+        '.ts',
+        '.tsx',
+        '.js',
+        '.jsx',
+    ];
+    return supportedExtensions.some((ext) => filepath.endsWith(ext));
+}
