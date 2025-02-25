@@ -6,6 +6,8 @@ import { getRepoFeatures } from './repos.js';
 import {
     VertesiaReviewFilePatchRequest,
     VertesiaReviewFilePatchResponse,
+    VertesiaSummarizeCodeDiffRequest,
+    VertesiaSummarizeCodeDiffResponse,
 } from './vertesia.js';
 
 export async function helloActivity() {
@@ -57,9 +59,11 @@ export type GeneratePullRequestSummaryRequest = {
     owner: string,
     repo: string,
     pullRequestNumber: number,
+    isBreakdownEnabled?: boolean,
 }
 export type GeneratePullRequestSummaryResponse = {
     summary: string,
+    breakdown?: string,
 }
 export async function generatePullRequestSummary(request: GeneratePullRequestSummaryRequest): Promise<GeneratePullRequestSummaryResponse> {
     const app = await VertesiaGithubApp.getInstance();
@@ -67,25 +71,53 @@ export async function generatePullRequestSummary(request: GeneratePullRequestSum
     let diff = diffResp.data as unknown as string;
     log.info(`Got diff for pull request ${request.owner}/${request.repo}/${request.pullRequestNumber}: ${diff.length} characters`);
 
-    const vertesiaClient = await createVertesiaClient();
-    const execResp = await vertesiaClient.interactions.executeByName<any, string>(
-        'GithubSummarizeCodeDiff@2',
-        {
-            data: {
-                code_diff: diff,
-                code_structure: getRepoFeatures(request.owner, request.repo).codeStructure,
-            }
-        },
-    );
-    log.info("Got summary from Vertesia", { respose: execResp });
+    const vertesiaRequest = {
+        code_diff: diff,
+        code_structure: getRepoFeatures(request.owner, request.repo).codeStructure,
+    };
 
-    let summary = execResp.result;
+    const vertesiaClient = await createVertesiaClient();
+    let summary;
+    let breakdown;
+
+    if (request.isBreakdownEnabled) {
+        const execResp = await vertesiaClient.interactions.executeByName<
+            VertesiaSummarizeCodeDiffRequest,
+            VertesiaSummarizeCodeDiffResponse
+        >(
+            'GithubSummarizeCodeDiff@3',
+            { data: vertesiaRequest },
+        );
+        log.info("Got summary from Vertesia", { respose: execResp });
+        summary = execResp.result.summary;
+
+        let breakdown = "Here is a breakdown of the changes:\n\n";
+        breakdown += `Path | Description\n`;
+        breakdown += `---- | -----------\n`;
+        for (let change of execResp.result.changes) {
+            const id = '`' + change.path_or_glob + '`';
+            breakdown += `${id} | ${change.description}\n`;
+        }
+    } else {
+        const execResp = await vertesiaClient.interactions.executeByName<
+            any,
+            string
+        >(
+            'GithubSummarizeCodeDiff@2',
+            { data: vertesiaRequest },
+        );
+        log.info("Got summary from Vertesia", { respose: execResp });
+        summary = execResp.result;
+    }
+
     if (summary.length > 5000) {
         log.warn("Summary is too long, truncating", { length: summary.length });
         summary = summary.substring(0, 5000) + "...";
     }
+
     return {
         summary: summary,
+        breakdown: breakdown,
     };
 }
 
