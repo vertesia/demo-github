@@ -478,11 +478,30 @@ export async function startCodeReview(ctx: AssistantContext) {
         ? `Currently, the code review only supports the following file extensions: ${supportedExtensions.map(v => '`' + v + '`').join(', ')}.`
         : undefined;
 
-    createPullRequestReview({
-        org: ctx.pullRequest.org,
-        repo: ctx.pullRequest.repo,
-        pullRequestNumber: ctx.pullRequest.number,
-        body: body,
-        comments: comments,
-    });
+    let postFailure = false;
+
+    try {
+        await createPullRequestReview({
+            org: ctx.pullRequest.org,
+            repo: ctx.pullRequest.repo,
+            pullRequestNumber: ctx.pullRequest.number,
+            body: body,
+            comments: comments,
+        });
+    } catch (err) {
+        log.error('Failed to create a pull request review. Posting a warning to GitHub',
+            { error: err, pull_request_ctx: ctx },
+        );
+        postFailure = true;
+    }
+
+    if (postFailure) {
+        await createPullRequestReview({
+            org: ctx.pullRequest.org,
+            repo: ctx.pullRequest.repo,
+            pullRequestNumber: ctx.pullRequest.number,
+            body: 'Failed to create a code review. Please check the workflow execution for more details.',
+            comments: [],
+        });
+    }
 }
