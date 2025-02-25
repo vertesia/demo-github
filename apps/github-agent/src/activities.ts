@@ -292,11 +292,44 @@ export async function createGitBranch(request: CreateGitBranchRequest): Promise<
 }
 
 export type UpdateGitSubmoduleRequest = {
+    /**
+     * The organization name.
+     *
+     * @example "vertesia"
+     */
     org: string,
+
+    /**
+     * The repository name.
+     *
+     * @example "studio"
+     */
     repo: string,
-    branch: string,
+
+    /**
+     * The commit SHA1 based on which the tree should be created.
+     *
+     * @example "a3ea9d4a9b5e437f20285b5151c9babca12f50e0"
+     */
+    sha: string,
+
+    /**
+     * The path to the submodule.
+     *
+     * @example "composableai"
+     */
     path: string,
+
+    /**
+     * The commit SHA1 of the submodule.
+     *
+     * @example "74e06523646661b052f19a2a79dfc20d9eca3e60"
+     */
     submoduleSha: string,
+
+    /**
+     * The message for the new commit.
+     */
     commitMessage: string,
 }
 export type UpdateGitSubmoduleResponse = {
@@ -309,7 +342,7 @@ export async function updateGitSubmodule(request: UpdateGitSubmoduleRequest): Pr
     const treeResp = await octokit.rest.git.createTree({
         owner: request.org,
         repo: request.repo,
-        base_tree: request.branch,
+        base_tree: request.sha,
         tree: [
             {
                 "path": request.path,
