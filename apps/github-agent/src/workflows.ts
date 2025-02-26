@@ -226,7 +226,7 @@ function toGithubComment(ctx: AssistantContext): string {
     if (repo.supportCodeReview) {
         comment += '\n\n';
         comment += '## Code Review\n\n';
-        comment += 'You can start a code review by mentioning "Vertesia, please review".';
+        comment += 'You can start a code review by adding a comment "Vertesia, please review".';
     }
     return comment.trim();
 }
