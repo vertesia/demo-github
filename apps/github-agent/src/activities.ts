@@ -9,6 +9,7 @@ import {
     VertesiaSummarizeCodeDiffResponse,
 } from './activities/vertesia.js';
 import { getRepoFeatures } from './repos.js';
+import { HunkSet } from './activities/patch.js';
 
 export async function helloActivity() {
     log.info("Hello, World!");
@@ -164,8 +165,15 @@ export type PullRequestReviewComment = {
     body: string,
     line?: number,
     side?: string,
-    start_line?: number,
-    start_side?: string,
+    startLine?: number,
+    startSide?: string,
+
+    /**
+     * Whether the comment is applicable to a specific line.
+     *
+     * This is an internal check before submitting the code review comments to GitHub.
+     */
+    applicable: boolean,
 }
 
 export type ReviewPullRequestPatchRequest = {
@@ -194,6 +202,7 @@ export async function reviewPullRequestPatch(request: ReviewPullRequestPatchRequ
         file_path: request.filePath,
         pull_request_description: request.pullRequestDescription,
     };
+    const hunks = HunkSet.parse(request.filePatch);
     const execResp = await vertesiaClient.interactions.executeByName<
         VertesiaReviewFilePatchRequest,
         VertesiaReviewFilePatchResponse
@@ -203,14 +212,29 @@ export async function reviewPullRequestPatch(request: ReviewPullRequestPatchRequ
     );
 
     const comments: PullRequestReviewComment[] = execResp.result.comments.map((c) => {
-        return {
+        const comment: PullRequestReviewComment = {
             filePath: request.filePath,
             body: c.body,
             line: c.line,
             side: c.side,
-            start_line: c.start_line,
-            start_side: c.start_side,
+            startLine: c.start_line,
+            startSide: c.start_side,
+            applicable: false,
         };
+
+        // validation
+        if (c.line) {
+            comment.applicable = hunks.isLineValid(c.side, c.line);
+        }
+        if (c.start_line) {
+            comment.applicable = hunks.isLineValid(c.start_side, c.start_line);
+        }
+
+        if (!comment.applicable) {
+            log.warn("Comment may not be applicable to the diff", { comment: c });
+        }
+
+        return comment;
     });
 
     return {
@@ -245,8 +269,8 @@ export async function createPullRequestReview(request: CreatePullRequestReviewRe
                 body: c.body,
                 line: c.line,
                 side: c.side,
-                start_line: c.start_line,
-                start_side: c.start_side,
+                start_line: c.startLine,
+                start_side: c.startSide,
             };
         }),
     });
