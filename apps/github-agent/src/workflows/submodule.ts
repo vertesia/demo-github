@@ -79,14 +79,15 @@ export async function updateSdkSubmodule(request: UpdateSdkSubmoduleRequest): Pr
         ref: `heads/main`,
     });
 
-    const msg = request.referralPullRequestUrl ? `Update SDK (${request.referralPullRequestUrl})` : "Update SDK";
     const commitResp = await updateGitSubmodule({
         org: "vertesia",
         repo: "studio",
         sha: refResp.sha,
         path: "composableai",
         submoduleSha: request.commit,
-        commitMessage: msg,
+        // We don't include the PR/issue number in the commit message because we already mentioned
+        // it in the pull request.
+        commitMessage: "Update SDK",
     });
 
     const branchResp = await createGitBranch({
