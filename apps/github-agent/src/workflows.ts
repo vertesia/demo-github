@@ -495,7 +495,9 @@ async function startCodeReview(ctx: AssistantContext) {
             return resp.comments;
         });
     const commentsPerFile = await Promise.all(commentPromises);
-    const comments: activities.PullRequestReviewComment[] = commentsPerFile.reduce((acc, f) => acc.concat(f), []);
+    const comments: activities.PullRequestReviewComment[] = commentsPerFile
+        .reduce((acc, f) => acc.concat(f), [])
+        .filter((c) => c.applicable);
     const body = comments.length == 0
         ? `Currently, the code review only supports the following file extensions: ${supportedExtensions.map(v => '`' + v + '`').join(', ')}.`
         : undefined;
