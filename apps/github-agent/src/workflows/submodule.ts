@@ -98,12 +98,9 @@ export async function updateSdkSubmodule(request: UpdateSdkSubmoduleRequest): Pr
 
     let body = request.pullRequestDescription;
     if (!body) {
-        body = `Update Git submodule composableai to commit https://github.com/vertesia/composableai/commit/${shortCommit}.`;
+        body = `Update Git submodule composableai to https://github.com/vertesia/composableai/commit/${shortCommit}.`;
         if (request.referralPullRequestUrl) {
             body += ` This is related to:\n\n* ${request.referralPullRequestUrl}\n`;
-        }
-        if (request.test === true) {
-            body += "\n\nThis is a test pull request.";
         }
     }
     const prResp = await createPullRequest({
