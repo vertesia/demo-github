@@ -85,7 +85,7 @@ export async function generatePullRequestSummary(request: GeneratePullRequestSum
             VertesiaSummarizeCodeDiffRequest,
             VertesiaSummarizeCodeDiffResponse
         >(
-            'GithubSummarizeCodeDiff@3',
+            'GithubSummarizeCodeDiff@4',
             { data: vertesiaRequest },
         );
         log.info("Got summary from Vertesia", { respose: execResp });
