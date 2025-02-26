@@ -448,6 +448,29 @@ export async function createPullRequest(request: CreatePullRequestRequest): Prom
     }
 }
 
+export type AddAssigneesToPullRequestRequest = {
+    org: string,
+    repo: string,
+    pullRequestNumber: number,
+    assignees: string[],
+}
+export type AddAssigneesToPullRequestResponse = {
+}
+export async function addAssigneesToPullRequest(request: AddAssigneesToPullRequestRequest): Promise<AddAssigneesToPullRequestResponse> {
+    log.info(`Assigning users to pull request ${request.org}/${request.repo}/pull/${request.pullRequestNumber}`, { request: request });
+    const app = await VertesiaGithubApp.getInstance();
+    const octokit = await app.getRestClient();
+
+    await octokit.rest.issues.addAssignees({
+        owner: request.org,
+        repo: request.repo,
+        issue_number: request.pullRequestNumber,
+        assignees: request.assignees,
+    });
+
+    return {};
+}
+
 async function createVertesiaClient(): Promise<VertesiaClient> {
     const vault = createSecretProvider(SupportedCloudEnvironments.gcp)
     const apiKey = await vault.getSecret('release-notes-api-key');
