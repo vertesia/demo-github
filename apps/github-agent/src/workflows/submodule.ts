@@ -5,6 +5,7 @@ import {
 import * as activities from "../activities.js";
 
 const {
+    addAssigneesToPullRequest,
     createGitBranch,
     createPullRequest,
     getGitRef,
@@ -28,6 +29,8 @@ export type UpdateSdkSubmoduleRequest = {
 
     /**
      * The URL to the pull request that triggered the submodule update.
+     *
+     * @example "https://github.com/vertesia/composableai/pull/113"
      */
     referralPullRequestUrl?: string;
 
@@ -40,6 +43,15 @@ export type UpdateSdkSubmoduleRequest = {
      * The description of the pull request.
      */
     pullRequestDescription?: string;
+
+    /**
+     * The user or service that triggered the workflow.
+     *
+     * It should be the creator of the pull request.
+     *
+     * @example "mincong-h"
+     */
+    triggeredBy?: string;
 
     /**
      * Whether the workflow is running in test mode.
@@ -113,6 +125,15 @@ export async function updateSdkSubmodule(request: UpdateSdkSubmoduleRequest): Pr
         base: "main",
         draft: request.test === true,
     })
+
+    if (request.triggeredBy) {
+        addAssigneesToPullRequest({
+            org: "vertesia",
+            repo: "studio",
+            pullRequestNumber: prResp.number,
+            assignees: [request.triggeredBy],
+        });
+    }
 
     return {
         ref: branchResp.ref,
