@@ -159,11 +159,10 @@ type PullRequestContext = {
     commentId: number | undefined;
     /**
      * This is the latest commit pushed to the pull request.
-     *
-     * This is useful for submitting a code review. On GitHub, each code review must be attached
-     * to a commit. This field is marked as optional for backward compatibility reason.
      */
     commitSha: string;
+    title: string;
+    body: string;
 }
 
 type DeploymentSpec = {
@@ -301,6 +300,8 @@ function computePullRequestContext(prEvent: any): PullRequestContext {
         diffUrl: prEvent.pull_request.diff_url,
         commentId: undefined,
         commitSha: prEvent.pull_request.head.sha,
+        title: prEvent.pull_request.title ?? "",
+        body: prEvent.pull_request.body ?? "",
     };
 }
 
@@ -403,6 +404,8 @@ async function handlePullRequestEvent(ctx: AssistantContext, prEvent: any, userF
 
     // update context
     ctx.pullRequest.commitSha = prEvent.pull_request.head.sha;
+    ctx.pullRequest.title = prEvent.pull_request.title ?? "";
+    ctx.pullRequest.body = prEvent.pull_request.body ?? "";
     if (!ctx.pullRequest.commentId) {
         ctx.pullRequest.commentId = commentId;
     }
@@ -474,7 +477,7 @@ export function extractStudioUiUrl(content: string): string | null {
     return null;
 }
 
-export async function startCodeReview(ctx: AssistantContext) {
+async function startCodeReview(ctx: AssistantContext) {
     const resp = await listFilesInPullRequest({
         org: ctx.pullRequest.org,
         repo: ctx.pullRequest.repo,
@@ -487,6 +490,7 @@ export async function startCodeReview(ctx: AssistantContext) {
             const resp = await reviewPullRequestPatch({
                 filePath: file.filename,
                 filePatch: file.patch,
+                pullRequestDescription: `${ctx.pullRequest.title}\n\n${ctx.pullRequest.body}`,
             });
             return resp.comments;
         });

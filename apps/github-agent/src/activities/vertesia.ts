@@ -15,8 +15,18 @@
  * @see https://preview.cloud.vertesia.io/studio/interactions/67b853cd7941dee93c9b0632?p=654df9de09676ad3b8631dc3&a=652d77895674c387e105948c#params
  */
 export type VertesiaReviewFilePatchRequest = {
+    /**
+     * @since 1
+     */
     file_path: string,
+    /**
+     * @since 1
+     */
     file_patch: string,
+    /**
+     * @since 2
+     */
+    pull_request_description?: string,
 }
 
 /**

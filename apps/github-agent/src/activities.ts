@@ -179,6 +179,10 @@ export type ReviewPullRequestPatchRequest = {
      * The patch applied to the file, extracted from the git-diff.
      */
     filePatch: string,
+    /**
+     * The description of the pull request, including the title and the body.
+     */
+    pullRequestDescription: string,
 }
 export type ReviewPullRequestPatchResponse = {
     status: string,
@@ -189,12 +193,13 @@ export async function reviewPullRequestPatch(request: ReviewPullRequestPatchRequ
     const params: VertesiaReviewFilePatchRequest = {
         file_patch: request.filePatch,
         file_path: request.filePath,
+        pull_request_description: request.pullRequestDescription,
     };
     const execResp = await vertesiaClient.interactions.executeByName<
         VertesiaReviewFilePatchRequest,
         VertesiaReviewFilePatchResponse
     >(
-        'GithubReviewFilePatch@1',
+        'GithubReviewFilePatch@2',
         { data: params },
     );
 
