@@ -198,7 +198,7 @@ export async function reviewPullRequestPatch(request: ReviewPullRequestPatchRequ
         VertesiaReviewFilePatchRequest,
         VertesiaReviewFilePatchResponse
     >(
-        'GithubReviewFilePatch@4',
+        'GithubReviewFilePatch@5',
         { data: params },
     );
 
