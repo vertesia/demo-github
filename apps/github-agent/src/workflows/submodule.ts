@@ -127,12 +127,17 @@ export async function updateSdkSubmodule(request: UpdateSdkSubmoduleRequest): Pr
     })
 
     if (request.triggeredBy) {
-        addAssigneesToPullRequest({
-            org: "vertesia",
-            repo: "studio",
-            pullRequestNumber: prResp.number,
-            assignees: [request.triggeredBy],
-        });
+        try {
+            await addAssigneesToPullRequest({
+                org: "vertesia",
+                repo: "studio",
+                pullRequestNumber: prResp.number,
+                assignees: [request.triggeredBy],
+            });
+        } catch (err) {
+            // We don't want to fail the workflow if we can't add assignees to the pull request.
+            log.error("Failed to add assignees to pull request", { error: err });
+        }
     }
 
     return {
