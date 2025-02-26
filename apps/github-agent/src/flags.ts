@@ -10,31 +10,31 @@ const enabledUsers: Record<string, UserFeatures> = {
         isCodeReviewEnabled: true,
         isDeploymentSummaryEnabled: true,
         isDiffSummaryEnabled: true,
-        isDiffSummaryBreakdownEnabled: false,
+        isDiffSummaryBreakdownEnabled: true,
     },
     'bstefanescu': {
         isCodeReviewEnabled: true,
         isDeploymentSummaryEnabled: true,
         isDiffSummaryEnabled: true,
-        isDiffSummaryBreakdownEnabled: false,
+        isDiffSummaryBreakdownEnabled: true,
     },
     'ebarroca': {
         isCodeReviewEnabled: true,
         isDeploymentSummaryEnabled: true,
         isDiffSummaryEnabled: true,
-        isDiffSummaryBreakdownEnabled: false,
+        isDiffSummaryBreakdownEnabled: true,
     },
     'LeonRuggiero': {
         isCodeReviewEnabled: true,
         isDeploymentSummaryEnabled: true,
         isDiffSummaryEnabled: true,
-        isDiffSummaryBreakdownEnabled: false,
+        isDiffSummaryBreakdownEnabled: true,
     },
     'loopingz': {
         isCodeReviewEnabled: true,
         isDeploymentSummaryEnabled: true,
         isDiffSummaryEnabled: true,
-        isDiffSummaryBreakdownEnabled: false,
+        isDiffSummaryBreakdownEnabled: true,
     },
     'mincong-h': {
         isCodeReviewEnabled: true,
@@ -46,7 +46,7 @@ const enabledUsers: Record<string, UserFeatures> = {
         isCodeReviewEnabled: true,
         isDeploymentSummaryEnabled: true,
         isDiffSummaryEnabled: true,
-        isDiffSummaryBreakdownEnabled: false,
+        isDiffSummaryBreakdownEnabled: true,
     },
 };
 
