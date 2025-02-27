@@ -147,7 +147,7 @@ export async function generatePullRequestPurpose(request: GeneratePullRequestPur
         VertesiaDeterminePullRequestPurposeRequest,
         VertesiaDeterminePullRequestPurposeResponse
     >(
-        'GithubDeterminePullRequestPurpose@1',
+        'GithubDeterminePullRequestPurpose@2',
         { data: vertesiaRequest },
     );
     log.info("Got purpose response from Vertesia", { respose: resp });
