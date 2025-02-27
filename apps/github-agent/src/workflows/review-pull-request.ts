@@ -158,7 +158,7 @@ type PullRequestContext = {
     commitSha: string;
     title: string;
     body: string;
-    relatedIssues: GithubIssue[];
+    relatedIssues: Record<string, GithubIssue>;
 }
 
 type DeploymentSpec = {
@@ -298,7 +298,7 @@ function computePullRequestContext(prEvent: any): PullRequestContext {
         commitSha: prEvent.pull_request.head.sha,
         title: prEvent.pull_request.title ?? "",
         body: prEvent.pull_request.body ?? "",
-        relatedIssues: [],
+        relatedIssues: {},
     };
 }
 
@@ -418,6 +418,16 @@ async function loadGithubIssues(ctx: AssistantContext) {
         body: ctx.pullRequest.body,
     });
 
+    const alreadyLoaded = issueRefs.every((ref) => {
+        return ctx.pullRequest.relatedIssues[ref.toHtmlUrl()] !== undefined;
+    });
+
+    if (alreadyLoaded) {
+        log.info('Skip loading GitHub issues because they are already loaded', { pull_request_ctx: ctx });
+        return;
+    }
+
+    log.info('Loading GitHub issues', { pull_request_ctx: ctx, issue_refs: issueRefs });
     const issues = await Promise.all(issueRefs.map(async (ref) => {
         return await getGithubIssue({
             org: ref.org,
@@ -433,8 +443,13 @@ async function loadGithubIssues(ctx: AssistantContext) {
             number: issue.number,
             title: issue.title,
             body: issue.body,
-        };
-    });
+        } as GithubIssue;
+    }).reduce((acc, issue) => {
+        const url = `https://github.com/${issue.org}/${issue.repo}/issues/${issue.number}`;
+        acc[url] = issue;
+        return acc;
+    }, {} as Record<string, GithubIssue>);
+    log.info('Loaded GitHub issues', { pull_request_ctx: ctx, issues: ctx.pullRequest.relatedIssues });
 }
 
 async function handleCommentEvent(ctx: AssistantContext, commentEvent: any): Promise<void> {
