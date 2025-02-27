@@ -14,6 +14,7 @@ import {
     UserFeatures,
 } from "../flags.js";
 import { getRepoFeatures, isAgentEnabled } from "../repos.js";
+import { GithubIssue } from "./types.js";
 
 const {
     // pull request
@@ -155,6 +156,7 @@ type PullRequestContext = {
     commitSha: string;
     title: string;
     body: string;
+    relatedIssues: GithubIssue[];
 }
 
 type DeploymentSpec = {
@@ -294,6 +296,7 @@ function computePullRequestContext(prEvent: any): PullRequestContext {
         commitSha: prEvent.pull_request.head.sha,
         title: prEvent.pull_request.title ?? "",
         body: prEvent.pull_request.body ?? "",
+        relatedIssues: [],
     };
 }
 
