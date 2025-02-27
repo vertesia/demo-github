@@ -505,36 +505,38 @@ async function loadGithubIssues(ctx: AssistantContext) {
 
     if (alreadyLoaded) {
         log.info('Skip loading GitHub issues because they are already loaded', { pull_request_ctx: ctx });
-        return;
+    } else {
+        log.info('Loading GitHub issues', { pull_request_ctx: ctx, issue_refs: issueRefs });
+        const issues = await Promise.all(issueRefs.map(async (ref) => {
+            return await getGithubIssue({
+                org: ref.org,
+                repo: ref.repo,
+                number: ref.number,
+            });
+        }));
+
+        ctx.pullRequest.relatedIssues = issues.map((issue) => {
+            return {
+                org: issue.org,
+                repo: issue.repo,
+                number: issue.number,
+                title: issue.title,
+                body: issue.body,
+            } as GithubIssue;
+        }).reduce((acc, issue) => {
+            const url = `https://github.com/${issue.org}/${issue.repo}/issues/${issue.number}`;
+            acc[url] = issue;
+            return acc;
+        }, {} as Record<string, GithubIssue>);
+
+        log.info('Loaded GitHub issues.', { pull_request_ctx: ctx, issues: ctx.pullRequest.relatedIssues });
     }
 
-    log.info('Loading GitHub issues', { pull_request_ctx: ctx, issue_refs: issueRefs });
-    const issues = await Promise.all(issueRefs.map(async (ref) => {
-        return await getGithubIssue({
-            org: ref.org,
-            repo: ref.repo,
-            number: ref.number,
+    log.info('Generating pull request purpose', { pull_request_ctx: ctx });
+    const issueDescriptions = Object.values(ctx.pullRequest.relatedIssues)
+        .map((issue) => {
+            return `${issue.title}\n\n${issue.body}`;
         });
-    }));
-
-    ctx.pullRequest.relatedIssues = issues.map((issue) => {
-        return {
-            org: issue.org,
-            repo: issue.repo,
-            number: issue.number,
-            title: issue.title,
-            body: issue.body,
-        } as GithubIssue;
-    }).reduce((acc, issue) => {
-        const url = `https://github.com/${issue.org}/${issue.repo}/issues/${issue.number}`;
-        acc[url] = issue;
-        return acc;
-    }, {} as Record<string, GithubIssue>);
-
-    log.info('Loaded GitHub issues. Generating purpose...', { pull_request_ctx: ctx, issues: ctx.pullRequest.relatedIssues });
-    const issueDescriptions = Object.values(ctx.pullRequest.relatedIssues).map((issue) => {
-        return `${issue.title}\n\n${issue.body}`;
-    });
     const prDescription = ctx.pullRequest.title + '\n\n' + ctx.pullRequest.body;
     const resp = await generatePullRequestPurpose({
         org: ctx.pullRequest.org,
