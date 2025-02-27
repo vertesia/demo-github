@@ -225,7 +225,7 @@ export type ReviewPullRequestPatchRequest = {
     /**
      * @deprecated since 2025-02-27, use `pullRequestPurpose` instead
      */
-    pullRequestDescription: string,
+    pullRequestDescription?: string,
     /**
      * The purpose of the pull request, including the motivation and the context.
      */

@@ -631,7 +631,7 @@ async function startCodeReview(ctx: AssistantContext) {
             const resp = await reviewPullRequestPatch({
                 filePath: file.filename,
                 filePatch: file.patch,
-                pullRequestDescription: `${ctx.pullRequest.title}\n\n${ctx.pullRequest.body}`,
+                pullRequestPurpose: `${ctx.pullRequest.motivation}\n\n${ctx.pullRequest.context}`,
             });
             return resp.comments;
         });
