@@ -158,7 +158,18 @@ type PullRequestContext = {
     commitSha: string;
     title: string;
     body: string;
+
     relatedIssues: Record<string, GithubIssue>;
+
+    /**
+     * Why the pull request is created.
+     */
+    motivation?: string;
+
+    /**
+     * What problem the pull request is solving.
+     */
+    context?: string;
 }
 
 type DeploymentSpec = {

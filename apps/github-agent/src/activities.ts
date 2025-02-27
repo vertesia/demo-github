@@ -122,6 +122,33 @@ export async function generatePullRequestSummary(request: GeneratePullRequestSum
     };
 }
 
+export type GeneratePullRequestPurposeRequest = {
+    owner: string,
+    repo: string,
+    number: number,
+    pullRequestDescription: string,
+    issueDescriptions: string[],
+}
+export type GeneratePullRequestPurposeResponse = {
+    motivation: string,
+    context: string,
+    clearness: number, // 1-5
+}
+export function generatePullRequestPurpose(request: GeneratePullRequestPurposeRequest): GeneratePullRequestPurposeResponse {
+    const vertesiaRequest = {
+        pull_request: request.pullRequestDescription,
+        issues: request.issueDescriptions,
+    };
+    log.info("Determining pull request purpose", { request: vertesiaRequest });
+
+    // Mock response
+    return {
+        motivation: "To fix a bug",
+        context: "The bug was reported by a user",
+        clearness: 5,
+    };
+}
+
 export type ListFilesInPullRequestRequest = {
     org: string,
     repo: string,
