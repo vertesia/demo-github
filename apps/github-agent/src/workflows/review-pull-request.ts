@@ -232,29 +232,38 @@ function toGithubComment(ctx: AssistantContext): string {
     if (repo.supportDiffSummary) {
         comment += toGithubCommentDiffSummary(ctx.summary, includeHeader);
     }
+    if (repo.supportPurpose) {
+        comment += toGithubCommentPurpose(ctx.pullRequest, includeHeader);
+    }
     if (repo.supportDeploymentSummary) {
-        comment += '\n\n';
         comment += toGithubCommentDeployment(ctx.deployment, includeHeader);
     }
     if (repo.supportCodeReview) {
-        comment += '\n\n';
-        comment += '## Code Review\n\n';
-        comment += 'You can start a code review by adding a comment "Vertesia, please review".';
+        comment += toGithubCommentCodeReview(ctx.pullRequest);
     }
     return comment.trim();
 }
 
 function toGithubCommentDiffSummary(summary: DiffSummary | undefined, includeHeader: boolean): string {
-    const optionalHeader = includeHeader ? '## Summary\n\n' : '';
+    const optionalHeader = includeHeader ? '## Changes\n\n' : '';
     if (!summary) {
-        return `${optionalHeader}_Summary is not available yet._`;
+        return `${optionalHeader}_Summary is not available yet._\n\n`;
     }
 
     let content = `${optionalHeader}${summary.summary}`;
     if (summary.breakdown) {
         content += `\n\n${summary.breakdown}`;
     }
-    return content;
+    return content + '\n\n';
+}
+
+function toGithubCommentPurpose(pr: PullRequestContext, includeHeader: boolean): string {
+    const optionalHeader = includeHeader ? '## Purpose\n\n' : '';
+    if (!pr.motivation || !pr.context) {
+        return `${optionalHeader}_Purpose is not available yet._`;
+    }
+
+    return `${optionalHeader}\n\n${pr.motivation}\n\n${pr.context}\n\n`;
 }
 
 function toGithubCommentDeployment(spec: DeploymentSpec | undefined, includeHeader: boolean): string {
@@ -273,10 +282,62 @@ function toGithubCommentDeployment(spec: DeploymentSpec | undefined, includeHead
 <details><summary><b>Click here</b> to learn more about your environment.</summary>
 
 ${specJson}
-</details>`;
+</details>
+
+`;
     } else {
-        return `${optionalHeader}Your pull request does not contain a dev environment. To enable a dev environment, please create a branch with the prefix "demo-", or contains keyword "feat" or "fix".`;
+        return `${optionalHeader}Your pull request does not contain a dev environment. To enable a dev environment, please create a branch with the prefix "demo-", or contains keyword "feat" or "fix".\n\n`;
     }
+}
+
+function toGithubCommentCodeReview(ctx: PullRequestContext): string {
+    let comment = '## Code Review\n\n';
+    comment += 'You can start a code review by adding a comment: "Vertesia, please review".\n\n';
+
+    let status: string | undefined;
+    let additionalNote: string | undefined;
+    if (ctx.clearness !== undefined) {
+        switch (ctx.clearness) {
+            case 1:
+                status = 'very unclear (1/5)';
+                additionalNote = 'Note that the motivation and context are rated as ' + status
+                    + ', please explain the motivation and describe the problem to clarify the'
+                    + ' purpose of the pull request. You can provide information in the pull'
+                    + ' request description or link this pull request to a GitHub issue.';
+                break;
+            case 2:
+                status = 'unclear (2/5)';
+                additionalNote = 'Note that the motivation and context are rated as ' + status
+                    + ', please explain the motivation and describe the problem to clarify the'
+                    + ' purpose of the pull request. You can provide information in the pull'
+                    + ' request description or link this pull request to a GitHub issue.';
+                break;
+            case 3:
+                status = 'moderate (3/5)';
+                additionalNote = 'Note that the motivation and context are rated as ' + status
+                    + ', you can improve the motivation and the problem statement to clarify the'
+                    + ' purpose of the pull request. You can provide information in the pull'
+                    + ' request description or link this pull request to a GitHub issue.';
+                break;
+            case 4:
+                status = 'clear (4/5)';
+                additionalNote = 'Note that the motivation and context are rated as ' + status
+                    + '. The agent has a good understanding of the purpose of the pull request.';
+                break;
+            case 5:
+                status = 'very clear (5/5)';
+                additionalNote = 'Note that the motivation and context are rated as ' + status
+                    + '. The agent has a very good understanding of the purpose of the pull request.';
+                break;
+            default:
+                break;
+        }
+    }
+    if (additionalNote) {
+        comment += additionalNote + '\n\n';
+    }
+
+    return comment;
 }
 
 function computeAssistantContext(prEvent: any): AssistantContext {
@@ -436,6 +497,7 @@ async function loadGithubIssues(ctx: AssistantContext) {
         branch: ctx.pullRequest.branch,
         body: ctx.pullRequest.body,
     });
+    log.info(`Found ${issueRefs.length} GitHub issues in the pull request`, { pull_request_ctx: ctx, issue_refs: issueRefs });
 
     const alreadyLoaded = issueRefs.every((ref) => {
         return ctx.pullRequest.relatedIssues[ref.toHtmlUrl()] !== undefined;
@@ -443,36 +505,38 @@ async function loadGithubIssues(ctx: AssistantContext) {
 
     if (alreadyLoaded) {
         log.info('Skip loading GitHub issues because they are already loaded', { pull_request_ctx: ctx });
-        return;
+    } else {
+        log.info('Loading GitHub issues', { pull_request_ctx: ctx, issue_refs: issueRefs });
+        const issues = await Promise.all(issueRefs.map(async (ref) => {
+            return await getGithubIssue({
+                org: ref.org,
+                repo: ref.repo,
+                number: ref.number,
+            });
+        }));
+
+        ctx.pullRequest.relatedIssues = issues.map((issue) => {
+            return {
+                org: issue.org,
+                repo: issue.repo,
+                number: issue.number,
+                title: issue.title,
+                body: issue.body,
+            } as GithubIssue;
+        }).reduce((acc, issue) => {
+            const url = `https://github.com/${issue.org}/${issue.repo}/issues/${issue.number}`;
+            acc[url] = issue;
+            return acc;
+        }, {} as Record<string, GithubIssue>);
+
+        log.info('Loaded GitHub issues.', { pull_request_ctx: ctx, issues: ctx.pullRequest.relatedIssues });
     }
 
-    log.info('Loading GitHub issues', { pull_request_ctx: ctx, issue_refs: issueRefs });
-    const issues = await Promise.all(issueRefs.map(async (ref) => {
-        return await getGithubIssue({
-            org: ref.org,
-            repo: ref.repo,
-            number: ref.number,
+    log.info('Generating pull request purpose', { pull_request_ctx: ctx });
+    const issueDescriptions = Object.values(ctx.pullRequest.relatedIssues)
+        .map((issue) => {
+            return `${issue.title}\n\n${issue.body}`;
         });
-    }));
-
-    ctx.pullRequest.relatedIssues = issues.map((issue) => {
-        return {
-            org: issue.org,
-            repo: issue.repo,
-            number: issue.number,
-            title: issue.title,
-            body: issue.body,
-        } as GithubIssue;
-    }).reduce((acc, issue) => {
-        const url = `https://github.com/${issue.org}/${issue.repo}/issues/${issue.number}`;
-        acc[url] = issue;
-        return acc;
-    }, {} as Record<string, GithubIssue>);
-
-    log.info('Loaded GitHub issues. Generating purpose...', { pull_request_ctx: ctx, issues: ctx.pullRequest.relatedIssues });
-    const issueDescriptions = Object.values(ctx.pullRequest.relatedIssues).map((issue) => {
-        return `${issue.title}\n\n${issue.body}`;
-    });
     const prDescription = ctx.pullRequest.title + '\n\n' + ctx.pullRequest.body;
     const resp = await generatePullRequestPurpose({
         org: ctx.pullRequest.org,

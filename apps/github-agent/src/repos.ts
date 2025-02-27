@@ -3,6 +3,7 @@ export type RepoSpec = {
     supportCodeReview: boolean;
     supportDeploymentSummary: boolean;
     supportDiffSummary: boolean;
+    supportPurpose: boolean;
     codeStructure: string | undefined;
 }
 
@@ -33,6 +34,7 @@ const repoFeatures: Record<string, RepoSpec> = {
         supportCodeReview: true,
         supportDeploymentSummary: false,
         supportDiffSummary: true,
+        supportPurpose: false,
         codeStructure: undefined,
     },
     'vertesia/demo-github': {
@@ -40,6 +42,7 @@ const repoFeatures: Record<string, RepoSpec> = {
         supportCodeReview: true,
         supportDeploymentSummary: false,
         supportDiffSummary: true,
+        supportPurpose: true,
         codeStructure: codeStructureDemoGithub,
     },
     'vertesia/studio': {
@@ -47,6 +50,7 @@ const repoFeatures: Record<string, RepoSpec> = {
         supportCodeReview: true,
         supportDeploymentSummary: true,
         supportDiffSummary: true,
+        supportPurpose: false,
         codeStructure: codeStructureStudio,
     },
 };
@@ -59,6 +63,7 @@ export function getRepoFeatures(owner: string, repo: string): RepoSpec {
             supportCodeReview: false,
             supportDeploymentSummary: false,
             supportDiffSummary: false,
+            supportPurpose: false,
             codeStructure: undefined,
         };
     }
