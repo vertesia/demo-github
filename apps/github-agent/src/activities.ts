@@ -223,9 +223,13 @@ export type ReviewPullRequestPatchRequest = {
      */
     filePatch: string,
     /**
-     * The description of the pull request, including the title and the body.
+     * @deprecated since 2025-02-27, use `pullRequestPurpose` instead
      */
-    pullRequestDescription: string,
+    pullRequestDescription?: string,
+    /**
+     * The purpose of the pull request, including the motivation and the context.
+     */
+    pullRequestPurpose?: string,
 }
 export type ReviewPullRequestPatchResponse = {
     status: string,
@@ -236,14 +240,14 @@ export async function reviewPullRequestPatch(request: ReviewPullRequestPatchRequ
     const params: VertesiaReviewFilePatchRequest = {
         file_patch: request.filePatch,
         file_path: request.filePath,
-        pull_request_description: request.pullRequestDescription,
+        pull_request_purpose: request.pullRequestPurpose,
     };
     const hunks = HunkSet.parse(request.filePatch);
     const execResp = await vertesiaClient.interactions.executeByName<
         VertesiaReviewFilePatchRequest,
         VertesiaReviewFilePatchResponse
     >(
-        'GithubReviewFilePatch@5',
+        'GithubReviewFilePatch@6',
         { data: params },
     );
 
