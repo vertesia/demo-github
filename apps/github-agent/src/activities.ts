@@ -1,15 +1,7 @@
 import { log } from "@temporalio/activity";
 import { VertesiaGithubApp } from "./activities/github.js";
 import { HunkSet } from './activities/patch.js';
-import {
-    createVertesiaClient,
-    VertesiaDeterminePullRequestPurposeRequest,
-    VertesiaDeterminePullRequestPurposeResponse,
-    VertesiaReviewFilePatchRequest,
-    VertesiaReviewFilePatchResponse,
-    VertesiaSummarizeCodeDiffRequest,
-    VertesiaSummarizeCodeDiffResponse,
-} from './activities/vertesia.js';
+import { createVertesiaClient } from './activities/vertesia.js';
 import { getRepoFeatures } from './repos.js';
 
 export async function helloActivity() {
@@ -73,43 +65,23 @@ export async function generatePullRequestSummary(request: GeneratePullRequestSum
     let diff = diffResp.data as unknown as string;
     log.info(`Got diff for pull request ${request.owner}/${request.repo}/${request.pullRequestNumber}: ${diff.length} characters`);
 
-    const vertesiaRequest = {
-        code_diff: diff,
-        code_structure: getRepoFeatures(request.owner, request.repo).codeStructure,
-    };
-
     const vertesiaClient = await createVertesiaClient();
     let summary;
     let breakdown;
 
-    if (request.isBreakdownEnabled) {
-        const execResp = await vertesiaClient.interactions.executeByName<
-            VertesiaSummarizeCodeDiffRequest,
-            VertesiaSummarizeCodeDiffResponse
-        >(
-            'GithubSummarizeCodeDiff@4',
-            { data: vertesiaRequest },
-        );
-        log.info("Got summary from Vertesia", { respose: execResp });
-        summary = execResp.result.summary;
+    const resp = await vertesiaClient.summarizeCodeDiff({
+        code_diff: diff,
+        code_structure: getRepoFeatures(request.owner, request.repo).codeStructure
+    });
+    log.info("Got summary from Vertesia", { respose: resp });
+    summary = resp.summary;
 
-        breakdown = "Here is a breakdown of the changes:\n\n";
-        breakdown += `Path | Description\n`;
-        breakdown += `---- | -----------\n`;
-        for (let change of execResp.result.changes) {
-            const id = '`' + change.path_or_glob + '`';
-            breakdown += `${id} | ${change.description}\n`;
-        }
-    } else {
-        const execResp = await vertesiaClient.interactions.executeByName<
-            any,
-            string
-        >(
-            'GithubSummarizeCodeDiff@2',
-            { data: vertesiaRequest },
-        );
-        log.info("Got summary from Vertesia", { respose: execResp });
-        summary = execResp.result;
+    breakdown = "Here is a breakdown of the changes:\n\n";
+    breakdown += `Path | Description\n`;
+    breakdown += `---- | -----------\n`;
+    for (let change of resp.changes ?? []) {
+        const id = '`' + change.path_or_glob + '`';
+        breakdown += `${id} | ${change.description}\n`;
     }
 
     if (summary.length > 5000) {
@@ -142,19 +114,13 @@ export async function generatePullRequestPurpose(request: GeneratePullRequestPur
     };
     log.info("Determining pull request purpose", { request: vertesiaRequest });
     const vertesiaClient = await createVertesiaClient();
-    const resp = await vertesiaClient.interactions.executeByName<
-        VertesiaDeterminePullRequestPurposeRequest,
-        VertesiaDeterminePullRequestPurposeResponse
-    >(
-        'GithubDeterminePullRequestPurpose@2',
-        { data: vertesiaRequest },
-    );
+    const resp = await vertesiaClient.determinePullRequestPurpose(vertesiaRequest);
     log.info("Got purpose response from Vertesia", { respose: resp });
 
     return {
-        motivation: resp.result.motivation,
-        context: resp.result.context,
-        clearness: resp.result.clearness,
+        motivation: resp.motivation,
+        context: resp.context,
+        clearness: resp.clearness,
     };
 }
 
@@ -237,21 +203,14 @@ export type ReviewPullRequestPatchResponse = {
 }
 export async function reviewPullRequestPatch(request: ReviewPullRequestPatchRequest): Promise<ReviewPullRequestPatchResponse> {
     const vertesiaClient = await createVertesiaClient();
-    const params: VertesiaReviewFilePatchRequest = {
+    const hunks = HunkSet.parse(request.filePatch);
+    const resp = await vertesiaClient.reviewFilePatch({
         file_patch: request.filePatch,
         file_path: request.filePath,
         pull_request_purpose: request.pullRequestPurpose,
-    };
-    const hunks = HunkSet.parse(request.filePatch);
-    const execResp = await vertesiaClient.interactions.executeByName<
-        VertesiaReviewFilePatchRequest,
-        VertesiaReviewFilePatchResponse
-    >(
-        'GithubReviewFilePatch@6',
-        { data: params },
-    );
+    });
 
-    const comments: PullRequestReviewComment[] = execResp.result.comments.map((c) => {
+    const comments: PullRequestReviewComment[] = resp.comments.map((c) => {
         const comment: PullRequestReviewComment = {
             filePath: request.filePath,
             body: c.body,

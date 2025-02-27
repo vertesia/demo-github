@@ -9,7 +9,7 @@
  *   - SubType is an optional suffix to the type, used for a nested structure
  */
 import { createSecretProvider, SupportedCloudEnvironments } from '@dglabs/cloud';
-import { VertesiaClient } from "@vertesia/client";
+import { VertesiaClient as VertesiaBaseClient } from "@vertesia/client";
 
 /**
  * Request to review a file patch.
@@ -65,7 +65,7 @@ export type VertesiaReviewFilePatchResponseComment = {
  * @see https://preview.cloud.vertesia.io/studio/interactions/67b847c87941dee93c9b0452?p=654df9de09676ad3b8631dc3&a=652d77895674c387e105948c#params
  */
 export type VertesiaSummarizeCodeDiffRequest = {
-    codd_diff: string,
+    code_diff: string,
     code_structure?: string,
 }
 
@@ -99,13 +99,57 @@ export type VertesiaDeterminePullRequestPurposeResponse = {
     clearness: number, // 1-5
 }
 
+export class VertesiaClient {
+    private client: VertesiaBaseClient;
+
+    constructor(client: VertesiaBaseClient) {
+        this.client = client;
+    }
+
+    async reviewFilePatch(request: VertesiaReviewFilePatchRequest): Promise<VertesiaReviewFilePatchResponse> {
+        const resp = await this.client.interactions.executeByName<
+            VertesiaReviewFilePatchRequest,
+            VertesiaReviewFilePatchResponse
+        >(
+            'GithubReviewFilePatch@6',
+            { data: request },
+        );
+        return resp.result;
+    }
+
+    async summarizeCodeDiff(request: VertesiaSummarizeCodeDiffRequest): Promise<VertesiaSummarizeCodeDiffResponse> {
+        const resp = await this.client.interactions.executeByName<
+            VertesiaSummarizeCodeDiffRequest,
+            VertesiaSummarizeCodeDiffResponse
+        >(
+            'GithubSummarizeCodeDiff@4',
+            { data: request },
+        );
+        return resp.result;
+    }
+
+    async determinePullRequestPurpose(request: VertesiaDeterminePullRequestPurposeRequest): Promise<VertesiaDeterminePullRequestPurposeResponse> {
+        const resp = await this.client.interactions.executeByName<
+            VertesiaDeterminePullRequestPurposeRequest,
+            VertesiaDeterminePullRequestPurposeResponse
+        >(
+            'GithubDeterminePullRequestPurpose@2',
+            { data: request },
+        );
+        return resp.result;
+    }
+}
+
+
 export async function createVertesiaClient(): Promise<VertesiaClient> {
     const vault = createSecretProvider(SupportedCloudEnvironments.gcp)
     const apiKey = await vault.getSecret('release-notes-api-key');
 
-    return new VertesiaClient({
+    const client = new VertesiaBaseClient({
         apikey: apiKey,
         serverUrl: 'https://studio-server-preview.api.vertesia.io',
         storeUrl: 'https://zeno-server-preview.api.vertesia.io',
     });
+
+    return new VertesiaClient(client);
 }
