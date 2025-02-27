@@ -42,6 +42,12 @@ const enabledUsers: Record<string, UserFeatures> = {
         isDiffSummaryEnabled: true,
         isDiffSummaryBreakdownEnabled: true,
     },
+    'royquilor': {
+        isCodeReviewEnabled: true,
+        isDeploymentSummaryEnabled: true,
+        isDiffSummaryEnabled: true,
+        isDiffSummaryBreakdownEnabled: true,
+    },
     'yangchi-tw': {
         isCodeReviewEnabled: true,
         isDeploymentSummaryEnabled: true,
