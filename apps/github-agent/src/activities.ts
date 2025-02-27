@@ -1,17 +1,16 @@
-import { createSecretProvider, SupportedCloudEnvironments } from '@dglabs/cloud';
 import { log } from "@temporalio/activity";
-import { VertesiaClient } from "@vertesia/client";
 import { VertesiaGithubApp } from "./activities/github.js";
+import { HunkSet } from './activities/patch.js';
 import {
+    createVertesiaClient,
+    VertesiaDeterminePullRequestPurposeRequest,
+    VertesiaDeterminePullRequestPurposeResponse,
     VertesiaReviewFilePatchRequest,
     VertesiaReviewFilePatchResponse,
     VertesiaSummarizeCodeDiffRequest,
     VertesiaSummarizeCodeDiffResponse,
-    VertesiaDeterminePullRequestPurposeRequest,
-    VertesiaDeterminePullRequestPurposeResponse,
 } from './activities/vertesia.js';
 import { getRepoFeatures } from './repos.js';
-import { HunkSet } from './activities/patch.js';
 
 export async function helloActivity() {
     log.info("Hello, World!");
@@ -565,15 +564,4 @@ export async function getGithubIssue(request: GetGithubIssueRequest): Promise<Ge
         title: resp.data.title,
         body: resp.data.body ?? "",
     }
-}
-
-async function createVertesiaClient(): Promise<VertesiaClient> {
-    const vault = createSecretProvider(SupportedCloudEnvironments.gcp)
-    const apiKey = await vault.getSecret('release-notes-api-key');
-
-    return new VertesiaClient({
-        apikey: apiKey,
-        serverUrl: 'https://studio-server-preview.api.vertesia.io',
-        storeUrl: 'https://zeno-server-preview.api.vertesia.io',
-    });
 }

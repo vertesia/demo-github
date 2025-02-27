@@ -8,6 +8,8 @@
  *   - Type is either a "Request" or "Response"
  *   - SubType is an optional suffix to the type, used for a nested structure
  */
+import { createSecretProvider, SupportedCloudEnvironments } from '@dglabs/cloud';
+import { VertesiaClient } from "@vertesia/client";
 
 /**
  * Request to review a file patch.
@@ -90,4 +92,15 @@ export type VertesiaDeterminePullRequestPurposeResponse = {
     motivation: string,
     context: string,
     clearness: number, // 1-5
+}
+
+export async function createVertesiaClient(): Promise<VertesiaClient> {
+    const vault = createSecretProvider(SupportedCloudEnvironments.gcp)
+    const apiKey = await vault.getSecret('release-notes-api-key');
+
+    return new VertesiaClient({
+        apikey: apiKey,
+        serverUrl: 'https://studio-server-preview.api.vertesia.io',
+        storeUrl: 'https://zeno-server-preview.api.vertesia.io',
+    });
 }
