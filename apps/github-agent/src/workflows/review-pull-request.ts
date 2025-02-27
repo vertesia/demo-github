@@ -15,7 +15,7 @@ import {
 } from "../flags.js";
 import { getRepoFeatures, isAgentEnabled } from "../repos.js";
 import { GithubIssue } from "./types.js";
-import { parseIssueIdsFromPullRequest } from "./parser.js";
+import { parseIssuesFromPullRequest } from "./parser.js";
 
 const {
     // pull request
@@ -411,16 +411,18 @@ async function handlePullRequestEvent(ctx: AssistantContext, prEvent: any, userF
 }
 
 async function loadGithubIssues(ctx: AssistantContext) {
-    const issueIds = parseIssueIdsFromPullRequest({
+    const issueRefs = parseIssuesFromPullRequest({
+        org: ctx.pullRequest.org,
+        repo: ctx.pullRequest.repo,
         branch: ctx.pullRequest.branch,
         body: ctx.pullRequest.body,
     });
 
-    const issues = await Promise.all(issueIds.map(async (id) => {
+    const issues = await Promise.all(issueRefs.map(async (ref) => {
         return await getGithubIssue({
-            org: ctx.pullRequest.org,
-            repo: ctx.pullRequest.repo,
-            number: id,
+            org: ref.org,
+            repo: ref.repo,
+            number: ref.number,
         });
     }));
 

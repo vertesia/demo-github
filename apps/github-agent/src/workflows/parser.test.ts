@@ -1,31 +1,67 @@
 import { expect, test } from 'vitest';
 import {
     parseIssueIdFromBranch,
-    parseIssueIdFromComment,
+    parseIssueIdsFromComment,
 } from './parser';
 
 test('Parse issue ID from Git branch', async () => {
-    expect(parseIssueIdFromBranch('feat/123/my-feature')).toEqual(123);
-    expect(parseIssueIdFromBranch('feat-123')).toEqual(123);
+    expect(parseIssueIdFromBranch({
+        org: 'vertesia',
+        repo: 'studio',
+        branch: 'feat/123/my-feature',
+    })).toEqual({
+        org: 'vertesia',
+        repo: 'studio',
+        number: 123,
+    });
+
+    expect(parseIssueIdFromBranch({
+        org: 'vertesia',
+        repo: 'studio',
+        branch: 'feat-123',
+    })).toEqual({
+        org: 'vertesia',
+        repo: 'studio',
+        number: 123,
+    });
 });
 
 test('Parse issue ID from comment', async () => {
-    expect(parseIssueIdFromComment(`\
+    expect(parseIssueIdsFromComment({
+        org: 'vertesia',
+        repo: 'studio',
+        comment: `\
 ## Description
 
 - #123
 `
-    )).toEqual([123, undefined]);
-
-    expect(parseIssueIdFromComment('This is a test')).toEqual([
-        undefined,
-        new Error('Could not parse issue id from comment.'),
+    })).toEqual([
+        {
+            org: 'vertesia',
+            repo: 'studio',
+            number: 123,
+        },
     ]);
 
-    expect(parseIssueIdFromComment(`
+    expect(parseIssueIdsFromComment({
+        org: 'vertesia',
+        repo: 'studio',
+        comment: 'This is a test',
+    })).toEqual([]);
+
+    expect(parseIssueIdsFromComment({
+        org: 'vertesia',
+        repo: 'studio',
+        comment: `\
 ## Description
 
-- https://github.com/vertesia/studio/issues/123
-`)).toEqual([123, undefined]);
-
+- https://github.com/vertesia/composableai/issues/123
+`}
+    )).toEqual([
+        {
+            org: 'vertesia',
+            repo: 'composableai',
+            number: 123,
+        }
+    ]);
 });

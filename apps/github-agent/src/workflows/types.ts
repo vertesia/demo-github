@@ -5,3 +5,11 @@ export type GithubIssue = {
     body: string,
     number: number,
 }
+
+export class GithubIssueRef {
+    constructor(public org: string, public repo: string, public number: number) { }
+
+    public toHtmlUrl(): string {
+        return `https://github.com/${this.org}/${this.repo}/issues/${this.number}`;
+    }
+}
