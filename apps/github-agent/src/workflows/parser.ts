@@ -1,7 +1,7 @@
 import { GithubIssueRef } from './types.js';
 
 export function parseIssueIdFromBranch({ org, repo, branch }: { org: string, repo: string, branch: string }): GithubIssueRef | undefined {
-    const match = branch.match(/^.*(\d+).*$/);
+    const match = branch.match(/(\d+)/);
     if (match === null) {
         return undefined;
     }

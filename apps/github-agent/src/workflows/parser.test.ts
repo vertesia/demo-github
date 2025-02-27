@@ -3,27 +3,20 @@ import {
     parseIssueIdFromBranch,
     parseIssueIdsFromComment,
 } from './parser';
+import { GithubIssueRef } from './types.js';
 
 test('Parse issue ID from Git branch', async () => {
     expect(parseIssueIdFromBranch({
         org: 'vertesia',
         repo: 'studio',
         branch: 'feat/123/my-feature',
-    })).toEqual({
-        org: 'vertesia',
-        repo: 'studio',
-        number: 123,
-    });
+    })).toEqual(new GithubIssueRef('vertesia', 'studio', 123));
 
     expect(parseIssueIdFromBranch({
         org: 'vertesia',
         repo: 'studio',
         branch: 'feat-123',
-    })).toEqual({
-        org: 'vertesia',
-        repo: 'studio',
-        number: 123,
-    });
+    })).toEqual(new GithubIssueRef('vertesia', 'studio', 123));
 });
 
 test('Parse issue ID from comment', async () => {
@@ -35,19 +28,19 @@ test('Parse issue ID from comment', async () => {
 
 - #123
 `
-    })).toEqual([
-        {
+    })).toEqual({
+        "https://github.com/vertesia/studio/issues/123": {
             org: 'vertesia',
             repo: 'studio',
             number: 123,
         },
-    ]);
+    });
 
     expect(parseIssueIdsFromComment({
         org: 'vertesia',
         repo: 'studio',
         comment: 'This is a test',
-    })).toEqual([]);
+    })).toEqual({});
 
     expect(parseIssueIdsFromComment({
         org: 'vertesia',
@@ -57,11 +50,11 @@ test('Parse issue ID from comment', async () => {
 
 - https://github.com/vertesia/composableai/issues/123
 `}
-    )).toEqual([
-        {
+    )).toEqual({
+        "https://github.com/vertesia/composableai/issues/123": {
             org: 'vertesia',
             repo: 'composableai',
             number: 123,
-        }
-    ]);
+        },
+    });
 });
