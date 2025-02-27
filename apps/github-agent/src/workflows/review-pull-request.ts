@@ -21,6 +21,7 @@ const {
     // pull request
     commentOnPullRequest,
     generatePullRequestSummary,
+    generatePullRequestPurpose,
     listFilesInPullRequest,
     createPullRequestReview,
     reviewPullRequestPatch,
@@ -460,7 +461,20 @@ async function loadGithubIssues(ctx: AssistantContext) {
         acc[url] = issue;
         return acc;
     }, {} as Record<string, GithubIssue>);
-    log.info('Loaded GitHub issues', { pull_request_ctx: ctx, issues: ctx.pullRequest.relatedIssues });
+
+    log.info('Loaded GitHub issues. Generating purpose...', { pull_request_ctx: ctx, issues: ctx.pullRequest.relatedIssues });
+    const issueDescriptions = Object.values(ctx.pullRequest.relatedIssues).map((issue) => {
+        return `${issue.title}\n\n${issue.body}`;
+    });
+    const prDescription = ctx.pullRequest.title + '\n\n' + ctx.pullRequest.body;
+    generatePullRequestPurpose({
+        org: ctx.pullRequest.org,
+        repo: ctx.pullRequest.repo,
+        number: ctx.pullRequest.number,
+        pullRequestDescription: prDescription,
+        issueDescriptions: issueDescriptions,
+    });
+
 }
 
 async function handleCommentEvent(ctx: AssistantContext, commentEvent: any): Promise<void> {
