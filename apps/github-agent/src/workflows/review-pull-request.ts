@@ -292,12 +292,7 @@ ${specJson}
 
 function toGithubCommentCodeReview(ctx: PullRequestContext): string {
     let comment = '## Code Review\n\n';
-    comment += 'You can start a code review by adding a comment:\n';
-    comment += '\n';
-    comment += '```\n';
-    comment += 'Vertesia, please review\n';
-    comment += '```\n';
-    comment += '\n';
+    comment += 'You can start a code review by adding a comment: "Vertesia, please review".\n\n';
 
     let status: string | undefined;
     let additionalNote: string | undefined;
