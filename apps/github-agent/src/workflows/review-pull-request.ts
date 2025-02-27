@@ -6,14 +6,14 @@ import {
     setHandler,
     workflowInfo,
 } from "@temporalio/workflow";
-import * as activities from "./activities.js";
+import * as activities from "../activities.js";
 import {
     getUserFlags,
     isCodeReviewEnabledForFile,
     supportedExtensions,
     UserFeatures,
-} from "./flags.js";
-import { getRepoFeatures, isAgentEnabled } from "./repos.js";
+} from "../flags.js";
+import { getRepoFeatures, isAgentEnabled } from "../repos.js";
 
 const {
     // pull request
@@ -22,9 +22,6 @@ const {
     listFilesInPullRequest,
     createPullRequestReview,
     reviewPullRequestPatch,
-
-    // test
-    helloActivity,
 } = proxyActivities<typeof activities>({
     startToCloseTimeout: "5 minute",
     retry: {
@@ -35,11 +32,6 @@ const {
         nonRetryableErrorTypes: [],
     },
 });
-
-export async function helloWorkflow() {
-    log.info("Entering Hello workflow");
-    await helloActivity();
-}
 
 /* ----------
  Pull Request Review Workflow
@@ -529,5 +521,3 @@ async function startCodeReview(ctx: AssistantContext) {
         });
     }
 }
-
-export * from "./workflows/submodule.js";
