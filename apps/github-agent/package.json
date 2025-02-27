@@ -7,7 +7,7 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "clean": "rimraf ./lib tsconfig.tsbuildinfo",
-    "build": "${npm_package_vertesia_pm} run clean && tsc --build && node ./bin/bundle-workflows.mjs lib/workflows.js lib/workflows-bundle.js",
+    "build": "${npm_package_vertesia_pm} run clean && tsc --build && node ./bin/bundle-workflows.mjs lib/workflows/index.js lib/workflows-bundle.js",
     "start": "node lib/main.js",
     "connect": "vertesia agent connect",
     "test": "vitest"

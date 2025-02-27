@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { extractStudioUiUrl } from './workflows';
+import { extractStudioUiUrl } from './review-pull-request';
 
 test('Extract Studio URL', async () => {
     const url = extractStudioUiUrl(`
