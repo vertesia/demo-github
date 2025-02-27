@@ -1,39 +1,38 @@
-export function parseIssueIdFromBranch(name: string): [number | undefined, Error | undefined] {
+export function parseIssueIdFromBranch(name: string): number | undefined {
     const match = name.match(/^.*(\d+).*$/);
     if (match === null) {
-        return [undefined, new Error(`Could not parse issue id from branch "${name}".`)];
+        return undefined;
     }
-    try {
-        const issueId = parseInt(match[1], 10);
-        return [issueId, undefined];
-    } catch (e: any) {
-        return [undefined, e];
-    }
+    return parseInt(match[1], 10);
 }
 
-export function parseIssueIdFromComment(comment: string): [number | undefined, Error | undefined] {
-    // Extract issue id from comment, examples:
-    //  - "This is a comment #123" -> 123
-    //  - "This is a comment #123 some more text" -> 123
-    const anchorMatch = comment.match(/^.* #(\d+)(| .*)$/);
+export function parseIssueIdsFromComment(comment: string): number[] {
+    const issuesIds: number[] = [];
+
+    // Match issue references like "#123 #456"
+    const anchorMatch = comment.match(/#(\d+)/g);
     if (anchorMatch !== null) {
-        try {
-            const issueId = parseInt(anchorMatch[1], 10);
-            return [issueId, undefined];
-        } catch (e: any) {
-            // Fall through to the next case
-        }
+        anchorMatch.map(m => parseInt(m.substring(1), 10))
+            .forEach(id => issuesIds.push(id));
     }
 
-    const urlMatch = comment.match(/https:\/\/github.com\/.*\/issues\/(\d+)/);
+    // Match issue references like
+    // "https://github.com/owner/repo/issues/123"
+    const urlMatch = comment.match(/https:\/\/github.com\/.*\/issues\/(\d+)/g);
     if (urlMatch !== null) {
-        try {
-            const issueId = parseInt(urlMatch[1], 10);
-            return [issueId, undefined];
-        } catch (e: any) {
-            // Fall through to the next case
-        }
+        urlMatch.map(m => parseInt(m.split('/').pop()!, 10))
+            .forEach(id => issuesIds.push(id));
     }
 
-    return [undefined, new Error(`Could not parse issue id from comment.`)];
+    return issuesIds;
+}
+
+export function parseIssueIdsFromPullRequest({ branch, body }: { branch: string, body: string }): number[] {
+    const issueIds = parseIssueIdsFromComment(body);
+    const refId = parseIssueIdFromBranch(branch);
+    if (refId !== undefined) {
+        issueIds.push(refId);
+    }
+
+    return Array.from(new Set(issueIds)).sort();
 }

@@ -15,6 +15,7 @@ import {
 } from "../flags.js";
 import { getRepoFeatures, isAgentEnabled } from "../repos.js";
 import { GithubIssue } from "./types.js";
+import { parseIssueIdsFromPullRequest } from "./parser.js";
 
 const {
     // pull request
@@ -23,6 +24,7 @@ const {
     listFilesInPullRequest,
     createPullRequestReview,
     reviewPullRequestPatch,
+    getGithubIssue,
 } = proxyActivities<typeof activities>({
     startToCloseTimeout: "5 minute",
     retry: {
@@ -394,6 +396,8 @@ async function handlePullRequestEvent(ctx: AssistantContext, prEvent: any, userF
         log.info('Diff summary is disabled for this user');
     }
 
+    loadGithubIssues(ctx);
+
     const comment = toGithubComment(ctx);
     const commentId = await upsertComment(ctx.pullRequest, comment);
 
@@ -404,6 +408,31 @@ async function handlePullRequestEvent(ctx: AssistantContext, prEvent: any, userF
     if (!ctx.pullRequest.commentId) {
         ctx.pullRequest.commentId = commentId;
     }
+}
+
+async function loadGithubIssues(ctx: AssistantContext) {
+    const issueIds = parseIssueIdsFromPullRequest({
+        branch: ctx.pullRequest.branch,
+        body: ctx.pullRequest.body,
+    });
+
+    const issues = await Promise.all(issueIds.map(async (id) => {
+        return await getGithubIssue({
+            org: ctx.pullRequest.org,
+            repo: ctx.pullRequest.repo,
+            number: id,
+        });
+    }));
+
+    ctx.pullRequest.relatedIssues = issues.map((issue) => {
+        return {
+            org: issue.org,
+            repo: issue.repo,
+            number: issue.number,
+            title: issue.title,
+            body: issue.body,
+        };
+    });
 }
 
 async function handleCommentEvent(ctx: AssistantContext, commentEvent: any): Promise<void> {
