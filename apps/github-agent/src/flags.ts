@@ -12,7 +12,7 @@ const enabledUsers: Record<string, UserFeatures> = {
         isDeploymentSummaryEnabled: true,
         isDiffSummaryEnabled: true,
         isDiffSummaryBreakdownEnabled: true,
-        isPurposeEnabled: false,
+        isPurposeEnabled: true,
     },
     'bstefanescu': {
         isCodeReviewEnabled: true,
@@ -26,14 +26,21 @@ const enabledUsers: Record<string, UserFeatures> = {
         isDeploymentSummaryEnabled: true,
         isDiffSummaryEnabled: true,
         isDiffSummaryBreakdownEnabled: true,
-        isPurposeEnabled: false,
+        isPurposeEnabled: true,
+    },
+    'gspradlin': {
+        isCodeReviewEnabled: true,
+        isDeploymentSummaryEnabled: true,
+        isDiffSummaryEnabled: true,
+        isDiffSummaryBreakdownEnabled: true,
+        isPurposeEnabled: true,
     },
     'LeonRuggiero': {
         isCodeReviewEnabled: true,
         isDeploymentSummaryEnabled: true,
         isDiffSummaryEnabled: true,
         isDiffSummaryBreakdownEnabled: true,
-        isPurposeEnabled: false,
+        isPurposeEnabled: true,
     },
     'loopingz': {
         isCodeReviewEnabled: true,
@@ -54,14 +61,14 @@ const enabledUsers: Record<string, UserFeatures> = {
         isDeploymentSummaryEnabled: true,
         isDiffSummaryEnabled: true,
         isDiffSummaryBreakdownEnabled: true,
-        isPurposeEnabled: false,
+        isPurposeEnabled: true,
     },
     'yangchi-tw': {
         isCodeReviewEnabled: true,
         isDeploymentSummaryEnabled: true,
         isDiffSummaryEnabled: true,
         isDiffSummaryBreakdownEnabled: true,
-        isPurposeEnabled: false,
+        isPurposeEnabled: true,
     },
 };
 
