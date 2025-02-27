@@ -3,6 +3,7 @@ export type UserFeatures = {
     isDeploymentSummaryEnabled: boolean;
     isDiffSummaryEnabled: boolean;
     isDiffSummaryBreakdownEnabled: boolean;
+    isPurposeEnabled?: boolean;
 }
 
 const enabledUsers: Record<string, UserFeatures> = {
@@ -11,48 +12,56 @@ const enabledUsers: Record<string, UserFeatures> = {
         isDeploymentSummaryEnabled: true,
         isDiffSummaryEnabled: true,
         isDiffSummaryBreakdownEnabled: true,
+        isPurposeEnabled: false,
     },
     'bstefanescu': {
         isCodeReviewEnabled: true,
         isDeploymentSummaryEnabled: true,
         isDiffSummaryEnabled: true,
         isDiffSummaryBreakdownEnabled: true,
+        isPurposeEnabled: false,
     },
     'ebarroca': {
         isCodeReviewEnabled: true,
         isDeploymentSummaryEnabled: true,
         isDiffSummaryEnabled: true,
         isDiffSummaryBreakdownEnabled: true,
+        isPurposeEnabled: false,
     },
     'LeonRuggiero': {
         isCodeReviewEnabled: true,
         isDeploymentSummaryEnabled: true,
         isDiffSummaryEnabled: true,
         isDiffSummaryBreakdownEnabled: true,
+        isPurposeEnabled: false,
     },
     'loopingz': {
         isCodeReviewEnabled: true,
         isDeploymentSummaryEnabled: true,
         isDiffSummaryEnabled: true,
         isDiffSummaryBreakdownEnabled: true,
+        isPurposeEnabled: false,
     },
     'mincong-h': {
         isCodeReviewEnabled: true,
         isDeploymentSummaryEnabled: true,
         isDiffSummaryEnabled: true,
         isDiffSummaryBreakdownEnabled: true,
+        isPurposeEnabled: true,
     },
     'royquilor': {
         isCodeReviewEnabled: true,
         isDeploymentSummaryEnabled: true,
         isDiffSummaryEnabled: true,
         isDiffSummaryBreakdownEnabled: true,
+        isPurposeEnabled: false,
     },
     'yangchi-tw': {
         isCodeReviewEnabled: true,
         isDeploymentSummaryEnabled: true,
         isDiffSummaryEnabled: true,
         isDiffSummaryBreakdownEnabled: true,
+        isPurposeEnabled: false,
     },
 };
 

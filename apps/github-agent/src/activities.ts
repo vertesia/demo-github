@@ -7,6 +7,8 @@ import {
     VertesiaReviewFilePatchResponse,
     VertesiaSummarizeCodeDiffRequest,
     VertesiaSummarizeCodeDiffResponse,
+    VertesiaDeterminePullRequestPurposeRequest,
+    VertesiaDeterminePullRequestPurposeResponse,
 } from './activities/vertesia.js';
 import { getRepoFeatures } from './repos.js';
 import { HunkSet } from './activities/patch.js';
@@ -119,6 +121,41 @@ export async function generatePullRequestSummary(request: GeneratePullRequestSum
     return {
         summary: summary,
         breakdown: breakdown,
+    };
+}
+
+export type GeneratePullRequestPurposeRequest = {
+    org: string,
+    repo: string,
+    number: number,
+    pullRequestDescription: string,
+    issueDescriptions: string[],
+}
+export type GeneratePullRequestPurposeResponse = {
+    motivation: string,
+    context: string,
+    clearness: number, // 1-5
+}
+export async function generatePullRequestPurpose(request: GeneratePullRequestPurposeRequest): Promise<GeneratePullRequestPurposeResponse> {
+    const vertesiaRequest = {
+        pull_request: request.pullRequestDescription,
+        issues: request.issueDescriptions,
+    };
+    log.info("Determining pull request purpose", { request: vertesiaRequest });
+    const vertesiaClient = await createVertesiaClient();
+    const resp = await vertesiaClient.interactions.executeByName<
+        VertesiaDeterminePullRequestPurposeRequest,
+        VertesiaDeterminePullRequestPurposeResponse
+    >(
+        'GithubDeterminePullRequestPurpose@1',
+        { data: vertesiaRequest },
+    );
+    log.info("Got purpose response from Vertesia", { respose: resp });
+
+    return {
+        motivation: resp.result.motivation,
+        context: resp.result.context,
+        clearness: resp.result.clearness,
     };
 }
 

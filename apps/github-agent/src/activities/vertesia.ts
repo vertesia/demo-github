@@ -81,3 +81,13 @@ export type VertesiaSummarizeCodeDiffResponseChange = {
     path_or_glob: string,
     description: string,
 }
+
+export type VertesiaDeterminePullRequestPurposeRequest = {
+    pull_request: string,
+    issues: string[],
+}
+export type VertesiaDeterminePullRequestPurposeResponse = {
+    motivation: string,
+    context: string,
+    clearness: number, // 1-5
+}

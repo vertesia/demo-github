@@ -21,6 +21,7 @@ const {
     // pull request
     commentOnPullRequest,
     generatePullRequestSummary,
+    generatePullRequestPurpose,
     listFilesInPullRequest,
     createPullRequestReview,
     reviewPullRequestPatch,
@@ -158,7 +159,23 @@ type PullRequestContext = {
     commitSha: string;
     title: string;
     body: string;
+
     relatedIssues: Record<string, GithubIssue>;
+
+    /**
+     * Why the pull request is created.
+     */
+    motivation?: string;
+
+    /**
+     * What problem the pull request is solving.
+     */
+    context?: string;
+
+    /**
+     * How clear the motivation and context are. Score from 1 to 5.
+     */
+    clearness?: number;
 }
 
 type DeploymentSpec = {
@@ -396,7 +413,9 @@ async function handlePullRequestEvent(ctx: AssistantContext, prEvent: any, userF
         log.info('Diff summary is disabled for this user');
     }
 
-    loadGithubIssues(ctx);
+    if (userFlags.isPurposeEnabled) {
+        await loadGithubIssues(ctx);
+    }
 
     const comment = toGithubComment(ctx);
     const commentId = await upsertComment(ctx.pullRequest, comment);
@@ -449,7 +468,24 @@ async function loadGithubIssues(ctx: AssistantContext) {
         acc[url] = issue;
         return acc;
     }, {} as Record<string, GithubIssue>);
-    log.info('Loaded GitHub issues', { pull_request_ctx: ctx, issues: ctx.pullRequest.relatedIssues });
+
+    log.info('Loaded GitHub issues. Generating purpose...', { pull_request_ctx: ctx, issues: ctx.pullRequest.relatedIssues });
+    const issueDescriptions = Object.values(ctx.pullRequest.relatedIssues).map((issue) => {
+        return `${issue.title}\n\n${issue.body}`;
+    });
+    const prDescription = ctx.pullRequest.title + '\n\n' + ctx.pullRequest.body;
+    const resp = await generatePullRequestPurpose({
+        org: ctx.pullRequest.org,
+        repo: ctx.pullRequest.repo,
+        number: ctx.pullRequest.number,
+        pullRequestDescription: prDescription,
+        issueDescriptions: issueDescriptions,
+    });
+
+    // update context
+    ctx.pullRequest.motivation = resp.motivation;
+    ctx.pullRequest.context = resp.context;
+    ctx.pullRequest.clearness = resp.clearness;
 }
 
 async function handleCommentEvent(ctx: AssistantContext, commentEvent: any): Promise<void> {
