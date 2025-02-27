@@ -27,8 +27,13 @@ export type VertesiaReviewFilePatchRequest = {
     file_patch: string,
     /**
      * @since 2
+     * @deprecated since 2025-02-27, use `pull_request_description` instead
      */
     pull_request_description?: string,
+    /**
+     * @since 6
+     */
+    pull_request_purpose?: string,
 }
 
 /**
