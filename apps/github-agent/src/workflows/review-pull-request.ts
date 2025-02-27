@@ -497,6 +497,7 @@ async function loadGithubIssues(ctx: AssistantContext) {
         branch: ctx.pullRequest.branch,
         body: ctx.pullRequest.body,
     });
+    log.info(`Found ${issueRefs.length} GitHub issues in the pull request`, { pull_request_ctx: ctx, issue_refs: issueRefs });
 
     const alreadyLoaded = issueRefs.every((ref) => {
         return ctx.pullRequest.relatedIssues[ref.toHtmlUrl()] !== undefined;
