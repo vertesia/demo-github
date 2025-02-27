@@ -10,7 +10,7 @@
     "build": "${npm_package_vertesia_pm} run clean && tsc --build && node ./bin/bundle-workflows.mjs lib/workflows/index.js lib/workflows-bundle.js",
     "start": "node lib/main.js",
     "connect": "vertesia agent connect",
-    "test": "vitest"
+    "test": "vitest run"
   },
   "vertesia": {
     "pm": "pnpm",

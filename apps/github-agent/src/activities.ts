@@ -498,6 +498,38 @@ export async function addAssigneesToPullRequest(request: AddAssigneesToPullReque
     return {};
 }
 
+export type GetGithubIssueRequest = {
+    org: string,
+    repo: string,
+    number: number,
+}
+export type GetGithubIssueResponse = {
+    org: string,
+    repo: string,
+    number: number,
+    title: string,
+    body: string,
+}
+export async function getGithubIssue(request: GetGithubIssueRequest): Promise<GetGithubIssueResponse> {
+    log.info(`Getting issue ${request.org}/${request.repo}/issue/${request.number}`);
+    const app = await VertesiaGithubApp.getInstance();
+    const octokit = await app.getRestClient();
+
+    const resp = await octokit.rest.issues.get({
+        owner: request.org,
+        repo: request.repo,
+        issue_number: request.number,
+    });
+
+    return {
+        org: request.org,
+        repo: request.repo,
+        number: request.number,
+        title: resp.data.title,
+        body: resp.data.body ?? "",
+    }
+}
+
 async function createVertesiaClient(): Promise<VertesiaClient> {
     const vault = createSecretProvider(SupportedCloudEnvironments.gcp)
     const apiKey = await vault.getSecret('release-notes-api-key');

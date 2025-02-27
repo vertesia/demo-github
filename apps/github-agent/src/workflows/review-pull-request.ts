@@ -14,6 +14,8 @@ import {
     UserFeatures,
 } from "../flags.js";
 import { getRepoFeatures, isAgentEnabled } from "../repos.js";
+import { GithubIssue } from "./types.js";
+import { parseIssuesFromPullRequest } from "./parser.js";
 
 const {
     // pull request
@@ -22,6 +24,7 @@ const {
     listFilesInPullRequest,
     createPullRequestReview,
     reviewPullRequestPatch,
+    getGithubIssue,
 } = proxyActivities<typeof activities>({
     startToCloseTimeout: "5 minute",
     retry: {
@@ -155,6 +158,7 @@ type PullRequestContext = {
     commitSha: string;
     title: string;
     body: string;
+    relatedIssues: Record<string, GithubIssue>;
 }
 
 type DeploymentSpec = {
@@ -294,6 +298,7 @@ function computePullRequestContext(prEvent: any): PullRequestContext {
         commitSha: prEvent.pull_request.head.sha,
         title: prEvent.pull_request.title ?? "",
         body: prEvent.pull_request.body ?? "",
+        relatedIssues: {},
     };
 }
 
@@ -391,6 +396,8 @@ async function handlePullRequestEvent(ctx: AssistantContext, prEvent: any, userF
         log.info('Diff summary is disabled for this user');
     }
 
+    loadGithubIssues(ctx);
+
     const comment = toGithubComment(ctx);
     const commentId = await upsertComment(ctx.pullRequest, comment);
 
@@ -401,6 +408,48 @@ async function handlePullRequestEvent(ctx: AssistantContext, prEvent: any, userF
     if (!ctx.pullRequest.commentId) {
         ctx.pullRequest.commentId = commentId;
     }
+}
+
+async function loadGithubIssues(ctx: AssistantContext) {
+    const issueRefs = parseIssuesFromPullRequest({
+        org: ctx.pullRequest.org,
+        repo: ctx.pullRequest.repo,
+        branch: ctx.pullRequest.branch,
+        body: ctx.pullRequest.body,
+    });
+
+    const alreadyLoaded = issueRefs.every((ref) => {
+        return ctx.pullRequest.relatedIssues[ref.toHtmlUrl()] !== undefined;
+    });
+
+    if (alreadyLoaded) {
+        log.info('Skip loading GitHub issues because they are already loaded', { pull_request_ctx: ctx });
+        return;
+    }
+
+    log.info('Loading GitHub issues', { pull_request_ctx: ctx, issue_refs: issueRefs });
+    const issues = await Promise.all(issueRefs.map(async (ref) => {
+        return await getGithubIssue({
+            org: ref.org,
+            repo: ref.repo,
+            number: ref.number,
+        });
+    }));
+
+    ctx.pullRequest.relatedIssues = issues.map((issue) => {
+        return {
+            org: issue.org,
+            repo: issue.repo,
+            number: issue.number,
+            title: issue.title,
+            body: issue.body,
+        } as GithubIssue;
+    }).reduce((acc, issue) => {
+        const url = `https://github.com/${issue.org}/${issue.repo}/issues/${issue.number}`;
+        acc[url] = issue;
+        return acc;
+    }, {} as Record<string, GithubIssue>);
+    log.info('Loaded GitHub issues', { pull_request_ctx: ctx, issues: ctx.pullRequest.relatedIssues });
 }
 
 async function handleCommentEvent(ctx: AssistantContext, commentEvent: any): Promise<void> {
