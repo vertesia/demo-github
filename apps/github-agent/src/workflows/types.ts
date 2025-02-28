@@ -14,6 +14,25 @@ export class GithubIssueRef {
     }
 }
 
+export type AssistPullRequestWorkflowRequest = {
+    /**
+     * The type of event that triggered this workflow in the GitHub API. This is part of the header
+     * "x-github-event" of the webhook.
+     */
+    githubEventType: string | undefined;
+    /**
+     * The event that triggered this workflow in the GitHub API.
+     *
+     * See https://docs.github.com/en/webhooks/webhook-events-and-payloads#pull_request
+     */
+    githubEvent: any;
+}
+
+export type AssistPullRequestWorkflowResponse = {
+    status: string;
+    reason: string | undefined;
+}
+
 export type ReviewPullRequestWorkflowRequest = {
     /**
      * The type of event that triggered this workflow in the GitHub API. This is part of the header
