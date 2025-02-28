@@ -117,12 +117,19 @@ export class VertesiaClient {
         return resp.result;
     }
 
+    /**
+     * Sumarize a code diff to a human-readable format.
+     *
+     * @param request the code diff to summarize
+     * @returns the summary of the code changes
+     * @version 5 Added a JSON example to the prompt to better indicate the expected result.
+     */
     async summarizeCodeDiff(request: VertesiaSummarizeCodeDiffRequest): Promise<VertesiaSummarizeCodeDiffResponse> {
         const resp = await this.client.interactions.executeByName<
             VertesiaSummarizeCodeDiffRequest,
             VertesiaSummarizeCodeDiffResponse
         >(
-            'GithubSummarizeCodeDiff@4',
+            'GithubSummarizeCodeDiff@5',
             { data: request },
         );
         return resp.result;
