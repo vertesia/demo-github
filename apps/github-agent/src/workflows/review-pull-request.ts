@@ -453,6 +453,7 @@ async function handlePullRequestEvent(ctx: AssistantContext, prEvent: any, userF
         return;
     }
 
+    // TODO: trigger a workflow
     log.info(`Handling pull_request event (${prEvent.action})`, { event: prEvent });
     if (userFlags.isDiffSummaryEnabled) {
         const resp = await generatePullRequestSummary({
@@ -560,6 +561,7 @@ async function handleCommentEvent(ctx: AssistantContext, commentEvent: any): Pro
 
     const body = commentEvent.comment.body as string;
     if (!commentEvent.comment.user.login.startsWith('vertesia') && body.toLowerCase().includes('vertesia, please review')) {
+        // TODO: trigger a workflow
         return startCodeReview(ctx);
     }
 
