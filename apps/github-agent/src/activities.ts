@@ -25,12 +25,6 @@ export async function commentOnPullRequest(request: CommentOnPullRequestRequest)
     const id = `${request.org}/${request.repo}/${request.pullRequestNumber}`;
     if (request.commentId) {
         log.info(`Updating comment on pull request: ${id}`, { request });
-        // const response = await app.updateComment(
-        //     request.org,
-        //     request.repo,
-        //     request.commentId,
-        //     request.message,
-        // );
         const response = await client.rest.issues.updateComment({
             owner: request.org,
             repo: request.repo,
