@@ -34,6 +34,9 @@ importers:
       '@vertesia/client':
         specifier: ^0.50.1
         version: 0.50.1
+      '@vertesia/common':
+        specifier: ^0.50.1
+        version: 0.50.1
       octokit:
         specifier: 4.1.2
         version: 4.1.2

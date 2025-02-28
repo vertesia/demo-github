@@ -10,6 +10,8 @@
  */
 import { createSecretProvider, SupportedCloudEnvironments } from '@dglabs/cloud';
 import { VertesiaClient as VertesiaBaseClient } from "@vertesia/client";
+import { ExecutionRun, ExecutionRunStatus } from "@vertesia/common";
+import { log } from '@temporalio/activity';
 
 /**
  * Request to review a file patch.
@@ -114,7 +116,7 @@ export class VertesiaClient {
             'GithubReviewFilePatch@6',
             { data: request },
         );
-        return resp.result;
+        return getResult(resp);
     }
 
     async summarizeCodeDiff(request: VertesiaSummarizeCodeDiffRequest): Promise<VertesiaSummarizeCodeDiffResponse> {
@@ -125,7 +127,7 @@ export class VertesiaClient {
             'GithubSummarizeCodeDiff@4',
             { data: request },
         );
-        return resp.result;
+        return getResult(resp);
     }
 
     async determinePullRequestPurpose(request: VertesiaDeterminePullRequestPurposeRequest): Promise<VertesiaDeterminePullRequestPurposeResponse> {
@@ -136,10 +138,32 @@ export class VertesiaClient {
             'GithubDeterminePullRequestPurpose@2',
             { data: request },
         );
-        return resp.result;
+        return getResult(resp);
     }
 }
 
+/**
+ * Gets the result of an execution run from the Vertesia API.
+ *
+ * This function is needed because sometimes the result is a stringified JSON object, which
+ * requires a manual parsing. On 2025-02-28, we had random failures on the result structure with
+ * the model Google Gemini 2.0 Pro.
+ *
+ * @template R the type of the response data from the Vertesia API
+ * @param {R} run the actual response of the execution run from the Vertesia API
+ * @returns {R} the result of the execution run
+ */
+function getResult<R = any>(run: ExecutionRun<any, R>): R {
+    if (run.status === ExecutionRunStatus.failed && typeof run.result === 'string') {
+        try {
+            return JSON.parse(run.result) as R;
+        } catch (e) {
+            log.error(`Failed to parse response from Vertesia. This should never happen, please investigate.`, { run, error: e });
+            throw new Error(`Execution failed with status ${run.status} and result ${run.result}`);
+        }
+    }
+    return run.result;
+}
 
 export async function createVertesiaClient(): Promise<VertesiaClient> {
     const vault = createSecretProvider(SupportedCloudEnvironments.gcp)

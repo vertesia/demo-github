@@ -66,8 +66,8 @@ export async function generatePullRequestSummary(request: GeneratePullRequestSum
     log.info(`Got diff for pull request ${request.owner}/${request.repo}/${request.pullRequestNumber}: ${diff.length} characters`);
 
     const vertesiaClient = await createVertesiaClient();
-    let summary;
-    let breakdown;
+    let summary: string;
+    let breakdown: string;
 
     const resp = await vertesiaClient.summarizeCodeDiff({
         code_diff: diff,
