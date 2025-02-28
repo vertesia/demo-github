@@ -37,10 +37,6 @@ const {
     },
 });
 
-/* ----------
- Pull Request Review Workflow
- ---------- */
-
 export const updatePullRequestSignal = defineSignal<[ReviewPullRequestRequest]>('updatePullRequest');
 export type ReviewPullRequestRequest = {
     /**
