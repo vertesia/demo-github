@@ -14,54 +14,6 @@ export class GithubIssueRef {
     }
 }
 
-/**
- * Start a new workflow to assist a pull request.
- *
- * Note: you can add more fields to this request as needed, but make them as optional whenever
- * possible. Information should be passed using Temporal Signals.
- *
- * @since 2025-02-28
- */
-export type AssistPullRequestWorkflowRequest = {
-    /**
-     * The organization that owns the repository to assist.
-     *
-     * @example "vertesia"
-     */
-    org: string,
-
-    /**
-     * The name of the repository to assist.
-     *
-     * @example "studio"
-     */
-    repo: string,
-
-    /**
-     * The number of the pull request to assist.
-     *
-     * @example 123
-     */
-    pullRequestNumber: number,
-
-    /**
-     * The ID of the comment to display assistance text.
-     *
-     * @example 2690986106
-     */
-    pullRequestCommentId?: number,
-}
-
-/**
- * @since 2025-02-28
- */
-export type AssistPullRequestWorkflowResponse = {
-    /**
-     * The URL to the pull request.
-     */
-    htmlUrl: string;
-}
-
 export type ReviewPullRequestWorkflowRequest = {
     /**
      * The type of event that triggered this workflow in the GitHub API. This is part of the header
