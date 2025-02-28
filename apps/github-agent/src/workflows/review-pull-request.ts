@@ -5,6 +5,7 @@ import {
     proxyActivities,
     setHandler,
     workflowInfo,
+    patched,
 } from "@temporalio/workflow";
 import * as activities from "../activities.js";
 import {
@@ -14,7 +15,7 @@ import {
     UserFeatures,
 } from "../flags.js";
 import { getRepoFeatures, isAgentEnabled } from "../repos.js";
-import { GithubIssue } from "./types.js";
+import { GithubIssue, UpdatePullRequestContextSignalRequest } from "./types.js";
 import { parseIssuesFromPullRequest } from "./parser.js";
 
 const {
@@ -38,6 +39,8 @@ const {
 });
 
 export const updatePullRequestSignal = defineSignal<[ReviewPullRequestRequest]>('updatePullRequest');
+export const updatePullRequestContextSignal = defineSignal<[UpdatePullRequestContextSignalRequest]>('updatePullRequestContext');
+
 export type ReviewPullRequestRequest = {
     /**
      * The type of event that triggered this workflow in the GitHub API. This is part of the header
@@ -479,11 +482,21 @@ async function handlePullRequestEvent(ctx: AssistantContext, prEvent: any, userF
     const commentId = await upsertComment(ctx.pullRequest, comment);
 
     // update context
-    ctx.pullRequest.commitSha = prEvent.pull_request.head.sha;
-    ctx.pullRequest.title = prEvent.pull_request.title ?? "";
-    ctx.pullRequest.body = prEvent.pull_request.body ?? "";
-    if (!ctx.pullRequest.commentId) {
-        ctx.pullRequest.commentId = commentId;
+    if (patched('use-signal_2025-02-28')) {
+        updatePullRequestContextSignal({
+            newHeadSha: prEvent.pull_request.head.sha,
+            newTitle: prEvent.pull_request.title,
+            newBody: prEvent.pull_request.body,
+            newCommentId: comment
+        });
+    } else {
+        // old implementation
+        ctx.pullRequest.commitSha = prEvent.pull_request.head.sha;
+        ctx.pullRequest.title = prEvent.pull_request.title ?? "";
+        ctx.pullRequest.body = prEvent.pull_request.body ?? "";
+        if (!ctx.pullRequest.commentId) {
+            ctx.pullRequest.commentId = commentId;
+        }
     }
 }
 
