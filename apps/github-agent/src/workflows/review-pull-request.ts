@@ -56,8 +56,20 @@ export const updatePullRequestSignal = defineSignal<[ReviewPullRequestWorkflowRe
  * @since 2025-02-28
  */
 export async function assistPullRequestWorkflow(request: AssistPullRequestWorkflowRequest): Promise<AssistPullRequestWorkflowResponse> {
-    // todo
-    return {}
+    const ctx: AssistantContext = {
+        deployment: undefined,
+        pullRequest: {
+            org: request.org,
+            repo: request.repo,
+            number: request.pullRequestNumber,
+        },
+    };
+
+    await condition(() => ctx.pullRequest.state === 'closed' || ctx.pullRequest.merged === true);
+
+    return {
+        htmlUrl: `https://github.com/${ctx.pullRequest.org}/${ctx.pullRequest.repo}/pull/${ctx.pullRequest.number}`,
+    }
 }
 
 /**
@@ -188,11 +200,7 @@ type AssistantContext = {
      *
      * Undefined if this is not a dev branch.
      */
-    deployment: DeploymentSpec | undefined;
-    /**
-     * The Temporal workflow execution information of the AI assistant.
-     */
-    execution: TemporalExecution;
+    deployment?: DeploymentSpec;
     /**
      * The pull request context.
      */
@@ -212,17 +220,17 @@ type PullRequestContext = {
     org: string;
     repo: string;
     number: number;
-    branch: string;
-    diffUrl: string;
-    commentId: number | undefined;
+    branch?: string;
+    diffUrl?: string;
+    commentId?: number;
     /**
      * This is the latest commit pushed to the pull request.
      */
-    commitSha: string;
-    title: string;
-    body: string;
+    commitSha?: string;
+    title?: string;
+    body?: string;
 
-    relatedIssues: Record<string, GithubIssue>;
+    relatedIssues?: Record<string, GithubIssue>;
 
     /**
      * Why the pull request is created.
@@ -238,6 +246,16 @@ type PullRequestContext = {
      * How clear the motivation and context are. Score from 1 to 5.
      */
     clearness?: number;
+
+    /**
+     * The state of the pull request. It can be "open", "closed", or "merged".
+     */
+    state?: string;
+
+    /**
+     * Whether the pull request is merged.
+     */
+    merged?: boolean;
 }
 
 type DeploymentSpec = {
@@ -273,15 +291,6 @@ type TemporalDeploymentSpec = {
 
 type VercelDeploymentSpec = {
     studioUiUrl: string;
-}
-
-type TemporalExecution = {
-    namespace: string;
-    service: string;
-    taskQueue: string;
-    workflowType: string;
-    workflowId: string;
-    runId: string;
 }
 
 function toGithubComment(ctx: AssistantContext): string {
@@ -405,18 +414,9 @@ function toGithubCommentCodeReview(ctx: PullRequestContext): string {
 function computeAssistantContext(prEvent: any): AssistantContext {
     const pullRequest = computePullRequestContext(prEvent);
     const repo = getRepoFeatures(pullRequest.org, pullRequest.repo);
-    const info = workflowInfo();
 
     const ctx: AssistantContext = {
         deployment: undefined,
-        execution: {
-            namespace: info.namespace,
-            service: 'vertesia_github-agent',
-            taskQueue: info.taskQueue,
-            workflowId: info.workflowId,
-            workflowType: info.workflowType,
-            runId: info.runId,
-        },
         pullRequest: pullRequest,
     }
 
@@ -556,13 +556,13 @@ async function loadGithubIssues(ctx: AssistantContext) {
     const issueRefs = parseIssuesFromPullRequest({
         org: ctx.pullRequest.org,
         repo: ctx.pullRequest.repo,
-        branch: ctx.pullRequest.branch,
-        body: ctx.pullRequest.body,
+        branch: ctx.pullRequest.branch!,
+        body: ctx.pullRequest.body!,
     });
     log.info(`Found ${issueRefs.length} GitHub issues in the pull request`, { pull_request_ctx: ctx, issue_refs: issueRefs });
 
-    const alreadyLoaded = issueRefs.every((ref) => {
-        return ctx.pullRequest.relatedIssues[ref.toHtmlUrl()] !== undefined;
+    const alreadyLoaded = ctx.pullRequest.relatedIssues !== undefined && issueRefs.every((ref) => {
+        return ctx.pullRequest.relatedIssues![ref.toHtmlUrl()] !== undefined;
     });
 
     if (alreadyLoaded) {

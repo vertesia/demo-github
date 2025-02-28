@@ -14,6 +14,14 @@ export class GithubIssueRef {
     }
 }
 
+/**
+ * Start a new workflow to assist a pull request.
+ *
+ * Note: you can add more fields to this request as needed, but make them as optional whenever
+ * possible. Information should be passed using Temporal Signals.
+ *
+ * @since 2025-02-28
+ */
 export type AssistPullRequestWorkflowRequest = {
     /**
      * The organization that owns the repository to assist.
@@ -44,7 +52,14 @@ export type AssistPullRequestWorkflowRequest = {
     pullRequestCommentId?: number,
 }
 
+/**
+ * @since 2025-02-28
+ */
 export type AssistPullRequestWorkflowResponse = {
+    /**
+     * The URL to the pull request.
+     */
+    htmlUrl: string;
 }
 
 export type ReviewPullRequestWorkflowRequest = {
