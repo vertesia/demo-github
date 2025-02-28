@@ -24,8 +24,6 @@ import {
     GithubIssue,
     ReviewCodeChangesWorkflowRequest,
     ReviewCodeChangesWorkflowResponse,
-    ReviewPullRequestWorkflowRequest,
-    ReviewPullRequestWorkflowResponse
 } from "./types.js";
 
 const {
@@ -48,7 +46,7 @@ const {
     },
 });
 
-export const updatePullRequestSignal = defineSignal<[ReviewPullRequestWorkflowRequest]>('updatePullRequest');
+export const updatePullRequestSignal = defineSignal<[AssistPullRequestWorkflowRequest]>('updatePullRequest');
 export async function assistPullRequestWorkflow(request: AssistPullRequestWorkflowRequest): Promise<AssistPullRequestWorkflowResponse> {
     log.info("Entering assistPullRequestWorkflow", { request });
     let prEvent = request.githubEvent;
@@ -86,7 +84,7 @@ export async function assistPullRequestWorkflow(request: AssistPullRequestWorkfl
     await handlePullRequestEvent(ctx, prEvent, userFlags);
 
     // Register the signal handler
-    setHandler(updatePullRequestSignal, async (updateReq: ReviewPullRequestWorkflowRequest) => {
+    setHandler(updatePullRequestSignal, async (updateReq: AssistPullRequestWorkflowRequest) => {
         log.info('Signal updatePullRequestSignal received', { request: updateReq, pull_request_ctx: ctx });
         try {
             if (updateReq.githubEventType === 'pull_request') {
@@ -108,17 +106,6 @@ export async function assistPullRequestWorkflow(request: AssistPullRequestWorkfl
         status: status,
         reason: undefined,
     };
-}
-
-/**
- * @deprecated since 2025-02-28, use reviewCodeChangesWorkflow instead
- */
-export async function reviewPullRequest(request: ReviewPullRequestWorkflowRequest): Promise<ReviewPullRequestWorkflowResponse> {
-    log.warn('reviewPullRequest is deprecated. Use reviewCodeChangesWorkflow instead.');
-    return assistPullRequestWorkflow({
-        githubEventType: request.githubEventType,
-        githubEvent: request.githubEvent,
-    });
 }
 
 export async function reviewCodeChangesWorkflow(request: ReviewCodeChangesWorkflowRequest): Promise<ReviewCodeChangesWorkflowResponse> {
