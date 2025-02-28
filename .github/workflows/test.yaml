@@ -65,8 +65,12 @@ jobs:
         cd apps/github-agent
         vertesia agent connect --profile "${VT_PROFILE}" --non-interactive
 
-    # - name: Set up Docker Buildx
-    #   uses: docker/setup-buildx-action@v3
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build Docker image
+      run: |
+        pnpm agent:build
 
     # - name: Docker meta
     #   id: meta
