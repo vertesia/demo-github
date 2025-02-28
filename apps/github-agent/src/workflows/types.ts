@@ -14,6 +14,39 @@ export class GithubIssueRef {
     }
 }
 
+export type AssistPullRequestWorkflowRequest = {
+    /**
+     * The organization that owns the repository to assist.
+     *
+     * @example "vertesia"
+     */
+    org: string,
+
+    /**
+     * The name of the repository to assist.
+     *
+     * @example "studio"
+     */
+    repo: string,
+
+    /**
+     * The number of the pull request to assist.
+     *
+     * @example 123
+     */
+    pullRequestNumber: number,
+
+    /**
+     * The ID of the comment to display assistance text.
+     *
+     * @example 2690986106
+     */
+    pullRequestCommentId?: number,
+}
+
+export type AssistPullRequestWorkflowResponse = {
+}
+
 export type ReviewPullRequestWorkflowRequest = {
     /**
      * The type of event that triggered this workflow in the GitHub API. This is part of the header

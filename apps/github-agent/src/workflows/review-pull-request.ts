@@ -20,6 +20,8 @@ import { getRepoFeatures, isAgentEnabled } from "../repos.js";
 import { parseIssuesFromPullRequest } from "./parser.js";
 import {
     GithubIssue,
+    AssistPullRequestWorkflowRequest,
+    AssistPullRequestWorkflowResponse,
     ReviewPullRequestWorkflowRequest,
     ReviewPullRequestWorkflowResponse,
     ReviewCodeChangesWorkflowRequest,
@@ -48,6 +50,19 @@ const {
 
 export const updatePullRequestSignal = defineSignal<[ReviewPullRequestWorkflowRequest]>('updatePullRequest');
 
+/**
+ * This is the main workflow for providing assistance to a GitHub pull request.
+ *
+ * @since 2025-02-28
+ */
+export async function assistPullRequestWorkflow(request: AssistPullRequestWorkflowRequest): Promise<AssistPullRequestWorkflowResponse> {
+    // todo
+    return {}
+}
+
+/**
+ * @deprecated since 2025-02-28, use assistPullRequestWorkflow instead
+ */
 export async function reviewPullRequest(request: ReviewPullRequestWorkflowRequest): Promise<ReviewPullRequestWorkflowResponse> {
     log.info("Entering reviewPullRequest workflow", { request });
     let prEvent = request.githubEvent;
