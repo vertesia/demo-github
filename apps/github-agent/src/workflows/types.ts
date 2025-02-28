@@ -47,11 +47,6 @@ export type ReviewPullRequestWorkflowRequest = {
     githubEvent: any;
 }
 
-export type ReviewPullRequestWorkflowResponse = {
-    status: string;
-    reason: string | undefined;
-}
-
 export type ReviewCodeChangesWorkflowRequest = {
     /**
      * The organization that owns the repository to review.
