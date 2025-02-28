@@ -2,11 +2,11 @@ import {
     condition,
     defineSignal,
     log,
+    patched,
     proxyActivities,
     setHandler,
-    workflowInfo,
     startChild,
-    patched,
+    workflowInfo,
 } from "@temporalio/workflow";
 import * as activities from "../activities.js";
 import { PullRequestWorkflowSpec } from "../common/spec.js";
@@ -19,11 +19,13 @@ import {
 import { getRepoFeatures, isAgentEnabled } from "../repos.js";
 import { parseIssuesFromPullRequest } from "./parser.js";
 import {
+    AssistPullRequestWorkflowRequest,
+    AssistPullRequestWorkflowResponse,
     GithubIssue,
-    ReviewPullRequestWorkflowRequest,
-    ReviewPullRequestWorkflowResponse,
     ReviewCodeChangesWorkflowRequest,
     ReviewCodeChangesWorkflowResponse,
+    ReviewPullRequestWorkflowRequest,
+    ReviewPullRequestWorkflowResponse
 } from "./types.js";
 
 const {
@@ -47,9 +49,8 @@ const {
 });
 
 export const updatePullRequestSignal = defineSignal<[ReviewPullRequestWorkflowRequest]>('updatePullRequest');
-
-export async function reviewPullRequest(request: ReviewPullRequestWorkflowRequest): Promise<ReviewPullRequestWorkflowResponse> {
-    log.info("Entering reviewPullRequest workflow", { request });
+export async function assistPullRequestWorkflow(request: AssistPullRequestWorkflowRequest): Promise<AssistPullRequestWorkflowResponse> {
+    log.info("Entering assistPullRequestWorkflow", { request });
     let prEvent = request.githubEvent;
 
     if (!isAgentEnabled(prEvent.repository.owner.login, prEvent.repository.name)) {
@@ -107,6 +108,17 @@ export async function reviewPullRequest(request: ReviewPullRequestWorkflowReques
         status: status,
         reason: undefined,
     };
+}
+
+/**
+ * @deprecated since 2025-02-28, use reviewCodeChangesWorkflow instead
+ */
+export async function reviewPullRequest(request: ReviewPullRequestWorkflowRequest): Promise<ReviewPullRequestWorkflowResponse> {
+    log.warn('reviewPullRequest is deprecated. Use reviewCodeChangesWorkflow instead.');
+    return assistPullRequestWorkflow({
+        githubEventType: request.githubEventType,
+        githubEvent: request.githubEvent,
+    });
 }
 
 export async function reviewCodeChangesWorkflow(request: ReviewCodeChangesWorkflowRequest): Promise<ReviewCodeChangesWorkflowResponse> {
