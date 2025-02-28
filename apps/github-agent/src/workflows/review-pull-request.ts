@@ -5,8 +5,11 @@ import {
     proxyActivities,
     setHandler,
     workflowInfo,
+    startChild,
+    patched,
 } from "@temporalio/workflow";
 import * as activities from "../activities.js";
+import { PullRequestWorkflowSpec } from "../common/spec.js";
 import {
     getUserFlags,
     isCodeReviewEnabledForFile,
@@ -14,8 +17,14 @@ import {
     UserFeatures,
 } from "../flags.js";
 import { getRepoFeatures, isAgentEnabled } from "../repos.js";
-import { GithubIssue } from "./types.js";
 import { parseIssuesFromPullRequest } from "./parser.js";
+import {
+    GithubIssue,
+    ReviewPullRequestWorkflowRequest,
+    ReviewPullRequestWorkflowResponse,
+    ReviewCodeChangesWorkflowRequest,
+    ReviewCodeChangesWorkflowResponse,
+} from "./types.js";
 
 const {
     // pull request
@@ -37,29 +46,9 @@ const {
     },
 });
 
-/* ----------
- Pull Request Review Workflow
- ---------- */
+export const updatePullRequestSignal = defineSignal<[ReviewPullRequestWorkflowRequest]>('updatePullRequest');
 
-export const updatePullRequestSignal = defineSignal<[ReviewPullRequestRequest]>('updatePullRequest');
-export type ReviewPullRequestRequest = {
-    /**
-     * The type of event that triggered this workflow in the GitHub API. This is part of the header
-     * "x-github-event" of the webhook.
-     */
-    githubEventType: string | undefined;
-    /**
-     * The event that triggered this workflow in the GitHub API.
-     *
-     * See https://docs.github.com/en/webhooks/webhook-events-and-payloads#pull_request
-     */
-    githubEvent: any;
-}
-export type ReviewPullRequestResponse = {
-    status: string;
-    reason: string | undefined;
-}
-export async function reviewPullRequest(request: ReviewPullRequestRequest): Promise<ReviewPullRequestResponse> {
+export async function reviewPullRequest(request: ReviewPullRequestWorkflowRequest): Promise<ReviewPullRequestWorkflowResponse> {
     log.info("Entering reviewPullRequest workflow", { request });
     let prEvent = request.githubEvent;
 
@@ -96,7 +85,7 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
     await handlePullRequestEvent(ctx, prEvent, userFlags);
 
     // Register the signal handler
-    setHandler(updatePullRequestSignal, async (updateReq: ReviewPullRequestRequest) => {
+    setHandler(updatePullRequestSignal, async (updateReq: ReviewPullRequestWorkflowRequest) => {
         log.info('Signal updatePullRequestSignal received', { request: updateReq, pull_request_ctx: ctx });
         try {
             if (updateReq.githubEventType === 'pull_request') {
@@ -118,6 +107,64 @@ export async function reviewPullRequest(request: ReviewPullRequestRequest): Prom
         status: status,
         reason: undefined,
     };
+}
+
+export async function reviewCodeChangesWorkflow(request: ReviewCodeChangesWorkflowRequest): Promise<ReviewCodeChangesWorkflowResponse> {
+    log.info("Entering reviewCodeChanges workflow", { request });
+    const resp = await listFilesInPullRequest({
+        org: request.org,
+        repo: request.repo,
+        pullRequestNumber: request.pullRequestNumber,
+    });
+    const commentPromises = resp.files
+        .filter((file) => isCodeReviewEnabledForFile(file.filename))
+        .filter((file) => file.status !== 'removed')
+        .map(async (file) => {
+            const resp = await reviewPullRequestPatch({
+                filePath: file.filename,
+                filePatch: file.patch,
+                pullRequestPurpose: request.purpose,
+            });
+            return resp.comments;
+        });
+    const commentsPerFile = await Promise.all(commentPromises);
+    const comments: activities.PullRequestReviewComment[] = commentsPerFile
+        .reduce((acc, f) => acc.concat(f), [])
+        .filter((c) => c.applicable);
+    const body = comments.length == 0
+        ? `Currently, the code review only supports the following file extensions: ${supportedExtensions.map(v => '`' + v + '`').join(', ')}.`
+        : undefined;
+
+    let postFailure = false;
+    let htmlUrl: string | undefined;
+
+    try {
+        const resp = await createPullRequestReview({
+            org: request.org,
+            repo: request.repo,
+            pullRequestNumber: request.pullRequestNumber,
+            body: body,
+            comments: comments,
+        });
+        htmlUrl = resp.htmlUrl;
+    } catch (err) {
+        log.error('Failed to create a pull request review. Posting a warning to GitHub',
+            { error: err, pull_request_ctx: request },
+        );
+        postFailure = true;
+    }
+
+    if (postFailure) {
+        const resp = await createPullRequestReview({
+            org: request.org,
+            repo: request.repo,
+            pullRequestNumber: request.pullRequestNumber,
+            body: 'Failed to create a code review. Please check the workflow execution for more details.',
+            comments: [],
+        });
+        htmlUrl = resp.htmlUrl;
+    }
+    return { htmlUrl: htmlUrl };
 }
 
 type AssistantContext = {
@@ -564,7 +611,32 @@ async function handleCommentEvent(ctx: AssistantContext, commentEvent: any): Pro
 
     const body = commentEvent.comment.body as string;
     if (!commentEvent.comment.user.login.startsWith('vertesia') && body.toLowerCase().includes('vertesia, please review')) {
-        return startCodeReview(ctx);
+        // note: we don't want to wait for the code review to finish
+        // because code review is an independent process.
+        if (patched('use-child-workflow-for-code-review')) {
+            const spec = new PullRequestWorkflowSpec(
+                ctx.pullRequest.org,
+                ctx.pullRequest.repo,
+                ctx.pullRequest.number,
+            );
+            const childHandle = await startChild(reviewCodeChangesWorkflow, {
+                args: [{
+                    org: ctx.pullRequest.org,
+                    repo: ctx.pullRequest.repo,
+                    pullRequestNumber: ctx.pullRequest.number,
+                    purpose: `${ctx.pullRequest.motivation}\n\n${ctx.pullRequest.context}`,
+                }],
+                workflowId: spec.codeReviewChildWorkflowId,
+            });
+            log.info(`Code review started as a child workflow`, {
+                childWorkflowId: childHandle.workflowId,
+                childWorkflowRunId: childHandle.firstExecutionRunId,
+            });
+        } else {
+            startCodeReview(ctx);
+            log.info('Code review started as an activity', { pull_request_ctx: ctx });
+        }
+        return;
     }
 
     log.info(`Skip comment event from user: ${commentEvent.comment.user.login}`, { pull_request_ctx: ctx });
@@ -618,6 +690,11 @@ export function extractStudioUiUrl(content: string): string | null {
     return null;
 }
 
+/**
+ * @deprecated since 2025-02-28, use reviewCodeChangesWorkflow instead
+ *
+ * TODO: Remove this function when all the PRs are updated to use reviewCodeChangesWorkflow
+ */
 async function startCodeReview(ctx: AssistantContext) {
     const resp = await listFilesInPullRequest({
         org: ctx.pullRequest.org,
