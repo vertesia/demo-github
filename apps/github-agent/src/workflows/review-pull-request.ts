@@ -1,12 +1,12 @@
 import {
     condition,
     defineSignal,
+    deprecatePatch,
     log,
-    patched,
     proxyActivities,
     setHandler,
     startChild,
-    workflowInfo,
+    workflowInfo
 } from "@temporalio/workflow";
 import * as activities from "../activities.js";
 import { PullRequestWorkflowSpec } from "../common/spec.js";
@@ -610,31 +610,28 @@ async function handleCommentEvent(ctx: AssistantContext, commentEvent: any): Pro
 
     const body = commentEvent.comment.body as string;
     if (!commentEvent.comment.user.login.startsWith('vertesia') && body.toLowerCase().includes('vertesia, please review')) {
+        deprecatePatch('use-child-workflow-for-code-review');
+        const spec = new PullRequestWorkflowSpec(
+            ctx.pullRequest.org,
+            ctx.pullRequest.repo,
+            ctx.pullRequest.number,
+        );
+
         // note: we don't want to wait for the code review to finish
         // because code review is an independent process.
-        if (patched('use-child-workflow-for-code-review')) {
-            const spec = new PullRequestWorkflowSpec(
-                ctx.pullRequest.org,
-                ctx.pullRequest.repo,
-                ctx.pullRequest.number,
-            );
-            const childHandle = await startChild(reviewCodeChangesWorkflow, {
-                args: [{
-                    org: ctx.pullRequest.org,
-                    repo: ctx.pullRequest.repo,
-                    pullRequestNumber: ctx.pullRequest.number,
-                    purpose: `${ctx.pullRequest.motivation}\n\n${ctx.pullRequest.context}`,
-                }],
-                workflowId: spec.codeReviewChildWorkflowId,
-            });
-            log.info(`Code review started as a child workflow`, {
-                childWorkflowId: childHandle.workflowId,
-                childWorkflowRunId: childHandle.firstExecutionRunId,
-            });
-        } else {
-            startCodeReview(ctx);
-            log.info('Code review started as an activity', { pull_request_ctx: ctx });
-        }
+        const childHandle = await startChild(reviewCodeChangesWorkflow, {
+            args: [{
+                org: ctx.pullRequest.org,
+                repo: ctx.pullRequest.repo,
+                pullRequestNumber: ctx.pullRequest.number,
+                purpose: `${ctx.pullRequest.motivation}\n\n${ctx.pullRequest.context}`,
+            }],
+            workflowId: spec.codeReviewChildWorkflowId,
+        });
+        log.info(`Code review started as a child workflow`, {
+            childWorkflowId: childHandle.workflowId,
+            childWorkflowRunId: childHandle.firstExecutionRunId,
+        });
         return;
     }
 
