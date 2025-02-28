@@ -65,6 +65,7 @@ jobs:
 
         cd apps/github-agent
         vertesia agent connect --profile "${VT_PROFILE}" --non-interactive
+        type docker-credential-vertesia
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
