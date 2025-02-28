@@ -252,6 +252,7 @@ export type CreatePullRequestReviewRequest = {
 export type CreatePullRequestReviewResponse = {
     status: string,
     reason: string,
+    htmlUrl?: string,
 }
 export async function createPullRequestReview(request: CreatePullRequestReviewRequest): Promise<CreatePullRequestReviewResponse> {
     const app = await VertesiaGithubApp.getInstance();
@@ -278,6 +279,7 @@ export async function createPullRequestReview(request: CreatePullRequestReviewRe
     return {
         status: "success",
         reason: `Pull request review created: ${resp.data.html_url}`,
+        htmlUrl: resp.data.html_url,
     }
 }
 
