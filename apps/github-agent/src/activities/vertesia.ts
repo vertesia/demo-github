@@ -10,6 +10,7 @@
  */
 import { createSecretProvider, SupportedCloudEnvironments } from '@dglabs/cloud';
 import { VertesiaClient as VertesiaBaseClient } from "@vertesia/client";
+import { log } from '@temporalio/activity';
 
 /**
  * Request to review a file patch.
@@ -114,14 +115,16 @@ export class VertesiaClient {
      * @version 7 Added a JSON example to the prompt to better indicate the expected result.
      */
     async reviewFilePatch(request: VertesiaReviewFilePatchRequest): Promise<VertesiaReviewFilePatchResponse> {
-        const resp = await this.client.interactions.executeByName<
+        const endpoint = 'GithubReviewFilePatch@7';
+        const response = await this.client.interactions.executeByName<
             VertesiaReviewFilePatchRequest,
             VertesiaReviewFilePatchResponse
         >(
-            'GithubReviewFilePatch@7',
+            endpoint,
             { data: request },
         );
-        return resp.result;
+        this.logResult(endpoint, request, response);
+        return response.result;
     }
 
     /**
@@ -132,25 +135,36 @@ export class VertesiaClient {
      * @version 5 Added a JSON example to the prompt to better indicate the expected result.
      */
     async summarizeCodeDiff(request: VertesiaSummarizeCodeDiffRequest): Promise<VertesiaSummarizeCodeDiffResponse> {
-        const resp = await this.client.interactions.executeByName<
+        const endpoint = 'GithubSummarizeCodeDiff@5';
+        const response = await this.client.interactions.executeByName<
             VertesiaSummarizeCodeDiffRequest,
             VertesiaSummarizeCodeDiffResponse
         >(
-            'GithubSummarizeCodeDiff@5',
+            endpoint,
             { data: request },
         );
-        return resp.result;
+        this.logResult(endpoint, request, response);
+        return response.result;
     }
 
     async determinePullRequestPurpose(request: VertesiaDeterminePullRequestPurposeRequest): Promise<VertesiaDeterminePullRequestPurposeResponse> {
-        const resp = await this.client.interactions.executeByName<
+        const endpoint = 'GithubDeterminePullRequestPurpose@2';
+        const response = await this.client.interactions.executeByName<
             VertesiaDeterminePullRequestPurposeRequest,
             VertesiaDeterminePullRequestPurposeResponse
         >(
-            'GithubDeterminePullRequestPurpose@2',
+            endpoint,
             { data: request },
         );
-        return resp.result;
+        this.logResult(endpoint, request, response);
+        return response.result;
+    }
+
+    private logResult(executionEndpoint: string, request: any, response: any) {
+        log.info(`Executed interaction "${executionEndpoint}"`, {
+            request: request,
+            response: response,
+        });
     }
 }
 
