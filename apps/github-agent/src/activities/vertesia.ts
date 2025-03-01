@@ -106,12 +106,19 @@ export class VertesiaClient {
         this.client = client;
     }
 
+    /**
+     * Review a file patch and provide comments.
+     *
+     * @param request the file patch to review
+     * @returns a list of review comments for the file patch
+     * @version 7 Added a JSON example to the prompt to better indicate the expected result.
+     */
     async reviewFilePatch(request: VertesiaReviewFilePatchRequest): Promise<VertesiaReviewFilePatchResponse> {
         const resp = await this.client.interactions.executeByName<
             VertesiaReviewFilePatchRequest,
             VertesiaReviewFilePatchResponse
         >(
-            'GithubReviewFilePatch@6',
+            'GithubReviewFilePatch@7',
             { data: request },
         );
         return resp.result;
