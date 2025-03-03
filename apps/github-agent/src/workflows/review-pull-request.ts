@@ -313,7 +313,7 @@ function toGithubCommentPurpose(pr: PullRequestContext, includeHeader: boolean):
     if (pr.relatedIssues) {
         content += 'Related issues:\n\n';
         for (const issue of Object.values(pr.relatedIssues)) {
-            content += `* https://github.com/${issue.org}/${issue.repo}/issues/${issue.number})\n`;
+            content += `* https://github.com/${issue.org}/${issue.repo}/issues/${issue.number}\n`;
         }
         content += '\n\n';
     } else {
