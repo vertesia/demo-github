@@ -34,7 +34,7 @@ const repoFeatures: Record<string, RepoSpec> = {
         supportCodeReview: true,
         supportDeploymentSummary: false,
         supportDiffSummary: true,
-        supportPurpose: false,
+        supportPurpose: true,
         codeStructure: undefined,
     },
     'vertesia/demo-github': {
@@ -50,7 +50,7 @@ const repoFeatures: Record<string, RepoSpec> = {
         supportCodeReview: true,
         supportDeploymentSummary: true,
         supportDiffSummary: true,
-        supportPurpose: false,
+        supportPurpose: true,
         codeStructure: codeStructureStudio,
     },
 };
