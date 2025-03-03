@@ -309,7 +309,17 @@ function toGithubCommentPurpose(pr: PullRequestContext, includeHeader: boolean):
         return `${optionalHeader}_Purpose is not available yet._`;
     }
 
-    return `${optionalHeader}\n\n${pr.motivation}\n\n${pr.context}\n\n`;
+    let content = `${optionalHeader}\n\n${pr.motivation}\n\n${pr.context}\n\n`;
+    if (pr.relatedIssues) {
+        content += 'Related issues:\n\n';
+        for (const issue of Object.values(pr.relatedIssues)) {
+            content += `* https://github.com/${issue.org}/${issue.repo}/issues/${issue.number})\n`;
+        }
+        content += '\n\n';
+    } else {
+        content += 'Related issues: N/A';
+    }
+    return content;
 }
 
 function toGithubCommentDeployment(spec: DeploymentSpec | undefined, includeHeader: boolean): string {
