@@ -7,7 +7,11 @@ export type GithubIssue = {
 }
 
 export class GithubIssueRef {
-    constructor(public org: string, public repo: string, public number: number) { }
+    constructor(public org: string, public repo: string, public number: number) {
+        if (this.org === 'becomposable') {
+            this.org = 'vertesia';
+        }
+    }
 
     public toHtmlUrl(): string {
         return `https://github.com/${this.org}/${this.repo}/issues/${this.number}`;
