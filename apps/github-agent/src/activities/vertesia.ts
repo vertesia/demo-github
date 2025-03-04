@@ -113,9 +113,10 @@ export class VertesiaClient {
      * @param request the file patch to review
      * @returns a list of review comments for the file patch
      * @version 7 Added a JSON example to the prompt to better indicate the expected result.
+     * @version 8 Fix incorrect dollor sign ($) in the prompt.
      */
     async reviewFilePatch(request: VertesiaReviewFilePatchRequest): Promise<VertesiaReviewFilePatchResponse> {
-        const endpoint = 'GithubReviewFilePatch@7';
+        const endpoint = 'GithubReviewFilePatch@8';
         const response = await this.client.interactions.executeByName<
             VertesiaReviewFilePatchRequest,
             VertesiaReviewFilePatchResponse
