@@ -14,7 +14,6 @@ import {
     getUserFlags,
     isCodeReviewEnabledForFile,
     supportedExtensions,
-    UserFeatures,
 } from "../flags.js";
 import { getRepoFeatures, isAgentEnabled } from "../repos.js";
 import { parseIssuesFromPullRequest } from "./parser.js";
@@ -51,37 +50,21 @@ export async function assistPullRequestWorkflow(request: AssistPullRequestWorkfl
     log.info("Entering assistPullRequestWorkflow", { request });
     let prEvent = request.githubEvent;
 
-    if (!isAgentEnabled(prEvent.repository.owner.login, prEvent.repository.name)) {
-        log.info(`Skip the pull request for repo: ${prEvent.repository.full_name}`);
-        return {
-            status: 'skipped',
-            reason: 'Agent is disabled for this repo.',
-        };
+    const skipResp = shouldSkipAssistance({
+        ownerLogin: prEvent.repository.owner.login,
+        userLogin: prEvent.pull_request.user.login,
+        org: prEvent.repository.owner.login,
+        repo: prEvent.repository.name,
+        baseRef: prEvent.pull_request.base.ref,
+        headRef: prEvent.pull_request.head.ref,
+    });
+    if (skipResp) {
+        return skipResp;
     }
 
-    const userFlags = getUserFlags({
-        repoFullName: prEvent.repository.full_name,
-        userId: prEvent.pull_request.user.login,
-    });
-    if (!userFlags) {
-        log.info(`Skip the pull request for user: ${prEvent.pull_request.user.login}`);
-        return {
-            status: 'skipped',
-            reason: 'Agent is disabled for this PR.',
-        };
-    }
-    if (prEvent.pull_request.base.ref === 'preview') {
-        // We don't support code review for the preview branch because it has too many changes.
-        // Also, the commits have been reviewed.
-        log.info(`Skip the pull request for branch: ${prEvent.pull_request.base.ref}`);
-        return {
-            status: 'skipped',
-            reason: 'Code review is not available for the preview branch.',
-        };
-    }
 
     const ctx = computeAssistantContext(prEvent);
-    await handlePullRequestEvent(ctx, prEvent, userFlags);
+    await handlePullRequestEvent(ctx, prEvent);
 
     // Register the signal handler
     setHandler(updatePullRequestSignal, async (updateReq: AssistPullRequestWorkflowRequest) => {
@@ -89,7 +72,7 @@ export async function assistPullRequestWorkflow(request: AssistPullRequestWorkfl
         try {
             if (updateReq.githubEventType === 'pull_request') {
                 prEvent = updateReq.githubEvent;
-                await handlePullRequestEvent(ctx, prEvent, userFlags);
+                await handlePullRequestEvent(ctx, updateReq.githubEvent);
             } else if (updateReq.githubEventType === 'issue_comment') {
                 await handleCommentEvent(ctx, updateReq.githubEvent);
             }
@@ -106,6 +89,46 @@ export async function assistPullRequestWorkflow(request: AssistPullRequestWorkfl
         status: status,
         reason: undefined,
     };
+}
+
+function shouldSkipAssistance({ ownerLogin, userLogin, org, repo, baseRef, headRef }:
+    { ownerLogin: string, userLogin: string, org: string, repo: string, baseRef: string, headRef: string }
+): AssistPullRequestWorkflowResponse | undefined {
+    if (!isAgentEnabled(ownerLogin, repo)) {
+        log.info(`Skip the pull request for repo: ${org}/${repo}`);
+        return {
+            status: 'skipped',
+            reason: 'Assistance is disabled for this repo.',
+        };
+    }
+    const userFlags = getUserFlags({
+        repoFullName: `${org}/${repo}`,
+        userId: userLogin,
+    });
+    if (!userFlags) {
+        log.info(`Skip the pull request for user: ${userLogin}`);
+        return {
+            status: 'skipped',
+            reason: 'Assistance is disabled for this user.',
+        };
+    }
+    if (baseRef === 'preview') {
+        // We don't support code review for the preview branch because it has too many changes.
+        // Also, the commits have been reviewed.
+        log.info(`Skip the pull request for branch: ${baseRef}`);
+        return {
+            status: 'skipped',
+            reason: 'Assistance is disabled for the preview branch.',
+        };
+    }
+    if (headRef.startsWith('renovate/')) {
+        // Skip the pull request created by Renovate bot.
+        log.info(`Skip the pull request created by Renovate bot: ${headRef}`);
+        return {
+            status: 'skipped',
+            reason: 'Assistance is disabled for the Renovate bot.',
+        };
+    }
 }
 
 export async function reviewCodeChangesWorkflow(request: ReviewCodeChangesWorkflowRequest): Promise<ReviewCodeChangesWorkflowResponse> {
@@ -507,13 +530,17 @@ function computeDeploymentSpec(branch: string): DeploymentSpec | undefined {
     return spec;
 }
 
-async function handlePullRequestEvent(ctx: AssistantContext, prEvent: any, userFlags: UserFeatures) {
+async function handlePullRequestEvent(ctx: AssistantContext, prEvent: any) {
     // Only handle the events when the PR is not closed or merged.
     if (prEvent.action === 'closed' || prEvent.pull_request.merged) {
         return;
     }
 
     log.info(`Handling pull_request event (${prEvent.action})`, { event: prEvent });
+    const userFlags = getUserFlags({
+        repoFullName: prEvent.repository.full_name,
+        userId: prEvent.pull_request.user.login,
+    })!;
     if (userFlags.isDiffSummaryEnabled) {
         const resp = await generatePullRequestSummary({
             owner: ctx.pullRequest.org,
