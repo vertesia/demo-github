@@ -56,6 +56,7 @@ export async function assistPullRequestWorkflow(request: AssistPullRequestWorkfl
         org: prEvent.repository.owner.login,
         repo: prEvent.repository.name,
         baseRef: prEvent.pull_request.base.ref,
+        headRef: prEvent.pull_request.head.ref,
     });
     if (skipResp) {
         return skipResp;
@@ -90,14 +91,14 @@ export async function assistPullRequestWorkflow(request: AssistPullRequestWorkfl
     };
 }
 
-function shouldSkipAssistance({ ownerLogin, userLogin, org, repo, baseRef }:
-    { ownerLogin: string, userLogin: string, org: string, repo: string, baseRef: string }
+function shouldSkipAssistance({ ownerLogin, userLogin, org, repo, baseRef, headRef }:
+    { ownerLogin: string, userLogin: string, org: string, repo: string, baseRef: string, headRef: string }
 ): AssistPullRequestWorkflowResponse | undefined {
     if (!isAgentEnabled(ownerLogin, repo)) {
         log.info(`Skip the pull request for repo: ${org}/${repo}`);
         return {
             status: 'skipped',
-            reason: 'Agent is disabled for this repo.',
+            reason: 'Assistance is disabled for this repo.',
         };
     }
     const userFlags = getUserFlags({
@@ -108,7 +109,7 @@ function shouldSkipAssistance({ ownerLogin, userLogin, org, repo, baseRef }:
         log.info(`Skip the pull request for user: ${userLogin}`);
         return {
             status: 'skipped',
-            reason: 'Agent is disabled for this PR.',
+            reason: 'Assistance is disabled for this user.',
         };
     }
     if (baseRef === 'preview') {
@@ -117,7 +118,15 @@ function shouldSkipAssistance({ ownerLogin, userLogin, org, repo, baseRef }:
         log.info(`Skip the pull request for branch: ${baseRef}`);
         return {
             status: 'skipped',
-            reason: 'Code review is not available for the preview branch.',
+            reason: 'Assistance is disabled for the preview branch.',
+        };
+    }
+    if (headRef.startsWith('renovate/')) {
+        // Skip the pull request created by Renovate bot.
+        log.info(`Skip the pull request created by Renovate bot: ${headRef}`);
+        return {
+            status: 'skipped',
+            reason: 'Assistance is disabled for the Renovate bot.',
         };
     }
 }
