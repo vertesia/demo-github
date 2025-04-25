@@ -19,7 +19,7 @@ const enabledUsers: Record<string, UserFeatures> = {
         isDeploymentSummaryEnabled: true,
         isDiffSummaryEnabled: true,
         isDiffSummaryBreakdownEnabled: true,
-        isPurposeEnabled: false,
+        isPurposeEnabled: true,
     },
     'ebarroca': {
         isCodeReviewEnabled: true,
@@ -47,7 +47,7 @@ const enabledUsers: Record<string, UserFeatures> = {
         isDeploymentSummaryEnabled: true,
         isDiffSummaryEnabled: true,
         isDiffSummaryBreakdownEnabled: true,
-        isPurposeEnabled: false,
+        isPurposeEnabled: true,
     },
     'mincong-h': {
         isCodeReviewEnabled: true,
@@ -85,7 +85,13 @@ type getUserFlagsOptions = {
 }
 export function getUserFlags(opts: getUserFlagsOptions): UserFeatures | undefined {
     if (!enabledUsers[opts.userId]) {
-        return undefined;
+        return {
+            isCodeReviewEnabled: true,
+            isDeploymentSummaryEnabled: true,
+            isDiffSummaryEnabled: true,
+            isDiffSummaryBreakdownEnabled: true,
+            isPurposeEnabled: true,
+        };
     }
     return enabledUsers[opts.userId];
 }

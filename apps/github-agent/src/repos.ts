@@ -45,6 +45,22 @@ const repoFeatures: Record<string, RepoSpec> = {
         supportPurpose: true,
         codeStructure: codeStructureDemoGithub,
     },
+    'vertesia/llumiverse': {
+        supportMultipleFeatures: true,
+        supportCodeReview: true,
+        supportDeploymentSummary: true,
+        supportDiffSummary: true,
+        supportPurpose: true,
+        codeStructure: undefined,
+    },
+    'vertesia/memory': {
+        supportMultipleFeatures: true,
+        supportCodeReview: true,
+        supportDeploymentSummary: true,
+        supportDiffSummary: true,
+        supportPurpose: true,
+        codeStructure: undefined,
+    },
     'vertesia/studio': {
         supportMultipleFeatures: true,
         supportCodeReview: true,
