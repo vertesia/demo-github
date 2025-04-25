@@ -53,6 +53,22 @@ const repoFeatures: Record<string, RepoSpec> = {
         supportPurpose: true,
         codeStructure: codeStructureStudio,
     },
+    'vertesia/llumiverse': {
+        supportMultipleFeatures: true,
+        supportCodeReview: true,
+        supportDeploymentSummary: true,
+        supportDiffSummary: true,
+        supportPurpose: true,
+        codeStructure: undefined,
+    },
+    'vertesia/memory': {
+        supportMultipleFeatures: true,
+        supportCodeReview: true,
+        supportDeploymentSummary: true,
+        supportDiffSummary: true,
+        supportPurpose: true,
+        codeStructure: undefined,
+    },
 };
 
 export function getRepoFeatures(owner: string, repo: string): RepoSpec {
