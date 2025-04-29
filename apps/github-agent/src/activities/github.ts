@@ -77,12 +77,12 @@ export class VertesiaGithubApp {
     static _privateKey: string | null = null;
     static _instances: Record<string, VertesiaGithubApp> = {};
 
-    static async create(privateKey: string) {
+    static async create(privateKey: string, org: string) {
         const app = new OctoApp({
             appId: GITHUB_CODE_REVIEW_APP_ID,
             privateKey: privateKey,
         });
-        const installation = await app.octokit.rest.apps.getOrgInstallation({ org: "vertesia" });
+        const installation = await app.octokit.rest.apps.getOrgInstallation({ org });
         return new VertesiaGithubApp(app, installation.data);
     }
 
@@ -91,7 +91,10 @@ export class VertesiaGithubApp {
             VertesiaGithubApp._privateKey = await getVertesiaGithubAppKey();
         }
         if (!VertesiaGithubApp._instances[org]) {
-            VertesiaGithubApp._instances[org] = await VertesiaGithubApp.create(VertesiaGithubApp._privateKey);
+            VertesiaGithubApp._instances[org] = await VertesiaGithubApp.create(
+                VertesiaGithubApp._privateKey,
+                org,
+            );
         }
         return VertesiaGithubApp._instances[org];
     }
