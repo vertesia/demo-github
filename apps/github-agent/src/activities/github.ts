@@ -14,7 +14,7 @@ export const GITHUB_CODE_REVIEW_APP_ID = "1234461";
  */
 async function getVertesiaGithubAppKey() {
     const vault = createSecretProvider(process.env.CLOUD as SupportedCloudEnvironments ?? SupportedCloudEnvironments.gcp)
-    return await vault.getSecret('github-vertesia-agent-code-review-v3');
+    return await vault.getSecret('github-vertesia-agent-code-review');
 }
 
 export class VertesiaGithubApp {
