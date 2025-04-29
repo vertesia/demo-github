@@ -74,21 +74,28 @@ export class VertesiaGithubApp {
         });
     }
 
-    static _instance: VertesiaGithubApp | null = null;
-    static async create(privateKey: string) {
+    static _privateKey: string | null = null;
+    static _instances: Record<string, VertesiaGithubApp> = {};
+
+    static async create(privateKey: string, org: string) {
         const app = new OctoApp({
             appId: GITHUB_CODE_REVIEW_APP_ID,
             privateKey: privateKey,
         });
-        const installation = await app.octokit.rest.apps.getOrgInstallation({ org: "vertesia" });
+        const installation = await app.octokit.rest.apps.getOrgInstallation({ org });
         return new VertesiaGithubApp(app, installation.data);
     }
 
-    static async getInstance() {
-        if (!VertesiaGithubApp._instance) {
-            const privateKey = await getVertesiaGithubAppKey();
-            VertesiaGithubApp._instance = await VertesiaGithubApp.create(privateKey);
+    static async getInstance(org: string) {
+        if (!VertesiaGithubApp._privateKey) {
+            VertesiaGithubApp._privateKey = await getVertesiaGithubAppKey();
         }
-        return VertesiaGithubApp._instance;
+        if (!VertesiaGithubApp._instances[org]) {
+            VertesiaGithubApp._instances[org] = await VertesiaGithubApp.create(
+                VertesiaGithubApp._privateKey,
+                org,
+            );
+        }
+        return VertesiaGithubApp._instances[org];
     }
 }

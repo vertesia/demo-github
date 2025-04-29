@@ -20,7 +20,7 @@ export type CommentOnPullRequestResponse = {
 }
 export async function commentOnPullRequest(request: CommentOnPullRequestRequest): Promise<CommentOnPullRequestResponse> {
     log.debug("Setting up GitHub App client");
-    const app = await VertesiaGithubApp.getInstance();
+    const app = await VertesiaGithubApp.getInstance(request.org);
     const client = await app.getRestClient();
     const id = `${request.org}/${request.repo}/${request.pullRequestNumber}`;
     if (request.commentId) {
@@ -61,7 +61,7 @@ export type GeneratePullRequestSummaryResponse = {
     breakdown?: string,
 }
 export async function generatePullRequestSummary(request: GeneratePullRequestSummaryRequest): Promise<GeneratePullRequestSummaryResponse> {
-    const app = await VertesiaGithubApp.getInstance();
+    const app = await VertesiaGithubApp.getInstance(request.owner);
     const diffResp = await app.getPullRequestDiff(request.owner, request.repo, request.pullRequestNumber);
     let diff = diffResp.data as unknown as string;
     log.info(`Got diff for pull request ${request.owner}/${request.repo}/${request.pullRequestNumber}: ${diff.length} characters`);
@@ -143,7 +143,7 @@ export type ListFilesInPullRequestResponse = {
     files: ListFilesInPullRequestResponseFile[],
 }
 export async function listFilesInPullRequest(request: ListFilesInPullRequestRequest): Promise<ListFilesInPullRequestResponse> {
-    const app = await VertesiaGithubApp.getInstance();
+    const app = await VertesiaGithubApp.getInstance(request.org);
     const filesResp = await app.listPullRequestFiles(request.org, request.repo, request.pullRequestNumber);
     let files: ListFilesInPullRequestResponseFile[] = filesResp.data.map((f: any) => {
         return {
@@ -256,7 +256,7 @@ export type CreatePullRequestReviewResponse = {
     htmlUrl?: string,
 }
 export async function createPullRequestReview(request: CreatePullRequestReviewRequest): Promise<CreatePullRequestReviewResponse> {
-    const app = await VertesiaGithubApp.getInstance();
+    const app = await VertesiaGithubApp.getInstance(request.org);
     const octokit = await app.getRestClient();
     const resp = await octokit.rest.pulls.createReview({
         owner: request.org,
@@ -295,7 +295,7 @@ export type GetGitRefResponse = {
 }
 export async function getGitRef(request: GetGitRefRequest): Promise<GetGitRefResponse> {
     log.info(`Getting Git reference ${request.ref} in ${request.org}/${request.repo}`);
-    const app = await VertesiaGithubApp.getInstance();
+    const app = await VertesiaGithubApp.getInstance(request.org);
     const octokit = await app.getRestClient();
 
     const resp = await octokit.rest.git.getRef({
@@ -343,7 +343,7 @@ export type CreateGitBranchResponse = {
 }
 export async function createGitBranch(request: CreateGitBranchRequest): Promise<CreateGitBranchResponse> {
     log.info(`Creating new branch ${request.branchName} from commit ${request.sha} in ${request.org}/${request.repo}`);
-    const app = await VertesiaGithubApp.getInstance();
+    const app = await VertesiaGithubApp.getInstance(request.org);
     const octokit = await app.getRestClient();
 
     const createResp = await octokit.rest.git.createRef({
@@ -409,7 +409,7 @@ export type UpdateGitSubmoduleResponse = {
 }
 export async function updateGitSubmodule(request: UpdateGitSubmoduleRequest): Promise<UpdateGitSubmoduleResponse> {
     log.info(`Updating submodule ${request.org}/${request.repo} to ${request.submoduleSha}`);
-    const app = await VertesiaGithubApp.getInstance();
+    const app = await VertesiaGithubApp.getInstance(request.org);
     const octokit = await app.getRestClient();
 
     const treeResp = await octokit.rest.git.createTree({
@@ -458,7 +458,7 @@ export type CreatePullRequestResponse = {
 }
 export async function createPullRequest(request: CreatePullRequestRequest): Promise<CreatePullRequestResponse> {
     log.info(`Creating pull request in ${request.org}/${request.repo}`, { request: request });
-    const app = await VertesiaGithubApp.getInstance();
+    const app = await VertesiaGithubApp.getInstance(request.org);
     const octokit = await app.getRestClient();
 
     const resp = await octokit.rest.pulls.create({
@@ -487,7 +487,7 @@ export type AddAssigneesToPullRequestResponse = {
 }
 export async function addAssigneesToPullRequest(request: AddAssigneesToPullRequestRequest): Promise<AddAssigneesToPullRequestResponse> {
     log.info(`Assigning users to pull request ${request.org}/${request.repo}/pull/${request.pullRequestNumber}`, { request: request });
-    const app = await VertesiaGithubApp.getInstance();
+    const app = await VertesiaGithubApp.getInstance(request.org);
     const octokit = await app.getRestClient();
 
     await octokit.rest.issues.addAssignees({
@@ -514,7 +514,7 @@ export type GetGithubIssueResponse = {
 }
 export async function getGithubIssue(request: GetGithubIssueRequest): Promise<GetGithubIssueResponse> {
     log.info(`Getting issue ${request.org}/${request.repo}/issue/${request.number}`);
-    const app = await VertesiaGithubApp.getInstance();
+    const app = await VertesiaGithubApp.getInstance(request.org);
     const octokit = await app.getRestClient();
 
     const resp = await octokit.rest.issues.get({
