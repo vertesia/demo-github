@@ -75,11 +75,11 @@ export function getRepoFeatures(owner: string, repo: string): RepoSpec {
     const fullName = `${owner}/${repo}`;
     if (!repoFeatures[fullName]) {
         return {
-            supportMultipleFeatures: false,
-            supportCodeReview: false,
+            supportMultipleFeatures: true,
+            supportCodeReview: true,
             supportDeploymentSummary: false,
-            supportDiffSummary: false,
-            supportPurpose: false,
+            supportDiffSummary: true,
+            supportPurpose: true,
             codeStructure: undefined,
         };
     }
