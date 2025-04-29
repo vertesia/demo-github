@@ -134,7 +134,7 @@ await run(options).catch((err: any) => {
 
 ## Production
 
-Build Docker image for the AI agent
+Build Docker image for the AI agent:
 
 ```sh
 pnpm agent:build
@@ -146,13 +146,13 @@ pnpm agent:build
 >
 > Open Docker Desktop, go to "Settings", visit "Generaral", under "Virtual Machine Options", disable option "Use Rosetta for x86_64/amd64 emulation on Apple Silicon". Apply and restart Docker Desktop.
 
-Push the Docker image to Google Cloud
+Push the Docker image to Google Cloud:
 
 ```sh
 pnpm agent:push
 ```
 
-Deploy the Docker image to Vertesia Cloud
+Deploy the Docker image to Vertesia Cloud:
 
 ```sh
 pnpm agent:deploy
