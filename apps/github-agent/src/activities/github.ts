@@ -77,30 +77,30 @@ export class VertesiaGithubApp {
     static _privateKey: string | null = null;
     static _instances: Record<string, VertesiaGithubApp> = {};
 
-    static async create(privateKey: string, org: string) {
+    static async create(privateKey: string, owner: string) {
         const app = new OctoApp({
             appId: GITHUB_CODE_REVIEW_APP_ID,
             privateKey: privateKey,
         });
         let installation: any;
         try {
-            installation = await app.octokit.rest.apps.getOrgInstallation({ org });
+            installation = await app.octokit.rest.apps.getOrgInstallation({ org: owner });
         } catch (e) {
-            installation = await app.octokit.rest.apps.getUserInstallation({ username: org });
+            installation = await app.octokit.rest.apps.getUserInstallation({ username: owner });
         }
         return new VertesiaGithubApp(app, installation.data);
     }
 
-    static async getInstance(org: string) {
+    static async getInstance(owner: string) {
         if (!VertesiaGithubApp._privateKey) {
             VertesiaGithubApp._privateKey = await getVertesiaGithubAppKey();
         }
-        if (!VertesiaGithubApp._instances[org]) {
-            VertesiaGithubApp._instances[org] = await VertesiaGithubApp.create(
+        if (!VertesiaGithubApp._instances[owner]) {
+            VertesiaGithubApp._instances[owner] = await VertesiaGithubApp.create(
                 VertesiaGithubApp._privateKey,
-                org,
+                owner,
             );
         }
-        return VertesiaGithubApp._instances[org];
+        return VertesiaGithubApp._instances[owner];
     }
 }
