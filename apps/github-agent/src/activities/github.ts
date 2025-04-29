@@ -4,9 +4,9 @@ import { App as OctoApp, Octokit } from 'octokit';
 
 /**
  * The app instance: https://github.com/organizations/vertesia/settings/apps/vertesia-code-review
- * The app installation: https://github.com/organizations/vertesia/settings/installations/61085579
+ * The app installation: https://github.com/organizations/vertesia/settings/installations/65503270
  */
-export const GITHUB_CODE_REVIEW_APP_ID = "1145971";
+export const GITHUB_CODE_REVIEW_APP_ID = "1234461";
 
 /**
  * Get the private key to sign the JWT token
@@ -14,7 +14,7 @@ export const GITHUB_CODE_REVIEW_APP_ID = "1145971";
  */
 async function getVertesiaGithubAppKey() {
     const vault = createSecretProvider(process.env.CLOUD as SupportedCloudEnvironments ?? SupportedCloudEnvironments.gcp)
-    return await vault.getSecret('github-vertesia-agent-code-review-v2');
+    return await vault.getSecret('github-vertesia-agent-code-review');
 }
 
 export class VertesiaGithubApp {
