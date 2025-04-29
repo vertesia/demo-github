@@ -85,7 +85,3 @@ export function getRepoFeatures(owner: string, repo: string): RepoSpec {
     }
     return repoFeatures[fullName];
 }
-
-export function isAgentEnabled(owner: string, repo: string): boolean {
-    return repoFeatures[`${owner}/${repo}`] !== undefined;
-}
