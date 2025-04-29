@@ -4,7 +4,7 @@ import { App as OctoApp, Octokit } from 'octokit';
 
 /**
  * The app instance: https://github.com/organizations/vertesia/settings/apps/vertesia-code-review
- * The app installation: https://github.com/organizations/vertesia/settings/installations/61085579
+ * The app installation: https://github.com/organizations/vertesia/settings/installations/65503270
  */
 export const GITHUB_CODE_REVIEW_APP_ID = "1234461";
 
