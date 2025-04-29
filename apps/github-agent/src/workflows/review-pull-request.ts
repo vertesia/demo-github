@@ -15,7 +15,7 @@ import {
     isCodeReviewEnabledForFile,
     supportedExtensions,
 } from "../flags.js";
-import { getRepoFeatures, isAgentEnabled } from "../repos.js";
+import { getRepoFeatures } from "../repos.js";
 import { parseIssuesFromPullRequest } from "./parser.js";
 import {
     AssistPullRequestWorkflowRequest,
@@ -91,16 +91,9 @@ export async function assistPullRequestWorkflow(request: AssistPullRequestWorkfl
     };
 }
 
-function shouldSkipAssistance({ ownerLogin, userLogin, org, repo, baseRef, headRef }:
+function shouldSkipAssistance({ userLogin, org, repo, baseRef, headRef }:
     { ownerLogin: string, userLogin: string, org: string, repo: string, baseRef: string, headRef: string }
 ): AssistPullRequestWorkflowResponse | undefined {
-    if (!isAgentEnabled(ownerLogin, repo)) {
-        log.info(`Skip the pull request for repo: ${org}/${repo}`);
-        return {
-            status: 'skipped',
-            reason: 'Assistance is disabled for this repo.',
-        };
-    }
     const userFlags = getUserFlags({
         repoFullName: `${org}/${repo}`,
         userId: userLogin,
