@@ -82,7 +82,12 @@ export class VertesiaGithubApp {
             appId: GITHUB_CODE_REVIEW_APP_ID,
             privateKey: privateKey,
         });
-        const installation = await app.octokit.rest.apps.getOrgInstallation({ org });
+        let installation: any;
+        try {
+            installation = await app.octokit.rest.apps.getOrgInstallation({ org });
+        } catch (e) {
+            installation = await app.octokit.rest.apps.getUserInstallation({ username: org });
+        }
         return new VertesiaGithubApp(app, installation.data);
     }
 
