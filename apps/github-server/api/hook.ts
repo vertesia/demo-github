@@ -4,14 +4,6 @@ import { createHmac, timingSafeEqual } from 'crypto';
 import * as dns from 'dns';
 
 const GITHUB_SECRET = process.env.GITHUB_SECRET || '';
-const supportedRepoUrls = [
-  'https://github.com/mincong-h/mincong-h.github.io',
-  'https://github.com/vertesia/composableai',
-  'https://github.com/vertesia/demo-github',
-  'https://github.com/vertesia/llumiverse',
-  'https://github.com/vertesia/memory',
-  'https://github.com/vertesia/studio',
-];
 
 // Temporal
 const temporalTaskQueue = `agents/vertesia/github-agent`;
@@ -67,13 +59,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
  * @param event the playload of the event
  */
 async function handlePullRequest(eventType: string, event: any) {
-  const repoUrl = event.repository.html_url;
-
-  if (!supportedRepoUrls.includes(repoUrl)) {
-    console.log('[pull_request] Skipped, unsupported repository:', repoUrl);
-    return;
-  }
-
   const prId = eventType === 'pull_request' ? event.number : event.issue.number;
   const workflowId = `${event.repository.full_name}/pull/${prId}`;
   console.log(`[pull_request] Event ${eventType} (${event.action}) is for workflow "${workflowId}"`);
