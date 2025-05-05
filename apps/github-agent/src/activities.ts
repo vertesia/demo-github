@@ -578,7 +578,7 @@ export async function getGuideline(request: GetGuidelineRequest): Promise<GetGui
             }
 
         } catch (error: any) {
-            log.warn(`Error getting guideline with ${filename}: ${error.message}`, { error });
+            log.warn(`Error getting guideline with ${filename}: ${error.message}. Continuing to the next file`, { error });
             // Continue to next file
         }
     }
