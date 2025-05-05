@@ -3,10 +3,11 @@ import {
     defineSignal,
     deprecatePatch,
     log,
+    patched,
     proxyActivities,
     setHandler,
     startChild,
-    workflowInfo
+    workflowInfo,
 } from "@temporalio/workflow";
 import * as activities from "../activities.js";
 import { PullRequestWorkflowSpec } from "../common/spec.js";
@@ -28,6 +29,7 @@ import {
 const {
     // pull request
     commentOnPullRequest,
+    getGuideline,
     generatePullRequestSummary,
     generatePullRequestPurpose,
     listFilesInPullRequest,
@@ -201,6 +203,11 @@ type AssistantContext = {
      * The summary of the code difference of the pull request.
      */
     summary?: DiffSummary;
+    /**
+     * This is the guideline for the pull-request assistance based on the file "VERTESIA.md"
+     * defined in the Git repository.
+     */
+    guideline?: string;
 }
 
 type DiffSummary = {
@@ -534,6 +541,22 @@ async function handlePullRequestEvent(ctx: AssistantContext, prEvent: any) {
         repoFullName: prEvent.repository.full_name,
         userId: prEvent.pull_request.user.login,
     })!;
+
+    if (patched('use-vertesia-md')) {
+        const resp = await getGuideline({
+            owner: prEvent.repository.owner.login,
+            repo: prEvent.repository.name,
+            ref: prEvent.pull_request.head.ref,
+        });
+        if (resp.error) {
+            log.warn('Failed to load VERTESIA.md', { error: resp.error, pull_request_ctx: ctx });
+        } else {
+            ctx.guideline = resp.content;
+        }
+    } else {
+        log.warn('Skip loading VERTESIA.md because the patch is not applied');
+    }
+
     if (userFlags.isDiffSummaryEnabled) {
         const resp = await generatePullRequestSummary({
             owner: ctx.pullRequest.org,
