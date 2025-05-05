@@ -2,7 +2,6 @@ import { log } from "@temporalio/activity";
 import { VertesiaGithubApp } from "./activities/github.js";
 import { HunkSet } from './activities/patch.js';
 import { createVertesiaClient } from './activities/vertesia.js';
-import { getRepoFeatures } from './repos.js';
 
 export async function helloActivity() {
     log.info("Hello, World!");
