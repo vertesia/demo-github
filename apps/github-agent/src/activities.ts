@@ -545,34 +545,43 @@ export async function getGuideline(request: GetGuidelineRequest): Promise<GetGui
     log.info(`Getting guideline for ${request.owner}/${request.repo} at ${request.ref}`);
     const app = await VertesiaGithubApp.getInstance(request.owner);
     const octokit = await app.getRestClient();
+    const filenames = [
+        "VERTESIA.md",
+        "CLAUDE.md",
+        "knowledge.md",
+    ];
 
-    try {
-        const resp = await octokit.rest.repos.getContent({
-            owner: request.owner,
-            repo: request.repo,
-            path: "VERTESIA.md",
-            ref: request.ref,
-        });
+    for (const filename of filenames) {
+        try {
+            const resp = await octokit.rest.repos.getContent({
+                owner: request.owner,
+                repo: request.repo,
+                path: filename,
+                ref: request.ref,
+            });
 
-        // Type guard: Ensure response is a file (not a directory, symlink, etc.)
-        if (!Array.isArray(resp.data) && resp.data.type === "file") {
-            const contentBase64 = resp.data.content;
-            const encoding = resp.data.encoding;
+            if (!Array.isArray(resp.data) && resp.data.type === "file") {
+                const contentBase64 = resp.data.content;
+                const encoding = resp.data.encoding;
 
-            if (contentBase64 && encoding === "base64") {
-                const decoded = Buffer.from(contentBase64, "base64").toString("utf-8");
-                log.info("Got guideline (VERTESIA.md)", { content: decoded });
-                return { content: decoded };
+                if (contentBase64 && encoding === "base64") {
+                    const decoded = Buffer.from(contentBase64, "base64").toString("utf-8");
+                    log.info(`Got guideline (${filename})`, { content: decoded });
+                    return { content: decoded };
+                } else {
+                    log.error("Unexpected encoding or empty content.");
+                    return { content: "", error: "Unexpected encoding or empty content." };
+                }
             } else {
-                log.error("Unexpected encoding or empty content.");
-                return { content: "", error: "Unexpected encoding or empty content." };
+                log.error("The response was not a file.");
+                return { content: "", error: "The response was not a file." };
             }
-        } else {
-            log.error("The response was not a file.");
-            return { content: "", error: "The response was not a file." };
+
+        } catch (error: any) {
+            log.warn(`Error getting guideline with ${filename}: ${error.message}. Continuing to the next file`, { error });
+            // Continue to next file
         }
-    } catch (error: any) {
-        log.warn(`Error getting guideline: ${error.message}`, { error });
-        return { content: "", error: `Error getting guideline: ${error.message}` };
     }
+
+    return { content: "", error: "Error getting guideline: All fallback files failed." };
 }
