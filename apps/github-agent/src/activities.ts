@@ -531,3 +531,43 @@ export async function getGithubIssue(request: GetGithubIssueRequest): Promise<Ge
         body: resp.data.body ?? "",
     }
 }
+
+export type GetGuidelineRequest = {
+    owner: string,
+    repo: string,
+    ref: string,
+}
+export type GetGuidelineResponse = {
+    content: string,
+    error?: string,
+}
+export async function getGuideline(request: GetGuidelineRequest): Promise<GetGuidelineResponse> {
+    log.info(`Getting guideline for ${request.owner}/${request.repo} at ${request.ref}`);
+    const app = await VertesiaGithubApp.getInstance(request.owner);
+    const octokit = await app.getRestClient();
+
+    const resp = await octokit.rest.repos.getContent({
+        owner: request.owner,
+        repo: request.repo,
+        path: "VERTESIA.md",
+        ref: request.ref,
+    });
+
+    // Type guard: Ensure response is a file (not a directory, symlink, etc.)
+    if (!Array.isArray(resp.data) && resp.data.type === "file") {
+        const contentBase64 = resp.data.content;
+        const encoding = resp.data.encoding;
+
+        if (contentBase64 && encoding === "base64") {
+            const decoded = Buffer.from(contentBase64, "base64").toString("utf-8");
+            log.info("Got guideline (VERTESIA.md)", { content: decoded });
+            return { content: decoded };
+        } else {
+            log.error("Unexpected encoding or empty content.");
+            return { content: "", error: "Unexpected encoding or empty content." };
+        }
+    } else {
+        log.error("The response was not a file.");
+        return { content: "", error: "The response was not a file." };
+    }
+}
