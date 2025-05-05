@@ -201,6 +201,11 @@ type AssistantContext = {
      * The summary of the code difference of the pull request.
      */
     summary?: DiffSummary;
+    /**
+     * This is the guideline for the pull-request assistance based on the file "VERTESIA.md"
+     * defined in the Git repository.
+     */
+    guideline?: string;
 }
 
 type DiffSummary = {
@@ -534,6 +539,10 @@ async function handlePullRequestEvent(ctx: AssistantContext, prEvent: any) {
         repoFullName: prEvent.repository.full_name,
         userId: prEvent.pull_request.user.login,
     })!;
+
+    // TODO: add workflow version flag
+    // TODO: load VERTESIA.md
+
     if (userFlags.isDiffSummaryEnabled) {
         const resp = await generatePullRequestSummary({
             owner: ctx.pullRequest.org,
