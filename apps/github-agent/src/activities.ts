@@ -55,6 +55,7 @@ export type GeneratePullRequestSummaryRequest = {
     repo: string,
     pullRequestNumber: number,
     isBreakdownEnabled?: boolean,
+    guideline?: string,
 }
 export type GeneratePullRequestSummaryResponse = {
     summary: string,
@@ -72,7 +73,7 @@ export async function generatePullRequestSummary(request: GeneratePullRequestSum
 
     const resp = await vertesiaClient.summarizeCodeDiff({
         code_diff: diff,
-        code_structure: getRepoFeatures(request.owner, request.repo).codeStructure
+        guideline: request.guideline,
     });
     log.info("Got summary from Vertesia", { respose: resp });
     summary = resp.summary;

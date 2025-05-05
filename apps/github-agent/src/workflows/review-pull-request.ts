@@ -563,6 +563,7 @@ async function handlePullRequestEvent(ctx: AssistantContext, prEvent: any) {
             repo: ctx.pullRequest.repo,
             pullRequestNumber: ctx.pullRequest.number,
             isBreakdownEnabled: userFlags.isDiffSummaryBreakdownEnabled,
+            guideline: ctx.guideline,
         });
         log.info(`Diff summary of the PR: ${resp.summary}`);
         ctx.summary = {
