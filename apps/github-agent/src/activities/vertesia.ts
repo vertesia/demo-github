@@ -67,7 +67,7 @@ export type VertesiaReviewFilePatchResponseComment = {
  */
 export type VertesiaSummarizeCodeDiffRequest = {
     code_diff: string,
-    code_structure?: string,
+    guideline?: string,
 }
 
 /**
@@ -136,7 +136,7 @@ export class VertesiaClient {
      * @version 5 Added a JSON example to the prompt to better indicate the expected result.
      */
     async summarizeCodeDiff(request: VertesiaSummarizeCodeDiffRequest): Promise<VertesiaSummarizeCodeDiffResponse> {
-        const endpoint = 'GithubSummarizeCodeDiff@5';
+        const endpoint = 'GithubSummarizeCodeDiff@6';
         const response = await this.client.interactions.executeByName<
             VertesiaSummarizeCodeDiffRequest,
             VertesiaSummarizeCodeDiffResponse
