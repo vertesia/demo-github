@@ -165,7 +165,7 @@ export class VertesiaClient {
 
 export async function createVertesiaClient(): Promise<VertesiaClient> {
     const vault = createSecretProvider(SupportedCloudEnvironments.gcp)
-    const apiKey = await vault.getSecret('github-app-api-key');
+    const apiKey = await vault.getSecret('github-vertesia-agent-vertesia-api-key');
 
     const client = new VertesiaBaseClient({
         apikey: apiKey,
