@@ -99,10 +99,11 @@ export class VertesiaClient {
      *
      * @param request the file patch to review
      * @returns a list of review comments for the file patch
-     * @version 1 Initial version.
+     * @version 1 Initial version
+     * @version 2 Update environment
      */
     async reviewFilePatch(request: VertesiaReviewFilePatchRequest): Promise<VertesiaReviewFilePatchResponse> {
-        const endpoint = 'review_file_patch@1';
+        const endpoint = 'review_file_patch@2';
         const response = await this.client.interactions.executeByName<
             VertesiaReviewFilePatchRequest,
             VertesiaReviewFilePatchResponse
@@ -119,10 +120,11 @@ export class VertesiaClient {
      *
      * @param request the code diff to summarize
      * @returns the summary of the code changes
-     * @version 1 Initial version.
+     * @version 1 Initial version
+     * @version 2 Update environment
      */
     async summarizeCodeDiff(request: VertesiaSummarizeCodeDiffRequest): Promise<VertesiaSummarizeCodeDiffResponse> {
-        const endpoint = 'summarize_code_diff@1';
+        const endpoint = 'summarize_code_diff@2';
         const response = await this.client.interactions.executeByName<
             VertesiaSummarizeCodeDiffRequest,
             VertesiaSummarizeCodeDiffResponse
@@ -139,10 +141,11 @@ export class VertesiaClient {
      *
      * @param request the pull request to analyze
      * @returns the purpose of the pull request
-     * @version 1 Initial version.
+     * @version 1 Initial version
+     * @version 2 Update environment
      */
     async determinePullRequestPurpose(request: VertesiaDeterminePullRequestPurposeRequest): Promise<VertesiaDeterminePullRequestPurposeResponse> {
-        const endpoint = 'determine_pull_request_purpose@1';
+        const endpoint = 'determine_pull_request_purpose@2';
         const response = await this.client.interactions.executeByName<
             VertesiaDeterminePullRequestPurposeRequest,
             VertesiaDeterminePullRequestPurposeResponse
