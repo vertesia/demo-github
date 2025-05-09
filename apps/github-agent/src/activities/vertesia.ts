@@ -14,8 +14,6 @@ import { log } from '@temporalio/activity';
 
 /**
  * Request to review a file patch.
- *
- * @see https://preview.cloud.vertesia.io/studio/interactions/67b853cd7941dee93c9b0632?p=654df9de09676ad3b8631dc3&a=652d77895674c387e105948c#params
  */
 export type VertesiaReviewFilePatchRequest = {
     /**
@@ -27,20 +25,13 @@ export type VertesiaReviewFilePatchRequest = {
      */
     file_patch: string,
     /**
-     * @since 2
-     * @deprecated since 2025-02-27, use `pull_request_description` instead
-     */
-    pull_request_description?: string,
-    /**
-     * @since 6
+     * @since 1
      */
     pull_request_purpose?: string,
 }
 
 /**
  * Response from reviewing a file patch.
- *
- * @see https://preview.cloud.vertesia.io/studio/interactions/67b853cd7941dee93c9b0632?p=654df9de09676ad3b8631dc3&a=652d77895674c387e105948c#params
  */
 export type VertesiaReviewFilePatchResponse = {
     comments: VertesiaReviewFilePatchResponseComment[]
@@ -62,8 +53,6 @@ export type VertesiaReviewFilePatchResponseComment = {
 
 /**
  * Request to summarize a code diff.
- *
- * @see https://preview.cloud.vertesia.io/studio/interactions/67b847c87941dee93c9b0452?p=654df9de09676ad3b8631dc3&a=652d77895674c387e105948c#params
  */
 export type VertesiaSummarizeCodeDiffRequest = {
     code_diff: string,
@@ -72,8 +61,6 @@ export type VertesiaSummarizeCodeDiffRequest = {
 
 /**
  * Response from summarizing a code diff.
- *
- * @see https://preview.cloud.vertesia.io/studio/interactions/67b847c87941dee93c9b0452?p=654df9de09676ad3b8631dc3&a=652d77895674c387e105948c#params
  */
 export type VertesiaSummarizeCodeDiffResponse = {
     summary: string,
@@ -112,11 +99,10 @@ export class VertesiaClient {
      *
      * @param request the file patch to review
      * @returns a list of review comments for the file patch
-     * @version 7 Added a JSON example to the prompt to better indicate the expected result.
-     * @version 8 Fix incorrect dollor sign ($) in the prompt.
+     * @version 1 Initial version.
      */
     async reviewFilePatch(request: VertesiaReviewFilePatchRequest): Promise<VertesiaReviewFilePatchResponse> {
-        const endpoint = 'GithubReviewFilePatch@8';
+        const endpoint = 'review_file_patch@1';
         const response = await this.client.interactions.executeByName<
             VertesiaReviewFilePatchRequest,
             VertesiaReviewFilePatchResponse
@@ -133,10 +119,10 @@ export class VertesiaClient {
      *
      * @param request the code diff to summarize
      * @returns the summary of the code changes
-     * @version 5 Added a JSON example to the prompt to better indicate the expected result.
+     * @version 1 Initial version.
      */
     async summarizeCodeDiff(request: VertesiaSummarizeCodeDiffRequest): Promise<VertesiaSummarizeCodeDiffResponse> {
-        const endpoint = 'GithubSummarizeCodeDiff@6';
+        const endpoint = 'summarize_code_diff@1';
         const response = await this.client.interactions.executeByName<
             VertesiaSummarizeCodeDiffRequest,
             VertesiaSummarizeCodeDiffResponse
@@ -148,8 +134,15 @@ export class VertesiaClient {
         return response.result;
     }
 
+    /**
+     * Determine the purpose of a pull request.
+     *
+     * @param request the pull request to analyze
+     * @returns the purpose of the pull request
+     * @version 1 Initial version.
+     */
     async determinePullRequestPurpose(request: VertesiaDeterminePullRequestPurposeRequest): Promise<VertesiaDeterminePullRequestPurposeResponse> {
-        const endpoint = 'GithubDeterminePullRequestPurpose@2';
+        const endpoint = 'determine_pull_request_purpose@1';
         const response = await this.client.interactions.executeByName<
             VertesiaDeterminePullRequestPurposeRequest,
             VertesiaDeterminePullRequestPurposeResponse
@@ -172,7 +165,7 @@ export class VertesiaClient {
 
 export async function createVertesiaClient(): Promise<VertesiaClient> {
     const vault = createSecretProvider(SupportedCloudEnvironments.gcp)
-    const apiKey = await vault.getSecret('release-notes-api-key');
+    const apiKey = await vault.getSecret('github-app-api-key');
 
     const client = new VertesiaBaseClient({
         apikey: apiKey,
