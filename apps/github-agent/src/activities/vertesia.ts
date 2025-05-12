@@ -9,8 +9,11 @@
  *   - SubType is an optional suffix to the type, used for a nested structure
  */
 import { createSecretProvider, SupportedCloudEnvironments } from '@dglabs/cloud';
-import { VertesiaClient as VertesiaBaseClient } from "@vertesia/client";
 import { log } from '@temporalio/activity';
+import {
+    UploadContentObjectPayload,
+    VertesiaClient as VertesiaBaseClient,
+} from "@vertesia/client";
 
 /**
  * Request to review a file patch.
@@ -88,29 +91,29 @@ export type VertesiaDeterminePullRequestPurposeResponse = {
 }
 
 export type VertesiaCreateChangeEntryRequest = {
-    pull_request: {
-        html_url: string,
+    pullRequest: {
+        htmlUrl: string,
         owner: string,
         repository: string,
         number: number,
-        repository_full_name: string,
+        repositoryFullName: string,
     },
     commit: {
         sha: string,
         date: string,
-        date_in_second: number,
+        dateInSecond: number,
     },
     author: {
-        user_id: string,
+        userId: string,
         date: string,
-        date_in_second: number,
+        dateInSecond: number,
     },
     description: string,
     tags: string[],
 }
 export type VertesiaCreateChangeEntryResponse = {
-    change_entry_id: string,
-    change_entry_url: string,
+    changeEntryId: string,
+    changeEntryUrl: string,
 }
 
 export class VertesiaClient {
@@ -186,7 +189,15 @@ export class VertesiaClient {
     async createChangeEntry(request: VertesiaCreateChangeEntryRequest): Promise<VertesiaCreateChangeEntryResponse> {
         // TODO: we cannot use the Objects API from Zeno because it does not support creating objects without
         // a file. We need to create a new endpoint for this.
-        return undefined as any;
+        const payload: UploadContentObjectPayload = {
+            type: '6821524ef3aed394f1ec4931', // ChangeEntry
+        }
+        const resp = await this.client.store.objects.create(payload);
+
+        return {
+            changeEntryId: resp.id,
+            changeEntryUrl: `https://studio-preview.api.vertesia.io/${resp.id}`,
+        };
     }
 
     private logResult(executionEndpoint: string, request: any, response: any) {
