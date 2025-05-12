@@ -14,12 +14,9 @@
  */
 import { createSecretProvider, SupportedCloudEnvironments } from '@dglabs/cloud';
 import { log } from '@temporalio/activity';
-import {
-    UploadContentObjectPayload,
-    VertesiaClient as VertesiaBaseClient,
-} from "@vertesia/client";
+import { VertesiaClient as VertesiaBaseClient } from "@vertesia/client";
 
-enum ContentTypes {
+export enum ContentTypes {
     /**
      * The ID of the content type "ChangeEntry".
      *
@@ -103,33 +100,6 @@ export type VertesiaDeterminePullRequestPurposeResponse = {
     clearness: number, // 1-5
 }
 
-export type VertesiaCreateChangeEntryRequest = {
-    pullRequest: {
-        htmlUrl: string,
-        owner: string,
-        repository: string,
-        number: number,
-        repositoryFullName: string,
-    },
-    commit: {
-        sha: string,
-        date: string,
-        dateInSecond: number,
-    },
-    author: {
-        userId: string,
-        date: string,
-        dateInSecond: number,
-    },
-    title: string,
-    description: string,
-    tags: string[],
-}
-export type VertesiaCreateChangeEntryResponse = {
-    changeEntryId: string,
-    changeEntryUrl: string,
-}
-
 export type VertesiaStore_ChangeEntry = {
     /**
      * The pull request related to this change entry.
@@ -189,6 +159,10 @@ export class VertesiaClient {
 
     constructor(client: VertesiaBaseClient) {
         this.client = client;
+    }
+
+    get baseClient(): VertesiaBaseClient {
+        return this.client;
     }
 
     /**
@@ -252,35 +226,6 @@ export class VertesiaClient {
         );
         this.logResult(endpoint, request, response);
         return response.result;
-    }
-
-    async createChangeEntry(request: VertesiaCreateChangeEntryRequest): Promise<VertesiaCreateChangeEntryResponse> {
-        const props: VertesiaStore_ChangeEntry = {
-            pull_request: {
-                number: request.pullRequest.number,
-                html_url: request.pullRequest.htmlUrl,
-                owner: request.pullRequest.owner,
-                repository: request.pullRequest.owner,
-                repository_full_name: request.pullRequest.repositoryFullName,
-            },
-            author: {
-                user_id: request.author.userId,
-                date: request.author.date,
-            },
-        };
-        const payload: UploadContentObjectPayload = {
-            type: ContentTypes.ChangeEntry,
-            name: request.title,
-            text: request.description,
-            properties: { ...props },
-            tags: request.tags,
-        };
-        const resp = await this.client.store.objects.create(payload);
-
-        return {
-            changeEntryId: resp.id,
-            changeEntryUrl: `https://studio-preview.api.vertesia.io/store/objects/${resp.id}`,
-        };
     }
 
     private logResult(executionEndpoint: string, request: any, response: any) {

@@ -34,6 +34,9 @@ importers:
       '@vertesia/client':
         specifier: ^0.50.1
         version: 0.50.1
+      '@vertesia/common':
+        specifier: ^0.55.0
+        version: 0.55.0
       octokit:
         specifier: 4.1.2
         version: 4.1.2
@@ -480,6 +483,9 @@ packages:
 
   '@llumiverse/core@0.15.0':
     resolution: {integrity: sha512-MDTHapYicYP+p0vpcc98njXey2F+hWtGc+gnWzS4ufU+vxYkL4DfBpeOF9O00Bg/hTxzGdxv0BYRcY88hqpk6g==}
+
+  '@llumiverse/core@0.17.0':
+    resolution: {integrity: sha512-hxfwnF9v4n1PfdbJoJhNdizNkZd6kQ5GmrmdEKHA96NvwMxj63rdb+Y/6iArh8UBTlwQgeIuyPVPqK+k05yPsw==}
 
   '@mapbox/node-pre-gyp@2.0.0':
     resolution: {integrity: sha512-llMXd39jtP0HpQLVI37Bf1m2ADlEb35GYSh1SDSLsBhR+5iCxiNGlT31yqbNtVHygHAtMy6dWFERpU2JgufhPg==}
@@ -1114,6 +1120,9 @@ packages:
   '@vertesia/common@0.50.1':
     resolution: {integrity: sha512-yF6YcxS9zBGEYUUYKLHuKMj75E8qFBEu12aZbBJ/7PZ6tFUyFOuKZrYy59fwGRUWhzhWpHb4D5I2BytsVcsV/Q==}
 
+  '@vertesia/common@0.55.0':
+    resolution: {integrity: sha512-dXdQrPtd1u7t8mVHrO2qS248TwsEHgKEPjfGJB1KrONVvpB0WrCOzXzBWyPs0IUJ2eQgXGFHYrEWZoVeQ95qOA==}
+
   '@vitest/expect@2.1.9':
     resolution: {integrity: sha512-UJCIkTBenHeKT1TTlKMJWy1laZewsRIzYighyYiJKZreqtdxSos/S1t+ktRMQWu2CKqaarrkeszJx1cgC5tGZw==}
 
@@ -1342,6 +1351,7 @@ packages:
   bson@6.10.1:
     resolution: {integrity: sha512-P92xmHDQjSKPLHqFxefqMxASNq/aWJMEZugpCjf+AF/pgcUpMMQCg7t7+ewko0/u8AapvF3luf/FoehddEK+sA==}
     engines: {node: '>=16.20.1'}
+    deprecated: a critical bug affecting only useBigInt64=true deserialization usage is fixed in bson@6.10.3
 
   buffer-equal-constant-time@1.0.1:
     resolution: {integrity: sha512-zRpUiDwd/xk6ADqPMATG8vc9VPrkck7T07OIx0gnjmJAnHnTVXNQG3vfvWNuiZIkwu9KrKdA1iJKfsfTVxE6NA==}
@@ -1978,6 +1988,11 @@ packages:
   mime-types@2.1.35:
     resolution: {integrity: sha512-ZDY+bPm5zTTF+YpCrAU9nK0UgICYPT0QtT1NZWFv4s++TNkcgVaT0g6+4R2uI4MjQjzysHB1zxuWL50hzaeXiw==}
     engines: {node: '>= 0.6'}
+
+  mime@4.0.7:
+    resolution: {integrity: sha512-2OfDPL+e03E0LrXaGYOtTFIYhiuzep94NSsuhrNULq+stylcJedcHdzHtz0atMUuGwJfFYs0YL5xeC/Ca2x0eQ==}
+    engines: {node: '>=16'}
+    hasBin: true
 
   minimatch@10.0.1:
     resolution: {integrity: sha512-ethXTt3SGGR+95gudmqJ1eNhRO7eGEGIgYA9vnPatK4/etz2MEVDno5GMCibdMTuBMyElzIlgxMna3K94XDIDQ==}
@@ -3456,6 +3471,12 @@ snapshots:
       ajv: 8.17.1
       ajv-formats: 3.0.1(ajv@8.17.1)
 
+  '@llumiverse/core@0.17.0':
+    dependencies:
+      '@types/node': 22.13.1
+      ajv: 8.17.1
+      ajv-formats: 3.0.1(ajv@8.17.1)
+
   '@mapbox/node-pre-gyp@2.0.0':
     dependencies:
       consola: 3.4.0
@@ -4255,6 +4276,13 @@ snapshots:
       '@llumiverse/core': 0.15.0
       ajv: 8.17.1
       json-schema: 0.4.0
+
+  '@vertesia/common@0.55.0':
+    dependencies:
+      '@llumiverse/core': 0.17.0
+      ajv: 8.17.1
+      json-schema: 0.4.0
+      mime: 4.0.7
 
   '@vitest/expect@2.1.9':
     dependencies:
@@ -5191,6 +5219,8 @@ snapshots:
   mime-types@2.1.35:
     dependencies:
       mime-db: 1.52.0
+
+  mime@4.0.7: {}
 
   minimatch@10.0.1:
     dependencies:
