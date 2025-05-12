@@ -64,7 +64,6 @@ export async function assistPullRequestWorkflow(request: AssistPullRequestWorkfl
         return skipResp;
     }
 
-
     const ctx = computeAssistantContext(prEvent);
     await handlePullRequestEvent(ctx, prEvent);
 
@@ -333,7 +332,7 @@ function toGithubCommentPurpose(pr: PullRequestContext, includeHeader: boolean):
     }
 
     let content = `${optionalHeader}\n\n${pr.motivation}\n\n${pr.context}\n\n`;
-    if (pr.relatedIssues) {
+    if (pr.relatedIssues && Object.keys(pr.relatedIssues).length > 0) {
         content += 'Related issues:\n\n';
         for (const issue of Object.values(pr.relatedIssues)) {
             content += `* https://github.com/${issue.org}/${issue.repo}/issues/${issue.number}\n`;
