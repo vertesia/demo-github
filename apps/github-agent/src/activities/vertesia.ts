@@ -87,6 +87,32 @@ export type VertesiaDeterminePullRequestPurposeResponse = {
     clearness: number, // 1-5
 }
 
+export type VertesiaCreateChangeEntryRequest = {
+    pull_request: {
+        html_url: string,
+        owner: string,
+        repository: string,
+        number: number,
+        repository_full_name: string,
+    },
+    commit: {
+        sha: string,
+        date: string,
+        date_in_second: number,
+    },
+    author: {
+        user_id: string,
+        date: string,
+        date_in_second: number,
+    },
+    description: string,
+    tags: string[],
+}
+export type VertesiaCreateChangeEntryResponse = {
+    change_entry_id: string,
+    change_entry_url: string,
+}
+
 export class VertesiaClient {
     private client: VertesiaBaseClient;
 
@@ -155,6 +181,12 @@ export class VertesiaClient {
         );
         this.logResult(endpoint, request, response);
         return response.result;
+    }
+
+    async createChangeEntry(request: VertesiaCreateChangeEntryRequest): Promise<VertesiaCreateChangeEntryResponse> {
+        // TODO: we cannot use the Objects API from Zeno because it does not support creating objects without
+        // a file. We need to create a new endpoint for this.
+        return undefined as any;
     }
 
     private logResult(executionEndpoint: string, request: any, response: any) {

@@ -85,6 +85,11 @@ export async function assistPullRequestWorkflow(request: AssistPullRequestWorkfl
 
     await condition(() => prEvent.pull_request.state === 'closed' || prEvent.pull_request.merged);
 
+    // TODO: persist results into zeno
+    if (patched('use-zeno-for-pull-request')) {
+
+    }
+
     const status = prEvent.pull_request.merged ? 'merged' : 'closed';
     log.info(`Pull request is ${status} (state: ${prEvent.pull_request.state}, merged: ${prEvent.pull_request.merged})`, { pull_request_ctx: ctx });
     return {
