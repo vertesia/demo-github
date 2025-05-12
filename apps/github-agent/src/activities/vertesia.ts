@@ -1,12 +1,16 @@
 /**
  * @file Types used by Interactions in Vertesia. The naming convention of these variables are:
  *
- *  Vertesia{Interaction}{Type:Request|Response}{SubType?}
+ *  1. Vertesia{Interaction}{Type:Request|Response}{SubType?}
+ *  2. VertesiaStore_{Type}
  *
- *  where:
- *   - Interaction is the name of the interaction endpoint
- *   - Type is either a "Request" or "Response"
- *   - SubType is an optional suffix to the type, used for a nested structure
+ *  where for the 1st pattern:
+ *   - "Interaction" is the name of the interaction endpoint
+ *   - "Type" is either a "Request" or "Response"
+ *   - "SubType" is an optional suffix to the type, used for a nested structure
+ *
+ *  where for the 2nd pattern:
+ *   - "Type" is the actual content type in the content store.
  */
 import { createSecretProvider, SupportedCloudEnvironments } from '@dglabs/cloud';
 import { log } from '@temporalio/activity';
@@ -14,6 +18,15 @@ import {
     UploadContentObjectPayload,
     VertesiaClient as VertesiaBaseClient,
 } from "@vertesia/client";
+
+enum ContentTypes {
+    /**
+     * The ID of the content type "ChangeEntry".
+     *
+     * @see {@linkcode VertesiaStore_ChangeEntry} for the actual schema.
+     */
+    ChangeEntry = '6821524ef3aed394f1ec4931',
+}
 
 /**
  * Request to review a file patch.
@@ -108,12 +121,67 @@ export type VertesiaCreateChangeEntryRequest = {
         date: string,
         dateInSecond: number,
     },
+    title: string,
     description: string,
     tags: string[],
 }
 export type VertesiaCreateChangeEntryResponse = {
     changeEntryId: string,
     changeEntryUrl: string,
+}
+
+export type VertesiaStore_ChangeEntry = {
+    /**
+     * The pull request related to this change entry.
+     *
+     * Present if the change entry is submitted via a pull request, else empty.
+     */
+    pull_request?: {
+        /**
+         * The pull request number
+         *
+         * @example 123
+         */
+        number: number,
+        /**
+         * The pull request HTML URL.
+         *
+         * @example https://github.com/vertesia/examples/pull/123
+         */
+        html_url: string,
+        /**
+         * The owner of the repository.
+         *
+         * @example vertesia
+         */
+        owner: string,
+        /**
+         * The repository name.
+         *
+         * @example examples
+         */
+        repository: string,
+        /**
+         * The repository full name, including the owner.
+         *
+         * @example vertesia/examples
+         */
+        repository_full_name: string,
+    }
+    author: {
+        /**
+         * The GitHub user ID of the commiter of this change.
+         *
+         * @example mincong-h
+         */
+        user_id: string,
+        /**
+         * The author date of this change in ISO-8601 string.
+         *
+         * @example 2025-05-12@17:58:00Z
+         */
+        date: string,
+    },
 }
 
 export class VertesiaClient {
@@ -187,16 +255,31 @@ export class VertesiaClient {
     }
 
     async createChangeEntry(request: VertesiaCreateChangeEntryRequest): Promise<VertesiaCreateChangeEntryResponse> {
-        // TODO: we cannot use the Objects API from Zeno because it does not support creating objects without
-        // a file. We need to create a new endpoint for this.
+        const props: VertesiaStore_ChangeEntry = {
+            pull_request: {
+                number: request.pullRequest.number,
+                html_url: request.pullRequest.htmlUrl,
+                owner: request.pullRequest.owner,
+                repository: request.pullRequest.owner,
+                repository_full_name: request.pullRequest.repositoryFullName,
+            },
+            author: {
+                user_id: request.author.userId,
+                date: request.author.date,
+            },
+        };
         const payload: UploadContentObjectPayload = {
-            type: '6821524ef3aed394f1ec4931', // ChangeEntry
-        }
+            type: ContentTypes.ChangeEntry,
+            name: request.title,
+            text: request.description,
+            properties: { ...props },
+            tags: request.tags,
+        };
         const resp = await this.client.store.objects.create(payload);
 
         return {
             changeEntryId: resp.id,
-            changeEntryUrl: `https://studio-preview.api.vertesia.io/${resp.id}`,
+            changeEntryUrl: `https://studio-preview.api.vertesia.io/store/objects/${resp.id}`,
         };
     }
 
