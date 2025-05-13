@@ -92,6 +92,10 @@ export async function assistPullRequestWorkflow(request: AssistPullRequestWorkfl
         if (prEvent.pull_request.merged && isUserEnabled) {
             log.info('Creating a change entry for the pull request', { pull_request_ctx: ctx });
             try {
+                let description = ctx.pullRequest.motivation ?? '';
+                description += '\n\n' + (ctx.pullRequest.context ?? '');
+                description = description.trim();
+
                 const resp = await createChangeEntry({
                     pullRequest: {
                         number: Number(prEvent.pull_request.number),
@@ -111,10 +115,8 @@ export async function assistPullRequestWorkflow(request: AssistPullRequestWorkfl
                         dateInSecond: Math.floor(new Date(prEvent.pull_request.updated_at).getTime() / 1000),
                     },
                     title: prEvent.pull_request.title,
-                    description: prEvent.pull_request.body,
-                    tags: [
-                        'app:studio-server',
-                    ], // TODO
+                    description: description,
+                    tags: [], // TODO
                 })
                 log.info('Created a change entry', { change_entry: resp });
             } catch (err) {

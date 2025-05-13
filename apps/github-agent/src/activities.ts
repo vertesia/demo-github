@@ -638,6 +638,7 @@ export async function createChangeEntry(request: VertesiaCreateChangeEntryReques
         type: ContentTypes.ChangeEntry,
         name: request.title,
         text: request.description,
+        location: `${request.pullRequest.repositoryFullName}/changes/${request.pullRequest.number}`,
         properties: { ...props },
         tags: request.tags,
     };
