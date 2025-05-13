@@ -87,8 +87,7 @@ export async function assistPullRequestWorkflow(request: AssistPullRequestWorkfl
     await condition(() => prEvent.pull_request.state === 'closed' || prEvent.pull_request.merged);
 
     if (patched('use-zeno-for-pull-request')) {
-        const isUserEnabled = prEvent.pull_request.user.login === 'mincong-h';
-        if (prEvent.pull_request.merged && isUserEnabled) {
+        if (prEvent.pull_request.merged) {
             log.info('Creating a change entry for the pull request', { pull_request_ctx: ctx });
             try {
                 let description = ctx.pullRequest.motivation ?? '';
