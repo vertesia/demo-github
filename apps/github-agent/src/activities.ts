@@ -625,7 +625,7 @@ export async function createChangeEntry(request: VertesiaCreateChangeEntryReques
             number: request.pullRequest.number,
             html_url: request.pullRequest.htmlUrl,
             owner: request.pullRequest.owner,
-            repository: request.pullRequest.owner,
+            repository: request.pullRequest.repository,
             repository_full_name: request.pullRequest.repositoryFullName,
         },
         author: {
