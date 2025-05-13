@@ -36,6 +36,8 @@ const {
     createPullRequestReview,
     reviewPullRequestPatch,
     getGithubIssue,
+    // content store
+    createChangeEntry,
 } = proxyActivities<typeof activities>({
     startToCloseTimeout: "5 minute",
     retry: {
@@ -83,6 +85,44 @@ export async function assistPullRequestWorkflow(request: AssistPullRequestWorkfl
     });
 
     await condition(() => prEvent.pull_request.state === 'closed' || prEvent.pull_request.merged);
+
+    if (patched('use-zeno-for-pull-request')) {
+        const isUserEnabled = prEvent.pull_request.user.login === 'mincong-h';
+        if (prEvent.pull_request.merged && isUserEnabled) {
+            log.info('Creating a change entry for the pull request', { pull_request_ctx: ctx });
+            try {
+                let description = ctx.pullRequest.motivation ?? '';
+                description += '\n\n' + (ctx.pullRequest.context ?? '');
+                description = description.trim();
+
+                const resp = await createChangeEntry({
+                    pullRequest: {
+                        number: Number(prEvent.pull_request.number),
+                        owner: prEvent.repository.owner.login,
+                        repository: prEvent.repository.name,
+                        repositoryFullName: prEvent.repository.full_name,
+                        htmlUrl: prEvent.pull_request.html_url,
+                    },
+                    commit: {
+                        sha: prEvent.pull_request.head.sha,
+                        date: prEvent.pull_request.updated_at,
+                        dateInSecond: Math.floor(new Date(prEvent.pull_request.updated_at).getTime() / 1000),
+                    },
+                    author: {
+                        userId: prEvent.pull_request.user.login,
+                        date: prEvent.pull_request.updated_at,
+                        dateInSecond: Math.floor(new Date(prEvent.pull_request.updated_at).getTime() / 1000),
+                    },
+                    title: prEvent.pull_request.title,
+                    description: description,
+                    tags: [], // TODO
+                })
+                log.info('Created a change entry', { change_entry: resp });
+            } catch (err) {
+                log.error('Failed to create a change entry', { error: err, pull_request_ctx: ctx });
+            }
+        }
+    }
 
     const status = prEvent.pull_request.merged ? 'merged' : 'closed';
     log.info(`Pull request is ${status} (state: ${prEvent.pull_request.state}, merged: ${prEvent.pull_request.merged})`, { pull_request_ctx: ctx });

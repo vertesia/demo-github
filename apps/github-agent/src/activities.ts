@@ -1,7 +1,13 @@
 import { log } from "@temporalio/activity";
+import { UploadContentObjectPayload } from "@vertesia/client";
+import { ContentObjectStatus } from '@vertesia/common';
 import { VertesiaGithubApp } from "./activities/github.js";
 import { HunkSet } from './activities/patch.js';
-import { createVertesiaClient } from './activities/vertesia.js';
+import {
+    ContentTypes,
+    createVertesiaClient,
+    VertesiaStore_ChangeEntry,
+} from './activities/vertesia.js';
 
 export async function helloActivity() {
     log.info("Hello, World!");
@@ -584,4 +590,69 @@ export async function getGuideline(request: GetGuidelineRequest): Promise<GetGui
     }
 
     return { content: "", error: "Error getting guideline: All fallback files failed." };
+}
+
+export type VertesiaCreateChangeEntryRequest = {
+    pullRequest: {
+        htmlUrl: string,
+        owner: string,
+        repository: string,
+        number: number,
+        repositoryFullName: string,
+    },
+    commit: {
+        sha: string,
+        date: string,
+        dateInSecond: number,
+    },
+    author: {
+        userId: string,
+        date: string,
+        dateInSecond: number,
+    },
+    title: string,
+    description: string,
+    tags: string[],
+}
+export type VertesiaCreateChangeEntryResponse = {
+    changeEntryId: string,
+    changeEntryUrl: string,
+}
+export async function createChangeEntry(request: VertesiaCreateChangeEntryRequest): Promise<VertesiaCreateChangeEntryResponse> {
+    const client = (await createVertesiaClient()).baseClient;
+    const props: VertesiaStore_ChangeEntry = {
+        pull_request: {
+            number: request.pullRequest.number,
+            html_url: request.pullRequest.htmlUrl,
+            owner: request.pullRequest.owner,
+            repository: request.pullRequest.repository,
+            repository_full_name: request.pullRequest.repositoryFullName,
+        },
+        author: {
+            user_id: request.author.userId,
+            date: request.author.date,
+        },
+    };
+
+    const payload: UploadContentObjectPayload = {
+        type: ContentTypes.ChangeEntry,
+        name: request.title,
+        text: request.description,
+        location: `${request.pullRequest.repositoryFullName}/changes/${request.pullRequest.number}`,
+        properties: { ...props },
+        tags: request.tags,
+    };
+    const creationResponse = await client.objects.create(payload);
+
+    // We don't use the "Standard Document Intake" for processing the object because we don't
+    // any blobs to be created. We just use the metadata of the object. So we mark the object
+    // as completed.
+    await client.store.objects.update(creationResponse.id, {
+        status: ContentObjectStatus.completed,
+    });
+
+    return {
+        changeEntryId: creationResponse.id,
+        changeEntryUrl: `https://preview.cloud.vertesia.io/store/objects/${creationResponse.id}`,
+    };
 }

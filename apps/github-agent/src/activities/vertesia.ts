@@ -1,16 +1,29 @@
 /**
  * @file Types used by Interactions in Vertesia. The naming convention of these variables are:
  *
- *  Vertesia{Interaction}{Type:Request|Response}{SubType?}
+ *  1. Vertesia{Interaction}{Type:Request|Response}{SubType?}
+ *  2. VertesiaStore_{Type}
  *
- *  where:
- *   - Interaction is the name of the interaction endpoint
- *   - Type is either a "Request" or "Response"
- *   - SubType is an optional suffix to the type, used for a nested structure
+ *  where for the 1st pattern:
+ *   - "Interaction" is the name of the interaction endpoint
+ *   - "Type" is either a "Request" or "Response"
+ *   - "SubType" is an optional suffix to the type, used for a nested structure
+ *
+ *  where for the 2nd pattern:
+ *   - "Type" is the actual content type in the content store.
  */
 import { createSecretProvider, SupportedCloudEnvironments } from '@dglabs/cloud';
-import { VertesiaClient as VertesiaBaseClient } from "@vertesia/client";
 import { log } from '@temporalio/activity';
+import { VertesiaClient as VertesiaBaseClient } from "@vertesia/client";
+
+export enum ContentTypes {
+    /**
+     * The ID of the content type "ChangeEntry".
+     *
+     * @see {@linkcode VertesiaStore_ChangeEntry} for the actual schema.
+     */
+    ChangeEntry = '6821524ef3aed394f1ec4931',
+}
 
 /**
  * Request to review a file patch.
@@ -87,11 +100,69 @@ export type VertesiaDeterminePullRequestPurposeResponse = {
     clearness: number, // 1-5
 }
 
+export type VertesiaStore_ChangeEntry = {
+    /**
+     * The pull request related to this change entry.
+     *
+     * Present if the change entry is submitted via a pull request, else empty.
+     */
+    pull_request?: {
+        /**
+         * The pull request number
+         *
+         * @example 123
+         */
+        number: number,
+        /**
+         * The pull request HTML URL.
+         *
+         * @example https://github.com/vertesia/examples/pull/123
+         */
+        html_url: string,
+        /**
+         * The owner of the repository.
+         *
+         * @example vertesia
+         */
+        owner: string,
+        /**
+         * The repository name.
+         *
+         * @example examples
+         */
+        repository: string,
+        /**
+         * The repository full name, including the owner.
+         *
+         * @example vertesia/examples
+         */
+        repository_full_name: string,
+    }
+    author: {
+        /**
+         * The GitHub user ID of the commiter of this change.
+         *
+         * @example mincong-h
+         */
+        user_id: string,
+        /**
+         * The author date of this change in ISO-8601 string.
+         *
+         * @example 2025-05-12@17:58:00Z
+         */
+        date: string,
+    },
+}
+
 export class VertesiaClient {
     private client: VertesiaBaseClient;
 
     constructor(client: VertesiaBaseClient) {
         this.client = client;
+    }
+
+    get baseClient(): VertesiaBaseClient {
+        return this.client;
     }
 
     /**
