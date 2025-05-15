@@ -378,7 +378,7 @@ function toGithubCommentPurpose(pr: PullRequestContext, includeHeader: boolean):
         }
         content += '\n\n';
     } else {
-        content += 'Related issues: N/A';
+        content += 'Related issues: N/A\n\n';
     }
     return content;
 }
