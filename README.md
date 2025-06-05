@@ -1,13 +1,13 @@
-# demo-github
+# GitHub Agent
 
-This projects demonstrates the integration of GitHub Agent into the Vertesia as a collection of Agentic Workflows.
+This project demonstrates the integration of GitHub into Vertesia as a Custom Worker.
 
 ![Architecture Overview Diagram](docs/diagrams/architecture-overview.png)
 
 ## Prerequisites
 
 * You need to have access to Google Cloud project `dengenlabs` to fetch certificates for connecting to Temporal Cloud.
-* You already installed and configured the Google Cloud CLI `gcloud`.
+* You have already installed and configured the Google Cloud CLI `gcloud`.
 * You have `temporal` CLI installed.
 * (Optional) you have Docker Desktop and `docker` CLI installed.
 
