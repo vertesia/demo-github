@@ -11,6 +11,7 @@ env:
   VT_ACCOUNT: 652d77895674c387e105948c  # Dengen Labs
   VT_PROJECT: 654df9de09676ad3b8631dc3  # Experiments
   VT_PROFILE: staging-experiments # note: this should match the field ".vertesia.profile" in the agent's "package.json" file.
+  VT_CLI_VERSION: 0.50.1
 
 jobs:
   test:
@@ -25,7 +26,7 @@ jobs:
         cache: pnpm
     - name: Authenticate to NPM registry
       run: |
-        npm install -g @vertesia/cli@0.50.1
+        npm install -g @vertesia/cli@${{ env.VT_CLI_VERSION }}
         vertesia --version
         vertesia profiles create "${VT_PROFILE}" \
             --target "${VT_ENV}" \
@@ -56,7 +57,7 @@ jobs:
 
     - name: Set up Vertesia CLI
       run: |
-        npm install -g @vertesia/cli
+        npm install -g @vertesia/cli${{ env.VT_CLI_VERSION }}
         vertesia profiles create "${VT_PROFILE}" \
             --target "${VT_ENV}" \
             --account "${VT_ACCOUNT}" \
