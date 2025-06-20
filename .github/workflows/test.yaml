@@ -57,7 +57,7 @@ jobs:
 
     - name: Set up Vertesia CLI
       run: |
-        npm install -g @vertesia/cli${{ env.VT_CLI_VERSION }}
+        npm install -g @vertesia/cli@${{ env.VT_CLI_VERSION }}
         vertesia profiles create "${VT_PROFILE}" \
             --target "${VT_ENV}" \
             --account "${VT_ACCOUNT}" \
