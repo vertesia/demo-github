@@ -35,8 +35,8 @@
     "@temporalio/activity": "1.11.7",
     "@temporalio/worker": "1.11.7",
     "@temporalio/workflow": "1.11.7",
-    "@vertesia/client": "^0.55.0",
-    "@vertesia/common": "^0.55.0",
+    "@vertesia/client": "0.50.1",
+    "@vertesia/common": "0.50.1",
     "octokit": "4.1.2"
   }
 }
