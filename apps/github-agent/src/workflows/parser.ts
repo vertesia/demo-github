@@ -32,7 +32,7 @@ export function parseIssueIdsFromComment({ org, repo, comment }: { org: string, 
     return issues;
 }
 
-export function parseIssuesFromPullRequest({ org, repo, branch, body }: { org: string, repo: string, branch: string, body: string }): GithubIssueRef[] {
+export function parseIssuesFromPullRequest({ org, repo, body }: { org: string, repo: string, body: string }): GithubIssueRef[] {
     const issues = parseIssueIdsFromComment({ org, repo, comment: body });
     return Object.values(issues);
 }
