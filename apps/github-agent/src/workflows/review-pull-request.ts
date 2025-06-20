@@ -632,7 +632,6 @@ async function loadGithubIssues(ctx: AssistantContext) {
     const issueRefs = parseIssuesFromPullRequest({
         org: ctx.pullRequest.org,
         repo: ctx.pullRequest.repo,
-        branch: ctx.pullRequest.branch,
         body: ctx.pullRequest.body,
     });
     log.info(`Found ${issueRefs.length} GitHub issues in the pull request`, { pull_request_ctx: ctx, issue_refs: issueRefs });

@@ -1,23 +1,5 @@
 import { expect, test } from 'vitest';
-import {
-    parseIssueIdFromBranch,
-    parseIssueIdsFromComment,
-} from './parser';
-import { GithubIssueRef } from './types.js';
-
-test('Parse issue ID from Git branch', async () => {
-    expect(parseIssueIdFromBranch({
-        org: 'vertesia',
-        repo: 'studio',
-        branch: 'feat/123/my-feature',
-    })).toEqual(new GithubIssueRef('vertesia', 'studio', 123));
-
-    expect(parseIssueIdFromBranch({
-        org: 'vertesia',
-        repo: 'studio',
-        branch: 'feat-123',
-    })).toEqual(new GithubIssueRef('vertesia', 'studio', 123));
-});
+import { parseIssueIdsFromComment } from './parser';
 
 test('Parse issue ID from comment', async () => {
     expect(parseIssueIdsFromComment({
