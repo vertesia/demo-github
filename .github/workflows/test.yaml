@@ -26,6 +26,7 @@ jobs:
     - name: Authenticate to NPM registry
       run: |
         npm install -g @vertesia/cli
+        vertesia --version
         vertesia profiles create "${VT_PROFILE}" \
             --target "${VT_ENV}" \
             --account "${VT_ACCOUNT}" \
