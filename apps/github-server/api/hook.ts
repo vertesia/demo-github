@@ -7,8 +7,8 @@ const GITHUB_SECRET = process.env.GITHUB_SECRET || '';
 
 // Temporal
 const temporalTaskQueue = `agents/vertesia/github-agent`;
-const temporalAddress = "staging.i16ci.tmprl.cloud:7233";
-const temporalNamespace = "staging.i16ci";
+const temporalAddress = "preview.i16ci.tmprl.cloud:7233";
+const temporalNamespace = "preview.i16ci";
 const temporalWorkflowType = "assistPullRequestWorkflow";
 
 let client: Client | null = null;
