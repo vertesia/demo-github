@@ -1,4 +1,4 @@
-import { createSecretProvider, SupportedCloudEnvironments } from '@dglabs/cloud';
+import { createSecretProvider, SecretProviderKind } from '@dglabs/cloud';
 import { Endpoints } from '@octokit/types';
 import { App as OctoApp, Octokit } from 'octokit';
 
@@ -13,7 +13,7 @@ export const GITHUB_CODE_REVIEW_APP_ID = "1234461";
  * @returns
  */
 async function getVertesiaGithubAppKey() {
-    const vault = createSecretProvider(process.env.CLOUD as SupportedCloudEnvironments ?? SupportedCloudEnvironments.gcp)
+    const vault = createSecretProvider(SecretProviderKind.google_secret_manager)
     return await vault.getSecret('github-vertesia-agent-code-review');
 }
 

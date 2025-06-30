@@ -19,7 +19,7 @@
       "organization": "vertesia",
       "name": "github-agent"
     },
-    "profile": "staging-experiments"
+    "profile": "preview-github"
   },
   "devDependencies": {
     "@octokit/types": "13.8.0",
@@ -30,8 +30,8 @@
     "vitest": "^2.1.9"
   },
   "dependencies": {
-    "@dglabs/agent-runner": "0.9.3",
-    "@dglabs/cloud": "0.9.3",
+    "@dglabs/agent-runner": "0.10.0",
+    "@dglabs/cloud": "0.10.0",
     "@temporalio/activity": "1.11.7",
     "@temporalio/worker": "1.11.7",
     "@temporalio/workflow": "1.11.7",

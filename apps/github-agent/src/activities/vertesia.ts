@@ -12,7 +12,7 @@
  *  where for the 2nd pattern:
  *   - "Type" is the actual content type in the content store.
  */
-import { createSecretProvider, SupportedCloudEnvironments } from '@dglabs/cloud';
+import { createSecretProvider, SecretProviderKind } from '@dglabs/cloud';
 import { log } from '@temporalio/activity';
 import { VertesiaClient as VertesiaBaseClient } from "@vertesia/client";
 
@@ -238,7 +238,7 @@ export class VertesiaClient {
 
 
 export async function createVertesiaClient(): Promise<VertesiaClient> {
-    const vault = createSecretProvider(SupportedCloudEnvironments.gcp)
+    const vault = createSecretProvider(SecretProviderKind.google_secret_manager)
     const apiKey = await vault.getSecret('github-vertesia-agent-vertesia-api-key');
 
     const client = new VertesiaBaseClient({
