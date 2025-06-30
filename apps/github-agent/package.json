@@ -19,7 +19,7 @@
       "organization": "vertesia",
       "name": "github-agent"
     },
-    "profile": "preview-experiments"
+    "profile": "preview-github"
   },
   "devDependencies": {
     "@octokit/types": "13.8.0",
