@@ -1,4 +1,4 @@
-# GitHub Agent
+# GitHub Worker
 
 This project demonstrates the integration of GitHub into Vertesia as a Custom Worker.
 
